@@ -1,3 +1,44 @@
-title: My Blog
-description: สวัสดี Jekyll!
-theme: minima
+title: "Professional Engineering Blog"
+description: "Sharing knowledge & experience in engineering services, EMS Testing, product design, and IT."
+url: "https://kpanuwat.github.io"
+baseurl: ""
+
+author:
+  name: "Panuwat"
+  email: "kpanuwat@gmail.com"
+  bio: "Engineering leader | 25+ years in EMS | Passion for cycling & running | KISS mindset"
+
+# Social Links
+# twitter_username: your_twitter
+github_username: kpanuwat
+# linkedin_username: your-linkedin
+# facebook_username: yourfacebook
+
+# Theme and Appearance
+theme: jekyll-theme-modernist
+#theme: minima # หรือเลือกธีมอื่น เช่น jekyll-theme-cayman, jekyll-theme-modernist
+# logo: "/assets/img/logo.png" # ใส่โลโก้ถ้ามี
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Permalink style (optional, for SEO friendly URLs)
+permalink: /:year/:month/:day/:title/
+
+# Pagination (ถ้าต้องการ)
+paginate: 5
+paginate_path: "/page:num/"
+
+# Plugins (optional)
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Google Analytics (optional)
+# google_analytics: UA-XXXXXXXXX-X
+
+# Disqus Comments (optional)
+disqus:
+  shortname: PK
