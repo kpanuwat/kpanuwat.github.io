@@ -1,9 +1,10 @@
 title: "Professional Engineering Blog"
-description: "Sharing knowledge & experience in engineering services, EMS Testing, product design, and IT."
-url: "https://kpanuwat.github.io"
-baseurl: ""
+description: "Sharing knowledge & experience in engineering management, EMS, product design, and IT."
+url: "https://kpanuwat.github.io" # เปลี่ยนเป็น URL ของคุณ
+baseurl: "" # ถ้าใช้ GitHub Pages แบบ user/organization site ให้เว้นว่าง
 
-author: "Panuwat"
+author:
+  name: "Panuwat"
   email: "kpanuwat@gmail.com"
   bio: "Engineering leader | 25+ years in EMS | Passion for cycling & running | KISS mindset"
 
@@ -15,8 +16,8 @@ github_username: kpanuwat
 
 # Theme and Appearance
 theme: jekyll-theme-modernist
-#theme: minima # หรือเลือกธีมอื่น เช่น jekyll-theme-cayman, jekyll-theme-modernist
-# logo: "/assets/img/logo.png" # ใส่โลโก้ถ้ามี
+# theme: minima # หรือเลือกธีมอื่น เช่น jekyll-theme-cayman, jekyll-theme-modernist
+# logo: "/assets/img/logo.png"
 
 # Build settings
 markdown: kramdown
