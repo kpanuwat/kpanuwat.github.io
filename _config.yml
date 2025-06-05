@@ -36,6 +36,23 @@ plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
 
+# Defaults for posts (optional)
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "Your Name"
+
+# Exclude files/folders from build
+exclude:
+  - "README.md"
+  - "Gemfile"
+  - "Gemfile.lock"
+  - "node_modules"
+  - "vendor"
+
 # Google Analytics (optional)
 # google_analytics: UA-XXXXXXXXX-X
 
