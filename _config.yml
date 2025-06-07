@@ -1,4 +1,67 @@
-title: "Professional Engineering Blog"
-description: "Sharing knowledge & experience in engineering management, EMS, product design, and IT."
+title: "Engineering Insight Hub"
+description: "Sharing knowledge & experience in EMS engineering management"
 url: "https://kpanuwat.github.io"
+
+# Site settings
+author:
+  name: "kpanuwat"
+  email: "kpanuwat@gmail.com"
+  url: "https://kpanuwat.github.io/about"
+
+# Theme
 theme: minima
+
+# Social links (add or remove as needed)
+# twitter_username: kpanuwat
+github_username:  kpanuwat
+# linkedin_username: kpanuwat
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+
+# Permalinks
+permalink: pretty
+
+# Pagination (optional)
+paginate: 5
+paginate_path: "/page:num/"
+
+# Exclude these files from your site
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# Google Analytics (uncomment & add your ID)
+# google_analytics: UA-XXXXXXXXX-X
+
+# Minima Customization (colors, fonts, etc. if needed)
+minima:
+  skin: auto
+  social_links:
+    - { platform: github,         user_url: "https://github.com/kpanuwat" }
+#    - { platform: twitter,        user_url: "https://twitter.com/kpanuwat" }
+#    - { platform: linkedin,       user_url: "https://linkedin.com/in/kpanuwat" }
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-paginate
+
+# Collections (optional)
+# collections:
+#   posts:
+#     output: true
+
+# Defaults (optional for posts/pages)
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "kpanuwat"
