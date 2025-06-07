@@ -6,7 +6,7 @@ categories: blog
 ---
 
 # A Deep Dive into the World of the Test Engineer in an EMS Factory
-<p>New Joined Test Engineer:</p>
+<p>อธิบายงาน Test Engineer เบื้องต้น:</p>
 <audio controls>
   <source src="/assets/audio/Test Engineer.wav" type="audio/wav">
   Your browser does not support the audio element.
