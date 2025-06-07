@@ -8,7 +8,7 @@ categories: blog
 # A Deep Dive into the World of the Component Engineer in an EMS Factory
 
 <div style="text-align:center;">
-  <img src="/assets/files/component-engineer-1.png"
+  <img src="/assets/images/component engineer-1.png"
        alt="A Deep Dive into the World of the Component Engineer in an EMS Factory"
        style="width:100%; max-width:1200px; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.13); margin:0 auto; display:block;">
   <br>
