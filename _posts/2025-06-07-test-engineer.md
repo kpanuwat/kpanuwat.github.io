@@ -6,6 +6,11 @@ categories: blog
 ---
 
 # A Deep Dive into the World of the Test Engineer in an EMS Factory
+<p>New Joined Test Engineer:</p>
+<audio controls>
+  <source src="/assets/audio/Test Engineer.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
 
 <div style="text-align:center;">
   <img src="/assets/images/Test Engineer.png"
