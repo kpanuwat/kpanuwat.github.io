@@ -3,10 +3,10 @@ description: "Sharing knowledge & experience in EMS engineering management"
 url: "https://kpanuwat.github.io"
 
 # Site settings
-author:
-  name: "kpanuwat"
-  email: "kpanuwat@gmail.com"
-  url: "https://kpanuwat.github.io/about"
+# author:
+#  name: "kpanuwat"
+#  email: "kpanuwat@gmail.com"
+#  url: "https://kpanuwat.github.io/about"
 
 # Theme
 theme: minima
