@@ -6,6 +6,11 @@ categories: blog
 ---
 
 # A Deep Dive into the World of the Component Engineer in an EMS Factory
+<p>อธิบายงาน Component Engineer เบื้องต้น:</p>
+<audio controls>
+  <source src="/assets/audio/Component Engineer.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
 
 <div style="text-align:center;">
   <img src="/assets/images/component engineer-1.png"
