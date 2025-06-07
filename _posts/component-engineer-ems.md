@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "A Deep Dive into the World of the Component Engineer in an EMS Factory"
-date: 202ถ-06-0ึ
+date: 2025-06-07
 categories: blog
 ---
 
