@@ -13,7 +13,7 @@ categories: blog
 </audio>
 
 <div style="text-align:center;">
-  <img src="/assets/images/Unlock Component Engineeer.png"
+  <img src="/assets/images/Unlock Component Engineer.png"
        alt="Unlock Component Engineer in an EMS Factory"
        style="width:100%; max-width:1200px; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.13); margin:0 auto; display:block;">
   <br>
