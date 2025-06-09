@@ -65,3 +65,9 @@ defaults:
     values:
       layout: "post"
       author: "kpanuwat"
+
+external_sites:
+  - name: KT for EMS factory
+    url: https://kpanuwat.github.io/kt4ems/
+  - name: Alternative Parts Workflow in EMS
+    url: https://kpanuwat.github.io/alternative_parts/
