@@ -1,0 +1,18 @@
+---
+layout: page
+---
+
+{{ content }}
+
+{% assign topics = site.pages | where: "layout", "topic-hub" | sort: "title" %}
+
+<ul class="list-unstyled mt-3">
+  {% for topic in topics %}
+  <li class="mb-3">
+    <a href="{{ topic.url | relative_url }}" class="fw-semibold fs-5">{{ topic.title }}</a>
+    {% if topic.description %}
+      <p class="text-muted small mb-0">{{ topic.description }}</p>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
