@@ -1,6 +1,6 @@
 ---
 title: "Obsidian YOLO: จาก Second Brain กลายเป็น Agent Workspace"
-date: 2026-05-13 00:00:00 +0700
+date: 2026-05-12 12:00:00 +0700
 categories: [Obsidian]
 tags: [obsidian, llm, agent, pkm, productivity]
 ---
