@@ -1,0 +1,5 @@
+# Series registry — add one entry per series
+# name: matches the `series:` frontmatter value in posts (use slug format)
+# title: display name
+# description: shown in the series nav block
+

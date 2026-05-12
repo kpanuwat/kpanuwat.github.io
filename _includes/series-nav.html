@@ -1,0 +1,48 @@
+{% if page.series %}
+  {% assign series_name = page.series %}
+  {% assign series_meta = site.data.series | where: "name", series_name | first %}
+  {% assign series_posts = site.posts | where: "series", series_name | sort: "date" %}
+
+  {% comment %} Pass 1: find current post index {% endcomment %}
+  {% assign current_idx = 0 %}
+  {% for p in series_posts %}
+    {% if p.url == page.url %}{% assign current_idx = forloop.index0 %}{% endif %}
+  {% endfor %}
+
+  {% assign prev_idx = current_idx | minus: 1 %}
+  {% assign next_idx = current_idx | plus: 1 %}
+
+  <aside class="series-nav card mb-4">
+    <div class="card-body">
+      <p class="text-muted small mb-1">SERIES</p>
+      <h5 class="card-title mb-0">{{ series_meta.title | default: series_name }}</h5>
+      {% if series_meta.description %}
+        <p class="text-muted small mt-1 mb-2">{{ series_meta.description }}</p>
+      {% endif %}
+
+      <ol class="ps-3 mb-3">
+        {% for p in series_posts %}
+          <li {% if p.url == page.url %}class="fw-bold"{% endif %}>
+            {% if p.url == page.url %}
+              {{ p.title }}
+            {% else %}
+              <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+
+      {% comment %} Pass 2: resolve prev / next {% endcomment %}
+      <div class="d-flex justify-content-between">
+        {% for p in series_posts %}
+          {% if forloop.index0 == prev_idx %}
+            <a href="{{ p.url | relative_url }}" class="btn btn-sm btn-outline-secondary">← {{ p.title }}</a>
+          {% endif %}
+          {% if forloop.index0 == next_idx %}
+            <a href="{{ p.url | relative_url }}" class="btn btn-sm btn-outline-primary ms-auto">{{ p.title }} →</a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+{% endif %}

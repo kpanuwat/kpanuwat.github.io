@@ -1,73 +1,87 @@
-title: "Engineering Insight Hub"
-description: "Sharing knowledge & experience in EMS engineering management"
+theme: jekyll-theme-chirpy
+
+# ── Site Identity ───────────────────────────────────────────────────────────
+title: Engineering Insight Hub
+tagline: Sharing knowledge & experience in EMS engineering management
+description: A personal knowledge sharing space — engineering, EMS, tools, and systems.
 url: "https://kpanuwat.github.io"
+baseurl: ""
 
-# Site settings
-# author:
-#  name: "kpanuwat"
-#  email: "kpanuwat@gmail.com"
-#  url: "https://kpanuwat.github.io/about"
+# ── Author ──────────────────────────────────────────────────────────────────
+github:
+  username: kpanuwat
 
-# Theme
-theme: minima
+social:
+  name: kpanuwat
+  email: ""
+  links: []
 
-# Social links (add or remove as needed)
-# twitter_username: kpanuwat
-github_username:  kpanuwat
-# linkedin_username: kpanuwat
+# ── Appearance ──────────────────────────────────────────────────────────────
+theme_mode:          # leave blank = follows OS preference; set "light" or "dark" to lock
+avatar: ""
 
-# Build settings
-markdown: kramdown
-kramdown:
-  input: GFM
+# ── Content ─────────────────────────────────────────────────────────────────
+timezone: Asia/Bangkok
+lang: en
 
-# Permalinks
-permalink: pretty
+paginate: 10
 
-# Pagination (optional)
-paginate: 5
-paginate_path: "/page:num/"
+# ── Comments (optional) ─────────────────────────────────────────────────────
+comments:
+  active:
+  giscus:
+    repo:
+    repo_id:
+    category:
+    category_id:
 
-# Exclude these files from your site
-exclude:
-  - Gemfile
-  - Gemfile.lock
-  - node_modules
-  - vendor
+# ── Search ──────────────────────────────────────────────────────────────────
+search:
+  provider: lunr
 
-# Google Analytics (uncomment & add your ID)
-# google_analytics: UA-XXXXXXXXX-X
+# ── Analytics (optional) ────────────────────────────────────────────────────
+analytics:
+  google:
+    id:
 
-# Minima Customization (colors, fonts, etc. if needed)
-minima:
-  skin: auto
-  social_links:
-    - { platform: github,         user_url: "https://kpanuwat.github.io/" }
-#    - { platform: twitter,        user_url: "https://twitter.com/kpanuwat" }
-#    - { platform: linkedin,       user_url: "https://linkedin.com/in/kpanuwat" }
+# ── Collections ─────────────────────────────────────────────────────────────
+collections:
+  tabs:
+    output: true
+    sort_by: order
 
-# Plugins
-plugins:
-  - jekyll-feed
-  - jekyll-seo-tag
-  - jekyll-paginate
-
-# Collections (optional)
-# collections:
-#   posts:
-#     output: true
-
-# Defaults (optional for posts/pages)
 defaults:
   - scope:
       path: ""
-      type: "posts"
+      type: posts
     values:
-      layout: "post"
-      author: "kpanuwat"
+      layout: post
+      comments: false
+      toc: true
+      math: false
+      mermaid: false
+  - scope:
+      path: _tabs
+      type: tabs
+    values:
+      layout: page
+      permalink: /:title/
 
-external_sites:
-  - name: KT for EMS factory
-    url: https://kpanuwat.github.io/kt4ems/
-  - name: Alternative Parts Workflow in EMS
-    url: https://kpanuwat.github.io/alternative_parts/
+# ── Build ────────────────────────────────────────────────────────────────────
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
+
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
