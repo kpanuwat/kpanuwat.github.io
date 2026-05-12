@@ -1,8 +1,9 @@
 ---
 layout: post
 title: "The Debug Engineer in an EMS Factory (คุณหมอ ประจำโรงงาน)"
-date: 2025-06-06
-categories: blog
+date: 2025-06-06 00:00:00 +0700
+categories: [Engineering]
+tags: [ems, debug, engineering-roles]
 ---
 
 # A Deep Dive into the World of the Debug Engineer in an EMS Factory

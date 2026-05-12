@@ -1,8 +1,9 @@
 ---
 layout: post
 title: "Unlock Component Engineer"
-date: 2025-06-08
-categories: blog
+date: 2025-06-08 00:00:00 +0700
+categories: [Engineering]
+tags: [ems, components, engineering-roles]
 ---
 
 # Unlock Component Engineer in an EMS Factory

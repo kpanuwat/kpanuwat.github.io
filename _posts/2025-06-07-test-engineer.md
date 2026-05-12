@@ -1,8 +1,9 @@
 ---
 layout: post
 title: "A Deep Dive into the World of the Test Engineer in an EMS Factory"
-date: 2025-06-07
-categories: blog
+date: 2025-06-07 06:00:00 +0700
+categories: [Engineering]
+tags: [ems, testing, engineering-roles]
 ---
 
 # A Deep Dive into the World of the Test Engineer in an EMS Factory
