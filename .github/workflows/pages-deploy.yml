@@ -29,6 +29,13 @@ jobs:
           ruby-version: "3.3"
           bundler-cache: true
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Render Marp decks
+        run: npx -p @marp-team/marp-cli@4.4.0 marp -I _slides/ -o slides/ --html
+
       - name: Build
         run: bundle exec jekyll build --destination "_site"
         env:

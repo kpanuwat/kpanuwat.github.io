@@ -81,6 +81,8 @@ compress_html:
   comments: all
   endings: all
 
+keep_files: [slides]
+
 plugins:
   - jekyll-feed
   - jekyll-sitemap
