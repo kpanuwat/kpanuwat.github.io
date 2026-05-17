@@ -6,6 +6,8 @@ tags: [obsidian, llm, agent, pkm, productivity]
 slides: true
 ---
 
+{% include slide-link.html %}
+
 ## TL;DR
 
 Obsidian YOLO เปลี่ยน vault จาก "ที่เก็บโน้ต" เป็น "workspace ของ AI agent" — LLM อ่าน เขียน จัดระเบียบ และต่อ toolchain ใน vault ได้จริง โดยเราเป็นคนกำกับทิศทาง (You Orchestrate, LLM Operates)
