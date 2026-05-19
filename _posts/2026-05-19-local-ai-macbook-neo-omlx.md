@@ -3,7 +3,10 @@ title: "ทดสอบรัน Local AI บน MacBook Neo ด้วย oMLX"
 date: 2026-05-19 12:00:00 +0700
 categories: [Tools]
 tags: [local-ai, omlx, llm, gemma, apple-silicon, quantization]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
