@@ -6,6 +6,8 @@ tags: [marp, markdown, slides, presentation, ai, open-source, claude-code]
 slides: true
 ---
 
+{% include slide-link.html %}
+
 ## TL;DR
 
 Marp เปลี่ยนไฟล์ Markdown ธรรมดาให้กลายเป็น Presentation Slides ระดับมืออาชีพ — ส่ง export เป็น HTML, PDF, PPTX หรือ PNG/JPEG ได้ในคำสั่งเดียว เมื่อจับคู่กับ Claude Code ก็แปลง blog post หรือ notes เป็น slide deck ได้โดยอัตโนมัติ
