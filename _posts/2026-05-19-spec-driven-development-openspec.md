@@ -3,7 +3,10 @@ title: "Spec-Driven Development: ใช้ Spec เป็น Contract อุด�
 date: 2026-05-19 12:00:00 +0700
 categories: [Tools]
 tags: [spec-driven-development, openspec, vibe-coding, ai-coding, llm, sddd]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
