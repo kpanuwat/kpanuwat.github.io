@@ -3,7 +3,10 @@ title: "Hermes Agent just got WAY more powerful: 8 New Features"
 date: 2026-05-19 12:00:00 +0700
 categories: [Tools]
 tags: [hermes-agent, ai-agent, nous-research, grok, computer-use, kanban, llm]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
