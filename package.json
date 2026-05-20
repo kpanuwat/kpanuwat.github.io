@@ -1,0 +1,13 @@
+{
+  "name": "knowledge-hub",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "slides": "marp -I _slides/ -o slides/",
+    "slides:watch": "marp -I _slides/ -o slides/ --watch",
+    "slides:pdf": "marp -I _slides/ -o slides/"
+  },
+  "devDependencies": {
+    "@marp-team/marp-cli": "4.4.0"
+  }
+}
