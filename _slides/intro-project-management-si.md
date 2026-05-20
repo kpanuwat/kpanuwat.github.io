@@ -32,7 +32,7 @@ style: |
   <rect x="18" y="16" width="4" height="132" fill="var(--accent)"/>
   <circle cx="64" cy="82" r="18" fill="var(--accent)"/>
   <text x="64" y="82" font-size="17" fill="var(--paper)" text-anchor="middle" dominant-baseline="central" font-family="system-ui">⚙</text>
-  <text x="104" y="56" font-size="15" font-weight="700" fill="var(--ink)" font-family="system-ui">Hybrid PM + Key Deliverables + Vendor Discipline</text>
+  <text x="104" y="56" font-size="13" font-weight="700" fill="var(--ink)" font-family="system-ui">Hybrid PM + Key Deliverables + Vendor Discipline</text>
   <text x="104" y="82" font-size="13" fill="var(--muted)" font-family="system-ui">ทำให้ Go-Live ผ่านโดยไม่มี surprise</text>
   <text x="104" y="108" font-size="13" fill="var(--muted)" font-family="system-ui">ตั้งแต่ Initiation จนถึง Hypercare</text>
   <rect x="432" y="20" width="58" height="20" rx="10" fill="var(--accent)"/>
