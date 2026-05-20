@@ -1,8 +1,4 @@
 html: true
 allowLocalFiles: true
 engine: ./marp.engine.cjs
-pdfNotes: true
-pdfOutlines:
-  pages: true
-  headings: true
 imageScale: 2
