@@ -86,6 +86,10 @@ Default post structure: `## TL;DR` → content sections → `## Key Takeaways`.
 
 ## Adding a Slide Deck
 
+> **Visual authoring rules** (SVG-first, no bullet defaults, CSS token discipline, 9 SVG patterns)
+> live in the `marp-deck` skill. The skill auto-runs after each new/updated post —
+> manual `marp` invocations should also load it. See `~/.claude/skills/marp-deck/SKILL.md`.
+
 Slides live in `_slides/` (Jekyll ignores `_`-prefixed dirs) and are rendered by Marp CLI in CI to `slides/` (served at `/slides/<slug>.html`).
 
 1. Write `_slides/<slug>.md` — use `_slides/.deck-template.md` as starting point.
