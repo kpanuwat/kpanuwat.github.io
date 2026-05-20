@@ -1,6 +1,6 @@
 ---
 title: "Printing Press: สร้าง CLI สำหรับ AI Agents ประหยัด Token กว่า MCP ถึง 35 เท่า"
-date: 2026-05-21 12:00:00 +0700
+date: 2026-05-20 12:00:00 +0700
 categories: [Tools]
 tags: [cli, ai-agents, mcp, token-efficiency, go, context-bloat]
 ---
