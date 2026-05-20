@@ -3,7 +3,10 @@ title: "อุตสาหกรรม Semiconductor และการเตร
 date: 2026-05-20 12:00:00 +0700
 categories: [Engineering]
 tags: [semiconductor, workforce, thailand, industry, training]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
