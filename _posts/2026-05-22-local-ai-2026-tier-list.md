@@ -1,6 +1,6 @@
 ---
 title: "Local AI ในปี 2026: Tier List งานที่คุ้มค่าจริง vs งานที่ยังต้องพึ่ง Cloud"
-date: 2026-05-22 12:00:00 +0700
+date: 2026-05-21 12:00:00 +0700
 categories: [Research]
 tags: [local-ai, llm, privacy, code-autocomplete, image-generation, speech-to-text, ollama]
 ---
