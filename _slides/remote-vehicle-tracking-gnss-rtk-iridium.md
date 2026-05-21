@@ -11,15 +11,17 @@ style: |
   .takeaway { border-left:4px solid var(--accent); background:var(--soft); padding:12px 16px; border-radius:0 8px 8px 0; font-size:15px; }
   .takeaway b { color:var(--accent); }
   .infographic { flex:1; display:flex; align-items:center; justify-content:center; }
-  section.title { background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%); color:white; }
-  section.title h1 { font-size:40px; color:white; margin:0 0 12px 0; line-height:1.2; }
-  section.title p { color:#94a3b8; font-size:18px; margin:4px 0; }
+  section.title { background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%); color:white; justify-content:flex-start; gap:2rem; }
+  section.title h1 { font-size:38px; color:white; margin:0; line-height:1.3; }
+  section.title p { color:#94a3b8; font-size:17px; margin:0; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { padding:5px 10px; border-bottom:1px solid var(--soft); text-align:left; }
+  th { color:var(--muted); font-weight:600; }
 ---
 
 <!-- _class: title -->
 
-# ออกแบบระบบ Vehicle Tracking ระยะไกล
-# ด้วย GNSS RTK + Iridium Satellite
+# ออกแบบระบบ Vehicle Tracking ระยะไกล<br>ด้วย GNSS RTK + Iridium Satellite
 
 **Centimeter-level accuracy · Global coverage · 15 MB/device/month**
 
@@ -197,66 +199,34 @@ style: |
 
 ## RockBLOCK 9704: Satellite Modem สำหรับ Production IoT
 
-<p class="subhead">Iridium Certus 100 — IMT payload 300× ใหญ่กว่ารุ่นเก่า SBD, rugged สำหรับภาคสนาม</p>
+<p class="subhead">Iridium Certus 100 — compact, rugged, IMT payload 300× ใหญ่กว่า SBD รุ่นเก่า</p>
 
-<div class="infographic">
-<svg viewBox="0 0 1100 360" width="100%" xmlns="http://www.w3.org/2000/svg">
-  <!-- Left: key specs card -->
-  <rect x="30" y="20" width="480" height="320" rx="14" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.5"/>
-  <text x="270" y="55" font-size="17" font-weight="700" fill="var(--accent)" text-anchor="middle" font-family="system-ui">RockBLOCK 9704 Specs</text>
+| Spec | Value |
+|------|-------|
+| Protocol | Iridium Messaging Transport (IMT) |
+| Payload | 25 bytes – 100 KB per message |
+| Data rate | 4.8 kbps bi-directional |
+| Latency | < 10 seconds (typical) |
+| Power | Peak 1.4 W · Idle < 60 mW · Sleep < 5 mW |
+| Temperature | -40°C to +70°C |
+| Size (SMA) | 48 × 52 × 16 mm, < 35 g |
+| Airtime | $17–75/month base · $0.30–0.50/KB overage |
 
-  <text x="60" y="90" font-size="13" fill="var(--muted)" font-family="system-ui">Payload</text>
-  <text x="340" y="90" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="end" font-family="system-ui">25 bytes – 100 KB / message</text>
-  <line x1="60" y1="98" x2="450" y2="98" stroke="var(--muted)" stroke-width="0.5" opacity="0.5"/>
-
-  <text x="60" y="120" font-size="13" fill="var(--muted)" font-family="system-ui">Data rate</text>
-  <text x="340" y="120" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="end" font-family="system-ui">4.8 kbps bi-directional</text>
-  <line x1="60" y1="128" x2="450" y2="128" stroke="var(--muted)" stroke-width="0.5" opacity="0.5"/>
-
-  <text x="60" y="150" font-size="13" fill="var(--muted)" font-family="system-ui">Latency</text>
-  <text x="340" y="150" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="end" font-family="system-ui">&lt; 10 seconds (typical)</text>
-  <line x1="60" y1="158" x2="450" y2="158" stroke="var(--muted)" stroke-width="0.5" opacity="0.5"/>
-
-  <text x="60" y="180" font-size="13" fill="var(--muted)" font-family="system-ui">Peak power</text>
-  <text x="340" y="180" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="end" font-family="system-ui">1.4 W  |  Idle &lt; 60 mW  |  Sleep &lt; 5 mW</text>
-  <line x1="60" y1="188" x2="450" y2="188" stroke="var(--muted)" stroke-width="0.5" opacity="0.5"/>
-
-  <text x="60" y="210" font-size="13" fill="var(--muted)" font-family="system-ui">Temperature</text>
-  <text x="340" y="210" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="end" font-family="system-ui">-40°C to +70°C</text>
-  <line x1="60" y1="218" x2="450" y2="218" stroke="var(--muted)" stroke-width="0.5" opacity="0.5"/>
-
-  <text x="60" y="240" font-size="13" fill="var(--muted)" font-family="system-ui">Size (SMA)</text>
-  <text x="340" y="240" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="end" font-family="system-ui">48 × 52 × 16 mm, &lt; 35 g</text>
-  <line x1="60" y1="248" x2="450" y2="248" stroke="var(--muted)" stroke-width="0.5" opacity="0.5"/>
-
-  <text x="60" y="270" font-size="13" fill="var(--muted)" font-family="system-ui">Interface</text>
-  <text x="340" y="270" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="end" font-family="system-ui">UART 3.3V, USB-C, U.FL GNSS passthrough</text>
-  <line x1="60" y1="278" x2="450" y2="278" stroke="var(--muted)" stroke-width="0.5" opacity="0.5"/>
-
-  <text x="60" y="300" font-size="13" fill="var(--muted)" font-family="system-ui">Airtime</text>
-  <text x="340" y="300" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="end" font-family="system-ui">$17–75/month base + $0.30–0.50/KB overage</text>
-
-  <!-- Right: SBD vs IMT comparison -->
-  <rect x="590" y="20" width="480" height="320" rx="14" fill="var(--soft)" stroke="var(--muted)" stroke-width="1.5"/>
-  <text x="830" y="55" font-size="17" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">SBD (9603) vs IMT (9704)</text>
-
-  <!-- SBD bar -->
-  <text x="620" y="105" font-size="13" fill="var(--muted)" font-family="system-ui">SBD payload</text>
-  <rect x="620" y="115" width="14" height="24" rx="3" fill="var(--danger)"/>
-  <text x="644" y="132" font-size="13" fill="var(--danger)" font-family="system-ui">340 bytes max</text>
-
-  <!-- IMT bar -->
-  <text x="620" y="175" font-size="13" fill="var(--muted)" font-family="system-ui">IMT payload</text>
-  <rect x="620" y="185" width="420" height="24" rx="3" fill="var(--accent)"/>
-  <text x="1050" y="202" font-size="13" fill="var(--accent)" text-anchor="end" font-family="system-ui">100,000 bytes (~300×)</text>
-
-  <text x="830" y="250" font-size="14" fill="var(--ink)" text-anchor="middle" font-family="system-ui">IMT เปิดให้ส่ง batch telemetry</text>
-  <text x="830" y="274" font-size="14" fill="var(--ink)" text-anchor="middle" font-family="system-ui">compressed payload ในขนาดใหญ่ขึ้น 300×</text>
-  <text x="830" y="310" font-size="13" fill="var(--muted)" text-anchor="middle" font-family="system-ui">ทำให้ delta encoding + batching เป็นไปได้</text>
+<div style="display:flex;justify-content:center;margin:0.25rem 0">
+<svg viewBox="0 0 540 64" width="540" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="4" width="120" height="56" rx="8" fill="none" stroke="#ef4444" stroke-width="2"/>
+  <text x="60" y="24" font-size="10" fill="#94a3b8" text-anchor="middle" font-family="system-ui">SBD — 9603</text>
+  <text x="60" y="48" font-size="20" font-weight="900" fill="#ef4444" text-anchor="middle" font-family="system-ui">340 B</text>
+  <text x="215" y="38" font-size="22" font-weight="900" fill="#3b82f6" text-anchor="middle" font-family="system-ui">→ 300×</text>
+  <rect x="310" y="4" width="120" height="56" rx="8" fill="none" stroke="#3b82f6" stroke-width="2"/>
+  <text x="370" y="24" font-size="10" fill="#94a3b8" text-anchor="middle" font-family="system-ui">IMT — 9704</text>
+  <text x="370" y="48" font-size="20" font-weight="900" fill="#3b82f6" text-anchor="middle" font-family="system-ui">100 KB</text>
+  <text x="450" y="22" font-size="10" fill="#94a3b8" font-family="system-ui">max</text>
+  <text x="450" y="36" font-size="10" fill="#94a3b8" font-family="system-ui">payload</text>
 </svg>
 </div>
 
-<div class="takeaway"><b>★ Takeaway:</b> IMT payload 300× ใหญ่กว่า SBD — ออกแบบ batch 50 positions/message แทนส่งทีละ point ลด satellite call overhead</div>
+<div class="takeaway"><b>★ Takeaway:</b> IMT payload 300× ใหญ่กว่า SBD — batch 50 positions/message, ลด satellite call overhead</div>
 
 <!-- Speaker note: ราคา hardware $279-299. ต้อง plan airtime cost ใน BOM ด้วย. เน้น sleep mode < 5mW สำคัญมากสำหรับ battery-powered edge device. -->
 
@@ -331,50 +301,19 @@ style: |
 
 ## Payload Design: Binary 20 bytes ดีกว่า JSON 150+ bytes
 
-<p class="subhead">บน satellite link ทุก byte มีราคา — JSON overhead คือ operational cost ที่ไม่จำเป็น</p>
+<p class="subhead">บน satellite link ทุก byte มีราคา — ออกแบบ payload ให้ compact ตั้งแต่แรก</p>
 
-<div class="infographic">
-<svg viewBox="0 0 1100 360" width="100%" xmlns="http://www.w3.org/2000/svg">
-  <!-- comparison-2col: JSON vs Binary -->
-  <rect x="30" y="20" width="490" height="320" rx="12" fill="var(--paper)" stroke="var(--danger)" stroke-width="2"/>
-  <rect x="30" y="20" width="490" height="50" rx="12" fill="var(--danger)" opacity="0.12"/>
-  <text x="275" y="52" font-size="17" font-weight="700" fill="var(--danger)" text-anchor="middle" font-family="system-ui">JSON (อย่าส่งบน satellite)</text>
+| Format | Bytes/point | Saving | 50-point batch |
+|--------|-------------|--------|----------------|
+| **JSON** | 150 B | baseline | 7,500 B |
+| **Binary Struct** | 20 B | **7× smaller** | 1,000 B |
+| **Delta Encoded** | ~6 B | **25× smaller** | ~300 B |
 
-  <text x="60" y="95" font-size="12" fill="var(--muted)" font-family="system-ui">{"lat":13.7563,"lng":100.5018,"alt":45.2,</text>
-  <text x="60" y="115" font-size="12" fill="var(--muted)" font-family="system-ui"> "fix":3,"spd":62,"hdg":180.5,"bat":87,</text>
-  <text x="60" y="135" font-size="12" fill="var(--muted)" font-family="system-ui"> "ts":1716278400,"flags":1}</text>
-
-  <rect x="60" y="155" width="420" height="28" rx="4" fill="var(--danger)" opacity="0.12"/>
-  <text x="270" y="174" font-size="14" font-weight="700" fill="var(--danger)" text-anchor="middle" font-family="system-ui">~150 bytes per position point</text>
-
-  <text x="60" y="220" font-size="13" fill="var(--ink)" font-family="system-ui">50 positions = 7,500 bytes / message</text>
-  <text x="60" y="248" font-size="13" fill="var(--muted)" font-family="system-ui">100K positions/month = 15 MB ✓</text>
-  <text x="60" y="276" font-size="13" fill="var(--danger)" font-family="system-ui">แต่ overhead สูง, batch น้อยกว่า</text>
-
-  <!-- Right: Binary struct -->
-  <rect x="580" y="20" width="490" height="320" rx="12" fill="var(--paper)" stroke="var(--accent)" stroke-width="2"/>
-  <rect x="580" y="20" width="490" height="50" rx="12" fill="var(--accent)" opacity="0.10"/>
-  <text x="825" y="52" font-size="17" font-weight="700" fill="var(--accent)" text-anchor="middle" font-family="system-ui">Binary Struct (ส่งแบบนี้)</text>
-
-  <!-- Field breakdown -->
-  <text x="610" y="90" font-size="13" fill="var(--muted)" font-family="system-ui">timestamp  (uint32)  →</text>
-  <text x="940" y="90" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="end" font-family="system-ui">4 bytes</text>
-  <text x="610" y="114" font-size="13" fill="var(--muted)" font-family="system-ui">latitude   (int32 ÷1e7) →</text>
-  <text x="940" y="114" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="end" font-family="system-ui">4 bytes</text>
-  <text x="610" y="138" font-size="13" fill="var(--muted)" font-family="system-ui">longitude  (int32 ÷1e7) →</text>
-  <text x="940" y="138" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="end" font-family="system-ui">4 bytes</text>
-  <text x="610" y="162" font-size="13" fill="var(--muted)" font-family="system-ui">altitude   (int16 cm)  →</text>
-  <text x="940" y="162" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="end" font-family="system-ui">2 bytes</text>
-  <text x="610" y="186" font-size="13" fill="var(--muted)" font-family="system-ui">fix_type + speed + hdg + battery + flags →</text>
-  <text x="940" y="186" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="end" font-family="system-ui">6 bytes</text>
-  <line x1="610" y1="198" x2="940" y2="198" stroke="var(--accent)" stroke-width="1" opacity="0.4"/>
-
-  <rect x="610" y="210" width="320" height="28" rx="4" fill="var(--accent)" opacity="0.12"/>
-  <text x="770" y="229" font-size="14" font-weight="700" fill="var(--accent)" text-anchor="middle" font-family="system-ui">20 bytes per position point</text>
-
-  <text x="610" y="268" font-size="13" fill="var(--ink)" font-family="system-ui">50 positions = 1,000 bytes / message</text>
-  <text x="610" y="294" font-size="13" fill="var(--ink)" font-family="system-ui">Delta encoding → 5–8 bytes/point</text>
-  <text x="610" y="320" font-size="13" fill="var(--accent)" font-family="system-ui">ประหยัด 7× vs JSON</text>
+<div style="margin:0.5rem 0;display:flex;justify-content:center">
+<svg viewBox="0 0 800 64" width="85%" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="800" height="64" rx="10" fill="#f1f5f9" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="400" y="24" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle" font-family="system-ui">Struct: timestamp 4B + lat 4B + lng 4B + alt 2B + flags 6B = 20 bytes</text>
+  <text x="400" y="48" font-size="13" fill="#94a3b8" text-anchor="middle" font-family="system-ui">delta: send full coords once, then only diff per point → ~6 bytes</text>
 </svg>
 </div>
 
@@ -525,54 +464,48 @@ style: |
 <p class="subhead">ระบบที่ดีไม่ได้อยู่ที่ cloud pipeline — อยู่ที่ firmware ที่ตัดสินใจ smart บน edge</p>
 
 <div class="infographic">
-<svg viewBox="0 0 1100 360" width="100%" xmlns="http://www.w3.org/2000/svg">
-  <!-- concentric-rings: core = edge intelligence, middle = key strategies, outer = enablers -->
-  <circle cx="280" cy="180" r="155" fill="none" stroke="var(--muted)" stroke-width="1" opacity="0.3"/>
-  <circle cx="280" cy="180" r="105" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
-  <circle cx="280" cy="180" r="60" fill="var(--accent)" opacity="0.12"/>
-  <circle cx="280" cy="180" r="60" fill="none" stroke="var(--accent)" stroke-width="2"/>
-  <text x="280" y="172" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle" font-family="system-ui">Edge</text>
-  <text x="280" y="190" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle" font-family="system-ui">Intelligence</text>
+<svg viewBox="0 0 1000 300" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <!-- Row 1: cards 1, 2, 3 -->
+  <rect x="10" y="10" width="300" height="120" rx="10" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.5"/>
+  <circle cx="42" cy="42" r="16" fill="var(--accent)"/>
+  <text x="42" y="48" font-size="14" font-weight="700" fill="white" text-anchor="middle" font-family="system-ui">1</text>
+  <text x="68" y="38" font-size="13" font-weight="700" fill="var(--ink)" font-family="system-ui">Iridium IMT</text>
+  <text x="20" y="72" font-size="12" fill="var(--muted)" font-family="system-ui">Payload 100 KB, latency &lt; 10s</text>
+  <text x="20" y="92" font-size="12" fill="var(--muted)" font-family="system-ui">RockBLOCK 9704: rugged, global</text>
+  <text x="20" y="112" font-size="11" fill="var(--accent)" font-family="system-ui">✓ ครอบคลุม 100% พื้นที่โลก</text>
 
-  <!-- Middle ring labels -->
-  <text x="280" y="82" font-size="12" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Adaptive Interval</text>
-  <text x="157" y="244" font-size="12" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Store-and-Forward</text>
-  <text x="403" y="244" font-size="12" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Payload Compression</text>
+  <rect x="350" y="10" width="300" height="120" rx="10" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.5"/>
+  <circle cx="382" cy="42" r="16" fill="var(--accent)"/>
+  <text x="382" y="48" font-size="14" font-weight="700" fill="white" text-anchor="middle" font-family="system-ui">2</text>
+  <text x="408" y="38" font-size="13" font-weight="700" fill="var(--ink)" font-family="system-ui">RTK Accuracy Tiers</text>
+  <text x="360" y="72" font-size="12" fill="var(--muted)" font-family="system-ui">Fixed ~1 cm · Float ~30 cm</text>
+  <text x="360" y="92" font-size="12" fill="var(--muted)" font-family="system-ui">Standalone GPS 3-5 m</text>
+  <text x="360" y="112" font-size="11" fill="var(--accent)" font-family="system-ui">✓ log fix_type ทุก message</text>
 
-  <!-- Outer ring labels -->
-  <text x="140" y="90" font-size="11" fill="var(--muted)" text-anchor="middle" font-family="system-ui">GNSS RTK</text>
-  <text x="420" y="90" font-size="11" fill="var(--muted)" text-anchor="middle" font-family="system-ui">Iridium IMT</text>
-  <text x="130" y="305" font-size="11" fill="var(--muted)" text-anchor="middle" font-family="system-ui">fix_type logging</text>
-  <text x="430" y="305" font-size="11" fill="var(--muted)" text-anchor="middle" font-family="system-ui">cost hard cap</text>
+  <rect x="690" y="10" width="300" height="120" rx="10" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.5"/>
+  <circle cx="722" cy="42" r="16" fill="var(--accent)"/>
+  <text x="722" y="48" font-size="14" font-weight="700" fill="white" text-anchor="middle" font-family="system-ui">3</text>
+  <text x="748" y="38" font-size="13" font-weight="700" fill="var(--ink)" font-family="system-ui">15 MB Budget</text>
+  <text x="700" y="72" font-size="12" fill="var(--muted)" font-family="system-ui">Binary + delta + batch + adaptive</text>
+  <text x="700" y="92" font-size="12" fill="var(--muted)" font-family="system-ui">อย่าส่ง JSON บน satellite</text>
+  <text x="700" y="112" font-size="11" fill="var(--accent)" font-family="system-ui">✓ 7× savings vs JSON</text>
 
-  <!-- Right side: 7 takeaways as items -->
-  <rect x="520" y="10" width="560" height="340" rx="14" fill="var(--soft)" stroke="var(--accent)" stroke-width="1"/>
-  <text x="800" y="42" font-size="15" font-weight="700" fill="var(--accent)" text-anchor="middle" font-family="system-ui">7 Key Takeaways</text>
+  <!-- Row 2: cards 4, 5 centered -->
+  <rect x="180" y="155" width="300" height="120" rx="10" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.5"/>
+  <circle cx="212" cy="187" r="16" fill="var(--accent)"/>
+  <text x="212" y="193" font-size="14" font-weight="700" fill="white" text-anchor="middle" font-family="system-ui">4</text>
+  <text x="238" y="183" font-size="13" font-weight="700" fill="var(--ink)" font-family="system-ui">Store-and-Forward</text>
+  <text x="190" y="217" font-size="12" fill="var(--muted)" font-family="system-ui">Flash queue สำหรับ link outage</text>
+  <text x="190" y="237" font-size="12" fill="var(--muted)" font-family="system-ui">Retry + exponential backoff</text>
+  <text x="190" y="257" font-size="11" fill="var(--accent)" font-family="system-ui">✓ ไม่มี queue = data loss</text>
 
-  <text x="550" y="76" font-size="12" fill="var(--accent)" font-family="system-ui">①</text>
-  <text x="575" y="76" font-size="12" fill="var(--ink)" font-family="system-ui">Iridium IMT payload 100 KB, latency &lt; 10s</text>
-
-  <text x="550" y="104" font-size="12" fill="var(--accent)" font-family="system-ui">②</text>
-  <text x="575" y="104" font-size="12" fill="var(--ink)" font-family="system-ui">RTK fallback tiers: Fixed → Float → Standalone</text>
-
-  <text x="550" y="132" font-size="12" fill="var(--accent)" font-family="system-ui">③</text>
-  <text x="575" y="132" font-size="12" fill="var(--ink)" font-family="system-ui">15 MB/month achievable ด้วย binary + delta + batch</text>
-
-  <text x="550" y="160" font-size="12" fill="var(--accent)" font-family="system-ui">④</text>
-  <text x="575" y="160" font-size="12" fill="var(--ink)" font-family="system-ui">Store-and-forward ไม่ optional — Flash queue จำเป็น</text>
-
-  <text x="550" y="188" font-size="12" fill="var(--accent)" font-family="system-ui">⑤</text>
-  <text x="575" y="188" font-size="12" fill="var(--ink)" font-family="system-ui">Cost guard: hard cap firmware + cloud anomaly alert</text>
-
-  <text x="550" y="216" font-size="12" fill="var(--accent)" font-family="system-ui">⑥</text>
-  <text x="575" y="216" font-size="12" fill="var(--ink)" font-family="system-ui">Supply chain: order BOM ล่วงหน้าอย่างน้อย 1 quarter</text>
-
-  <text x="550" y="244" font-size="12" fill="var(--accent)" font-family="system-ui">⑦</text>
-  <text x="575" y="244" font-size="12" fill="var(--ink)" font-family="system-ui">Edge intelligence decide when/how much — cloud แค่ receive</text>
-
-  <rect x="540" y="270" width="520" height="60" rx="8" fill="var(--accent)" opacity="0.08" stroke="var(--accent)" stroke-width="1"/>
-  <text x="800" y="296" font-size="13" font-weight="700" fill="var(--accent)" text-anchor="middle" font-family="system-ui">อย่าส่ง JSON บน satellite</text>
-  <text x="800" y="316" font-size="12" fill="var(--muted)" text-anchor="middle" font-family="system-ui">Binary 20 bytes = 7× cheaper than JSON 150 bytes</text>
+  <rect x="520" y="155" width="300" height="120" rx="10" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.5"/>
+  <circle cx="552" cy="187" r="16" fill="var(--accent)"/>
+  <text x="552" y="193" font-size="14" font-weight="700" fill="white" text-anchor="middle" font-family="system-ui">5</text>
+  <text x="578" y="183" font-size="13" font-weight="700" fill="var(--ink)" font-family="system-ui">Cost Guard Rails</text>
+  <text x="530" y="217" font-size="12" fill="var(--muted)" font-family="system-ui">Firmware byte counter + hard cap</text>
+  <text x="530" y="237" font-size="12" fill="var(--muted)" font-family="system-ui">Cloud anomaly alert on volume</text>
+  <text x="530" y="257" font-size="11" fill="var(--accent)" font-family="system-ui">✓ overage $0.50/KB = expensive</text>
 </svg>
 </div>
 
