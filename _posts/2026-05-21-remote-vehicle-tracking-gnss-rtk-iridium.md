@@ -3,7 +3,10 @@ title: "ออกแบบระบบ Vehicle Tracking ระยะไกลด
 date: 2026-05-21 12:00:00 +0700
 categories: [Engineering]
 tags: [gnss, rtk, iridium, satellite-iot, firmware, telemetry, vehicle-tracking, iot]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
