@@ -3,7 +3,10 @@ title: "Local AI ในปี 2026: Tier List งานที่คุ้มค�
 date: 2026-05-21 12:00:00 +0700
 categories: [Research]
 tags: [local-ai, llm, privacy, code-autocomplete, image-generation, speech-to-text, ollama]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
