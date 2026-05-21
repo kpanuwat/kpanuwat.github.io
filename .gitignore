@@ -6,3 +6,4 @@ Gemfile.lock
 vendor/
 slides/
 exports/
+.notebooklm-cache/
