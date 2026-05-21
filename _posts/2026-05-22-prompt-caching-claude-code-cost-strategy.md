@@ -3,7 +3,10 @@ title: "Prompt Caching: กลยุทธ์ลดต้นทุน Claude Cod
 date: 2026-05-21 12:00:00 +0700
 categories: [Engineering]
 tags: [prompt-caching, claude-code, llm, cost-optimization, anthropic]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
