@@ -3,7 +3,10 @@ title: "วัดพลังงาน Cooling Tower ด้วย Schneider PM22
 date: 2026-05-22 12:00:00 +0700
 categories: [Engineering]
 tags: [energy-monitoring, power-meter, modbus, bms, ems, cooling-tower, schneider, hvac, rs485]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
