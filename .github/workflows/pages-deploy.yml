@@ -34,7 +34,12 @@ jobs:
           node-version: "20"
 
       - name: Render Marp decks
-        run: npx -p @marp-team/marp-cli@4.4.0 marp -I _slides/ -o slides/ --html
+        run: |
+          npx -p @marp-team/marp-cli@4.4.0 marp -I _slides/ -o slides/ --html
+          if [ -d _slides/assets ]; then
+            mkdir -p slides/assets
+            cp -r _slides/assets/. slides/assets/
+          fi
 
       - name: Build
         run: bundle exec jekyll build --destination "_site"

@@ -20,6 +20,8 @@ Marp (local preview):
 npx -p @marp-team/marp-cli@4.4.0 marp -I _slides/ -o slides/ --html
 ```
 
+CI adds `cp -r _slides/assets/. slides/assets/` after Marp render — publishes `_slides/assets/*.png` to `/slides/assets/` on the live site. Jekyll ignores `_`-prefixed dirs, so this copy step is required for deployed PNG assets to resolve.
+
 No test suite. CI runs Marp then `bundle exec jekyll build --destination "_site"` with `JEKYLL_ENV=production`.
 
 ## Architecture
