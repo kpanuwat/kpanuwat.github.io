@@ -4,6 +4,7 @@ date: 2026-05-22 00:00:00 +0700
 categories: [Engineering]
 tags: [qms, iso9001, iatf16949, iso13485, certifications, ems, manufacturing, quality]
 series: ems-factory
+slides: true
 ---
 
 {% include slide-link.html %}
