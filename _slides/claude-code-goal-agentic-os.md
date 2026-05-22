@@ -54,9 +54,9 @@ style: |
   .bento.cols-2 { grid-template-columns:1fr 1fr; }
   .bento.cols-3 { grid-template-columns:1fr 1fr 1fr; }
   .bento.cols-4 { grid-template-columns:repeat(4,1fr); }
-  .img-card { margin:0; padding:8px; background:var(--paper); border-radius:var(--radius); box-shadow:var(--shadow-lg); max-width:100%; }
-  .img-card img { display:block; width:100%; border-radius:var(--radius-sm); }
-  .img-card figcaption { font-size:11px; color:var(--muted); padding:8px 6px 2px; text-align:center; }
+  .img-card { margin:0; padding:8px; background:var(--paper); border-radius:var(--radius); box-shadow:var(--shadow-lg); max-width:100%; max-height:100%; display:flex; flex-direction:column; align-items:center; min-height:0; box-sizing:border-box; }
+  .img-card img { display:block; max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; margin:0 auto; border-radius:var(--radius-sm); min-height:0; }
+  .img-card figcaption { font-size:11px; color:var(--muted); padding:8px 6px 2px; text-align:center; flex-shrink:0; }
   .src { position:absolute; bottom:20px; left:64px; font-size:10px; color:var(--muted); letter-spacing:.02em; }
   section.title {
     background:linear-gradient(135deg,#0f172a 0%,var(--accent-deep) 100%);
