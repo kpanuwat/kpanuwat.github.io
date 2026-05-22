@@ -1,6 +1,6 @@
 ---
 title: "เจาะลึก Goal Feature ใน Claude Code: ก้าวสู่ Agentic OS ที่ทำงานต่อเนื่องข้ามเซสชัน"
-date: 2026-05-22 12:00:00 +0700
+date: 2026-05-22 00:00:00 +0700
 categories: [Engineering]
 tags: [claude-code, agentic-os, hermes, ai-agents, goal-feature, anthropic]
 ---
