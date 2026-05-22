@@ -9,6 +9,8 @@ slides: true
 
 {% include series-nav.html %}
 
+{% include slide-link.html %}
+
 ## TL;DR
 
 Product Development ใน SI/Tech project คือ chain ของ decision gates ตั้งแต่ Idea ถึง Commercial — แต่ละ phase มี 2–4 task หลักที่ต้องทำให้ "complete จริง" ก่อน unblock phase ถัดไป บทความนี้แมป 10 phases พร้อม task ที่ PM และทีมต้อง execute ในแต่ละ gate โดยมีหัวใจ 4 cross-cutting disciplines: BOM maturity, supply risk, cross-discipline sync, และ change control ที่ thread ผ่านทุก phase
