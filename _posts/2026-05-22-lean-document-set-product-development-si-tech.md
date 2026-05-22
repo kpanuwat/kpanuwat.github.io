@@ -4,6 +4,7 @@ date: 2026-05-22 00:24:00 +0700
 categories: [Engineering]
 tags: [lean-documentation, product-development, system-integrator, si, prd, bom, sow, phase-gate, evt-dvt-pvt, sat-uat, design-review, change-control, project-management]
 series: project-management-si
+slides: true
 ---
 
 {% include series-nav.html %}
