@@ -4,6 +4,7 @@ date: 2026-05-22 00:19:00 +0700
 categories: [Engineering]
 tags: [ems, testing, ict, fct, boundary-scan, jtag, npi, fixture-design, pcba]
 series: ems-factory
+slides: true
 ---
 
 {% include slide-link.html %}
