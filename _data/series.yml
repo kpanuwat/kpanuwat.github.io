@@ -7,3 +7,7 @@
   title: "เจาะลึก EMS Factory"
   description: "Deep-dive series on EMS factory operations: DFM, PCBA, SMT, QMS, traceability, supply chain resilience, and ESG compliance."
 
+- name: project-management-si
+  title: "Project Management for SI"
+  description: "Deep-dive series on managing System Integrator projects: charters, milestones, commercial alignment, governance, and lifecycle management."
+
