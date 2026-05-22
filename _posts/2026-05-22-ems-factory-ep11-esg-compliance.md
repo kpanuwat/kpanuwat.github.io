@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP11: ESG & Compliance (Scope 1–3, Conflict Minerals)"
-date: 2026-05-22 19:28:57 +0700
+date: 2026-05-22 00:16:00 +0700
 categories: [Engineering]
 tags: [esg, scope-3, conflict-minerals, 3tg, csrd, dodd-frank, compliance, ems, manufacturing]
 series: ems-factory

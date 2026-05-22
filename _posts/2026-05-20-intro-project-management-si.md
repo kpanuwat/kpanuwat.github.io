@@ -1,6 +1,6 @@
 ---
 title: "Project Management เบื้องต้น สำหรับงาน SI (System Integrations)"
-date: 2026-05-20 16:12:28 +0700
+date: 2026-05-20 00:01:00 +0700
 categories: [Engineering]
 tags: [project-management, system-integration, si, pmbok, agile]
 slides: true

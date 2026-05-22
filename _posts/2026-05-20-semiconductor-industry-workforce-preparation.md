@@ -1,6 +1,6 @@
 ---
 title: "อุตสาหกรรม Semiconductor และการเตรียมความพร้อมบุคลากร"
-date: 2026-05-20 23:17:25 +0700
+date: 2026-05-20 00:04:00 +0700
 categories: [Engineering]
 tags: [semiconductor, workforce, thailand, industry, training]
 slides: true

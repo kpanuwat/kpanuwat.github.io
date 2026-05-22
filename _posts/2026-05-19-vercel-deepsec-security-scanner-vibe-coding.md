@@ -1,6 +1,6 @@
 ---
 title: "Vercel deepsec: เครื่องมือสแกนช่องโหว่ Open-source สำหรับ Vibe Coding"
-date: 2026-05-19 03:02:57 +0700
+date: 2026-05-19 00:02:00 +0700
 categories: [Tools]
 tags: [vercel, security, vibe-coding, owasp, open-source, ai-agent]
 slides: true

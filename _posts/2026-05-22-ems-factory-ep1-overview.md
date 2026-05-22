@@ -1,6 +1,6 @@
 ---
 title: "เจาะลึก EMS Factory EP1: ภาพรวม Value Chain และ Why Process Control Wins"
-date: 2026-05-22 17:08:37 +0700
+date: 2026-05-22 00:06:00 +0700
 categories: [Engineering]
 tags: [ems, manufacturing, pcba, smt, quality, supply-chain, ipc]
 series: ems-factory

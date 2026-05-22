@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP6: Quality Standards & IPC Framework"
-date: 2026-05-22 18:22:36 +0700
+date: 2026-05-22 00:11:00 +0700
 categories: [Engineering]
 tags: [ipc, quality, standards, ems, manufacturing, pcba]
 series: ems-factory

@@ -1,6 +1,6 @@
 ---
 title: "Chrome Browser MCP: ให้ Claude Code ควบคุม Chrome ได้โดยตรง"
-date: 2026-05-19 05:28:25 +0700
+date: 2026-05-19 00:07:00 +0700
 categories: [Tools]
 tags: [mcp, chrome, browser-automation, claude-code, devtools]
 slides: true

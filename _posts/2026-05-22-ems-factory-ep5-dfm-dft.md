@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP5: DFM / DFT — Design for Manufacturability & Testability"
-date: 2026-05-22 18:09:19 +0700
+date: 2026-05-22 00:10:00 +0700
 categories: [Engineering]
 tags: [dfm, dft, pcb, ems, manufacturing, design]
 series: ems-factory

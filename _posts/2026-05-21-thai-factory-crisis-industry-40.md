@@ -1,6 +1,6 @@
 ---
 title: "วิกฤตโรงงานไทยปิดตัว: ถึงเวลา Industry 4.0 หรืออยู่รอด?"
-date: 2026-05-21 14:16:21 +0700
+date: 2026-05-21 00:04:00 +0700
 categories: [Engineering]
 tags: [industry-4.0, automation, ai, manufacturing, thailand, upskilling]
 slides: true

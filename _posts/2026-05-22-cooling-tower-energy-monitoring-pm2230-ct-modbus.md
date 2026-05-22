@@ -1,6 +1,6 @@
 ---
 title: "วัดพลังงาน Cooling Tower ด้วย Schneider PM2230 + Split-core CT + Modbus RTU"
-date: 2026-05-22 20:04:50 +0700
+date: 2026-05-22 00:18:00 +0700
 categories: [Engineering]
 tags: [energy-monitoring, power-meter, modbus, bms, ems, cooling-tower, schneider, hvac, rs485]
 slides: true

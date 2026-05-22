@@ -1,6 +1,6 @@
 ---
 title: "Ultra-Wideband (UWB) Tracking: เทคโนโลยีระบุตำแหน่งความแม่นยำสูง"
-date: 2026-05-20 22:40:23 +0700
+date: 2026-05-20 00:03:00 +0700
 categories: [Research]
 tags: [uwb, indoor-positioning, iot, wireless, rtls]
 slides: true

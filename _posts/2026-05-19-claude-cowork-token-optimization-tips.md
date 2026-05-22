@@ -1,6 +1,6 @@
 ---
 title: "Top 5 Claude Co-work Tips: ประหยัด Token และทำงานมีประสิทธิภาพ"
-date: 2026-05-19 05:58:10 +0700
+date: 2026-05-19 00:08:00 +0700
 categories: [Tools]
 tags: [claude, claude-code, token-optimization, co-work, obsidian, claude-md, productivity]
 ---

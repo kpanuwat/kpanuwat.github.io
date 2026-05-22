@@ -1,6 +1,6 @@
 ---
 title: "เจาะลึก EMS Factory EP3: PCBA Basics — SMT vs THT"
-date: 2026-05-22 17:39:02 +0700
+date: 2026-05-22 00:08:00 +0700
 categories: [Engineering]
 tags: [ems, pcba, smt, tht, manufacturing, soldering, assembly]
 series: ems-factory

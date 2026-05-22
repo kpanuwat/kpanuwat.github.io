@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP10: Manufacturing Yield Optimization (SPC, FPY, OEE)"
-date: 2026-05-22 19:20:19 +0700
+date: 2026-05-22 00:15:00 +0700
 categories: [Engineering]
 tags: [spc, fpy, oee, yield, manufacturing, ems, quality, six-sigma]
 series: ems-factory

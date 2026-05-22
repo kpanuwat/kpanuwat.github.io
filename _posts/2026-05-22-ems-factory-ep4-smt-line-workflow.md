@@ -1,6 +1,6 @@
 ---
 title: "เจาะลึก EMS Factory EP4: SMT Line Workflow"
-date: 2026-05-22 17:48:22 +0700
+date: 2026-05-22 00:09:00 +0700
 categories: [Engineering]
 tags: [ems, smt, pcba, manufacturing, soldering, reflow, quality, yield]
 series: ems-factory
