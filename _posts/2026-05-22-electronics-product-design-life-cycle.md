@@ -3,8 +3,10 @@ title: "เจาะลึกเกี่ยวกับ Electronics Product Des
 date: 2026-05-22 00:20:00 +0700
 categories: [Engineering]
 tags: [electronics, product-design, hardware, pcb-design, dfm, prototyping, certification]
-slides: false
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
