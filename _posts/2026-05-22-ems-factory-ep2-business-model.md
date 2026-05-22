@@ -1,6 +1,6 @@
 ---
 title: "เจาะลึก EMS Factory EP2: Business Model & Value Chain"
-date: 2026-05-22 00:00:00 +0700
+date: 2026-05-22 17:24:05 +0700
 categories: [Engineering]
 tags: [ems, manufacturing, business-model, value-chain, oem, odm, turnkey]
 series: ems-factory

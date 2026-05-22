@@ -1,6 +1,6 @@
 ---
 title: "Spec-Driven Development: ใช้ Spec เป็น Contract อุดรอยรั่วของ Vibe Coding"
-date: 2026-05-19 12:00:00 +0700
+date: 2026-05-19 03:25:23 +0700
 categories: [Tools]
 tags: [spec-driven-development, openspec, vibe-coding, ai-coding, llm, sddd]
 slides: true

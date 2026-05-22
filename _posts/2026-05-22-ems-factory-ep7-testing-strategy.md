@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP7: Testing Strategy (AOI, ICT, FCT)"
-date: 2026-05-22 00:00:00 +0700
+date: 2026-05-22 18:36:45 +0700
 categories: [Engineering]
 tags: [aoi, ict, fct, testing, ems, manufacturing, pcba]
 series: ems-factory

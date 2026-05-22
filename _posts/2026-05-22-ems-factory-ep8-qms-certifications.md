@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP8: QMS & Certifications (ISO 9001, IATF 16949, ISO 13485)"
-date: 2026-05-22 00:00:00 +0700
+date: 2026-05-22 18:50:59 +0700
 categories: [Engineering]
 tags: [qms, iso9001, iatf16949, iso13485, certifications, ems, manufacturing, quality]
 series: ems-factory

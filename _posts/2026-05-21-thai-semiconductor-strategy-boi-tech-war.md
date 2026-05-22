@@ -1,6 +1,6 @@
 ---
 title: "ยุทธศาสตร์เซมิคอนดักเตอร์ไทย: BOI + Tech War → ชิป >10nm และ Supply Chain โลก"
-date: 2026-05-21 12:00:00 +0700
+date: 2026-05-21 06:09:45 +0700
 categories: [Research]
 tags: [semiconductor, boi, thailand, tech-war, supply-chain, ic, pcb, fdi]
 slides: true

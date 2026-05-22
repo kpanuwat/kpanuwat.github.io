@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP9: Supply Chain Risk & Component Obsolescence"
-date: 2026-05-22 00:00:00 +0700
+date: 2026-05-22 19:02:28 +0700
 categories: [Engineering]
 tags: [supply-chain, component-obsolescence, ems, manufacturing, bom, risk-management]
 series: ems-factory

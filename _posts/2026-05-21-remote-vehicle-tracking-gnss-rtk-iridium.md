@@ -1,6 +1,6 @@
 ---
 title: "ออกแบบระบบ Vehicle Tracking ระยะไกลด้วย GNSS RTK และ Iridium Satellite"
-date: 2026-05-21 12:00:00 +0700
+date: 2026-05-21 21:49:31 +0700
 categories: [Engineering]
 tags: [gnss, rtk, iridium, satellite-iot, firmware, telemetry, vehicle-tracking, iot]
 slides: true

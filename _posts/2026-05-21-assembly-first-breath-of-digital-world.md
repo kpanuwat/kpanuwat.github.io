@@ -1,6 +1,6 @@
 ---
 title: "Assembly: ลมหายใจแรกของโลกดิจิทัล"
-date: 2026-05-21 12:00:00 +0700
+date: 2026-05-21 05:37:48 +0700
 categories: [Engineering]
 tags: [assembly, systems-programming, hardware, low-level, computer-science]
 ---

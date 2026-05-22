@@ -1,6 +1,6 @@
 ---
 title: "Marp: สร้าง Presentation Slides จาก Markdown ด้วย AI"
-date: 2026-05-19 12:00:00 +0700
+date: 2026-05-19 06:00:49 +0700
 categories: [Tools]
 tags: [marp, markdown, slides, presentation, ai, open-source, claude-code]
 slides: true

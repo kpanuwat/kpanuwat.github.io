@@ -1,6 +1,6 @@
 ---
 title: "ตั้งค่า Claude Code ให้ประหยัด Token ด้วย CLAUDE.md, Memory และ Skills"
-date: 2026-05-19 12:00:00 +0700
+date: 2026-05-19 04:48:07 +0700
 categories: [Tools]
 tags: [claude-code, token-optimization, productivity, obsidian, ai-workflow]
 slides: true

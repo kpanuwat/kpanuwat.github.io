@@ -1,6 +1,6 @@
 ---
 title: "NotebookLM: สำรวจหัวข้อวิจัยด้วย AI ก่อนบันทึกลง Obsidian"
-date: 2026-05-22 12:00:00 +0700
+date: 2026-05-22 04:06:32 +0700
 categories: [Tools]
 tags: [notebooklm, research, obsidian, knowledge-management, ai]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP12: ECO/ECN — Engineering Change Control"
-date: 2026-05-22 00:00:00 +0700
+date: 2026-05-22 19:41:35 +0700
 categories: [Engineering]
 tags: [eco, ecn, change-control, plm, erp, mes, traceability, manufacturing, ems, ccb]
 series: ems-factory
