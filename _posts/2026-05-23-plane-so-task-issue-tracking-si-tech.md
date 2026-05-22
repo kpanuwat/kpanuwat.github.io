@@ -1,6 +1,6 @@
 ---
 title: "Plane.so สำหรับงาน SI/Tech: Task & Issue Tracking ระดับ Engineering Team"
-date: 2026-05-23 00:01:00 +0700
+date: 2026-05-22 00:26:00 +0700
 categories: [Engineering]
 tags: [plane, task-tracking, issue-tracking, project-management, system-integrator, si, epic, wbs, sprint, milestone, agile, open-source, devops]
 series: project-management-si
