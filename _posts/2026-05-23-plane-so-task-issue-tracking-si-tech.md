@@ -4,7 +4,10 @@ date: 2026-05-23 00:01:00 +0700
 categories: [Engineering]
 tags: [plane, task-tracking, issue-tracking, project-management, system-integrator, si, epic, wbs, sprint, milestone, agile, open-source, devops]
 series: project-management-si
+slides: true
 ---
+
+{% include slide-link.html %}
 
 {% include series-nav.html %}
 
