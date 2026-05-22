@@ -3,7 +3,10 @@ title: "เจาะลึก KT Problem Solving & Decision Making (Kepner-Trego
 date: 2026-05-22 00:22:00 +0700
 categories: [Engineering]
 tags: [problem-solving, decision-making, kepner-tregoe, methodology, management, root-cause-analysis]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
