@@ -4,7 +4,10 @@ date: 2026-05-22 00:18:00 +0700
 categories: [Engineering]
 tags: [engineering-services, npi, process-engineering, test-engineering, dfm, dft, tooling, sustaining-engineering, ems, manufacturing]
 series: ems-factory
+slides: true
 ---
+
+{% include slide-link.html %}
 
 {% include series-nav.html %}
 
