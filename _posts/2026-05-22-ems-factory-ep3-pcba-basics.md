@@ -4,7 +4,10 @@ date: 2026-05-22 00:00:00 +0700
 categories: [Engineering]
 tags: [ems, pcba, smt, tht, manufacturing, soldering, assembly]
 series: ems-factory
+slides: true
 ---
+
+{% include slide-link.html %}
 
 {% include series-nav.html %}
 
