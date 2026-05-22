@@ -4,6 +4,7 @@ date: 2026-05-22 00:00:00 +0700
 categories: [Engineering]
 tags: [ipc, quality, standards, ems, manufacturing, pcba]
 series: ems-factory
+slides: true
 ---
 
 {% include slide-link.html %}
