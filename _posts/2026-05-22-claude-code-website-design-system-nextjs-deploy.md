@@ -3,7 +3,10 @@ title: "สร้างเว็บไซต์ด้วย Claude Code: Design 
 date: 2026-05-22 00:00:00 +0700
 categories: [Tools]
 tags: [claude-code, nextjs, tailwind, design-system, spline, vercel, web-development]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
