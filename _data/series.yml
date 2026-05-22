@@ -3,3 +3,6 @@
 # title: display name
 # description: shown in the series nav block
 
+- name: ems-factory
+  title: "เจาะลึก EMS Factory"
+  description: "Deep-dive series on EMS factory operations: DFM, PCBA, SMT, QMS, traceability, supply chain resilience, and ESG compliance."
