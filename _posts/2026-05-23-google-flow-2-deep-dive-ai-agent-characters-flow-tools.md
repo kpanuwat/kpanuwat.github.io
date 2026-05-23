@@ -3,8 +3,10 @@ title: "เจาะลึก Google Flow 2.0: AI Agent, Characters และ Fl
 date: 2026-05-23 00:05:00 +0700
 categories: [Tools]
 tags: [google-flow, ai-video, video-generation, ai-agent, gemini, generative-ai, no-code]
-slides: false
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
