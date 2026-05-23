@@ -4,9 +4,11 @@ date: 2026-05-23 00:29:00 +0700
 categories: [Engineering]
 tags: [si-tech, super-ai-engineer, ai-intern, llm, enterprise-ai, forward-deploy, data-engineering, system-integration]
 series: project-management-si
+slides: true
 ---
 
 {% include series-nav.html %}
+{% include slide-link.html %}
 
 ## TL;DR
 
