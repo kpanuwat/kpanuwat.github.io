@@ -3,7 +3,10 @@ title: "Hyperframes + Claude CLI: สร้าง Short Video และ Auto Upl
 date: 2026-05-23 00:11:00 +0700
 categories: [Tools]
 tags: [hyperframes, claude-code, video, youtube, automation, elevenlabs, ffmpeg, ai]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
