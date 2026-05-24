@@ -3,7 +3,10 @@ title: "Claude Design: จาก PRD ยาวเหยียดสู่ Protot
 date: 2026-05-23 00:09:00 +0700
 categories: [Tools]
 tags: [claude, anthropic, prototyping, agile, ai-tools, software-development, ux-design]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
