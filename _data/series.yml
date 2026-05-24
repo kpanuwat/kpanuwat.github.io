@@ -14,3 +14,7 @@
 - name: openspec-beginners
   title: "เจาะลึก OpenSpec สำหรับ Beginners"
   description: "Series สำหรับ beginners ที่อยากใช้ OpenSpec ในการทำ Spec-Driven Development: ตั้งแต่ติดตั้ง, core workflow, เจาะลึก artifacts, ไปจนถึง expanded commands"
+
+- name: iso56001-2024
+  title: "เจาะลึก ISO 56001:2024"
+  description: "Series เจาะลึก ISO 56001:2024 มาตรฐานระบบบริหารจัดการนวัตกรรม (Innovation Management System): ตั้งแต่ภาพรวม, HLS structure, context & leadership, planning, support & operations, ไปจนถึง performance evaluation"
