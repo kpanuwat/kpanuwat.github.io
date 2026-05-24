@@ -1,6 +1,6 @@
 ---
 title: "EMS Factory EP13: Engineering Services — NPI, Process, Test, และ Customer Support"
-date: 2026-05-22 00:18:00 +0700
+date: 2026-05-22 00:21:00 +0700
 categories: [Engineering]
 tags: [engineering-services, npi, process-engineering, test-engineering, dfm, dft, tooling, sustaining-engineering, ems, manufacturing]
 series: ems-factory

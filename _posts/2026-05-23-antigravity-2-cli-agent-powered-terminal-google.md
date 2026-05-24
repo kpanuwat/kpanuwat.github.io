@@ -1,6 +1,6 @@
 ---
 title: "Antigravity 2.0 CLI: เจาะลึก Agent-Powered Terminal Interface ของ Google"
-date: 2026-05-23 00:30:00 +0700
+date: 2026-05-22 00:31:00 +0700
 categories: [Tools]
 tags: [cli, ai-agent, google, orchestration, antigravity, gemini]
 slides: true

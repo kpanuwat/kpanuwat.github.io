@@ -1,6 +1,6 @@
 ---
 title: "OpenSpec EP4: เจาะลึก Artifacts — proposal, specs, design, tasks"
-date: 2026-05-24 00:04:00 +0700
+date: 2026-05-23 00:04:00 +0700
 categories: [Tools]
 tags: [openspec, spec-driven-development, ai-coding, artifacts, technical-writing]
 series: openspec-beginners

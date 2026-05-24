@@ -1,6 +1,6 @@
 ---
 title: "SI Tech × Super AI Engineer: เปิดรับ Intern 4 บทบาท พัฒนา AI Use Cases จริงในอุตสาหกรรม"
-date: 2026-05-23 00:29:00 +0700
+date: 2026-05-22 00:29:00 +0700
 categories: [Engineering]
 tags: [si-tech, super-ai-engineer, ai-intern, llm, enterprise-ai, forward-deploy, data-engineering, system-integration]
 series: project-management-si

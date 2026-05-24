@@ -1,6 +1,6 @@
 ---
 title: "OpenSpec + Hermes Agent: เจาะลึกการประยุกต์ใช้ใน Multi-Agent Swarm"
-date: 2026-05-24 00:07:00 +0700
+date: 2026-05-23 00:07:00 +0700
 categories: [Tools]
 tags: [openspec, hermes-agent, multi-agent, spec-driven-development, swarm, developer-tools]
 slides: true

@@ -1,6 +1,6 @@
 ---
 title: "OpenSpec EP2: ติดตั้งและ Init โปรเจกต์แรก"
-date: 2026-05-24 00:02:00 +0700
+date: 2026-05-23 00:02:00 +0700
 categories: [Tools]
 tags: [openspec, spec-driven-development, ai-coding, developer-tools, nodejs]
 series: openspec-beginners

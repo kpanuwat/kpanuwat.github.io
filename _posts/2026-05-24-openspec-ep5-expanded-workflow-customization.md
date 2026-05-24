@@ -1,6 +1,6 @@
 ---
 title: "OpenSpec EP5: Expanded Workflow, Customization และ Tool Integrations"
-date: 2026-05-24 00:05:00 +0700
+date: 2026-05-23 00:05:00 +0700
 categories: [Tools]
 tags: [openspec, spec-driven-development, ai-coding, customization, developer-tools]
 series: openspec-beginners
