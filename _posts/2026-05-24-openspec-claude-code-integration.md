@@ -3,6 +3,7 @@ title: "OpenSpec + Claude Code CLI: เจาะลึกการ Integrate ส
 date: 2026-05-24 00:06:00 +0700
 categories: [Tools]
 tags: [openspec, claude-code, spec-driven-development, ai-coding, developer-tools]
+slides: true
 ---
 
 {% include slide-link.html %}
