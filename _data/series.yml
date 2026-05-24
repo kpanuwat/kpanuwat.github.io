@@ -11,3 +11,6 @@
   title: "Project Management for SI"
   description: "Deep-dive series on managing System Integrator projects: charters, milestones, commercial alignment, governance, and lifecycle management."
 
+- name: openspec-beginners
+  title: "เจาะลึก OpenSpec สำหรับ Beginners"
+  description: "Series สำหรับ beginners ที่อยากใช้ OpenSpec ในการทำ Spec-Driven Development: ตั้งแต่ติดตั้ง, core workflow, เจาะลึก artifacts, ไปจนถึง expanded commands"
