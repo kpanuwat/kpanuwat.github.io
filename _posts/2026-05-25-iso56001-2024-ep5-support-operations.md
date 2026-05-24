@@ -4,8 +4,10 @@ date: 2026-05-24 00:06:00 +0700
 categories: [Engineering]
 tags: [iso56001, innovation-management, operations, knowledge-management, support, idea-to-launch, ims]
 series: iso56001-2024
-slides: false
+slides: true
 ---
+
+{% include slide-link.html %}
 
 {% include series-nav.html %}
 
