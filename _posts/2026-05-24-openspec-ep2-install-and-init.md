@@ -4,8 +4,10 @@ date: 2026-05-24 00:02:00 +0700
 categories: [Tools]
 tags: [openspec, spec-driven-development, ai-coding, developer-tools, nodejs]
 series: openspec-beginners
+slides: true
 ---
 
+{% include slide-link.html %}
 {% include series-nav.html %}
 
 ## TL;DR

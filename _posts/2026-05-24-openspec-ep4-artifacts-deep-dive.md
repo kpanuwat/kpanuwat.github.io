@@ -4,8 +4,10 @@ date: 2026-05-24 00:04:00 +0700
 categories: [Tools]
 tags: [openspec, spec-driven-development, ai-coding, artifacts, technical-writing]
 series: openspec-beginners
+slides: true
 ---
 
+{% include slide-link.html %}
 {% include series-nav.html %}
 
 ## TL;DR
