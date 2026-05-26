@@ -4,7 +4,7 @@ date: 2026-05-26 00:03:00 +0700
 categories: [Engineering]
 tags: [system-design, scalability, architecture, load-balancing, caching, cdn]
 series: system-design-fundamentals
-slides: false
+slides: true
 ---
 
 {% include series-nav.html %}
