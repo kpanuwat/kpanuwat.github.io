@@ -4,9 +4,10 @@ date: 2026-05-26 00:06:00 +0700
 categories: [Engineering]
 tags: [system-design, api-design, rest, graphql, grpc, http, protocol-buffers]
 series: system-design-fundamentals
-slides: false
+slides: true
 ---
 
+{% include slide-link.html %}
 {% include series-nav.html %}
 
 ## TL;DR
