@@ -3,7 +3,10 @@ title: "AI สร้าง HTML Presentation แทน PowerPoint: Interactive S
 date: 2026-05-26 00:02:00 +0700
 categories: [Tools]
 tags: [html, presentation, ai-agent, claude-code, cursor, interactive, 21st-dev, reveal-js]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
