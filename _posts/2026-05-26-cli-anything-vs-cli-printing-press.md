@@ -3,7 +3,10 @@ title: "CLI-Anything vs CLI Printing Press: วางสถาปัตยกร
 date: 2026-05-25 00:01:00 +0700
 categories: [Engineering]
 tags: [cli, ai-agents, tool-use, automation, mcp]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
