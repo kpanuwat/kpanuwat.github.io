@@ -18,3 +18,7 @@
 - name: iso56001-2024
   title: "เจาะลึก ISO 56001:2024"
   description: "Series เจาะลึก ISO 56001:2024 มาตรฐานระบบบริหารจัดการนวัตกรรม (Innovation Management System): ตั้งแต่ภาพรวม, HLS structure, context & leadership, planning, support & operations, ไปจนถึง performance evaluation"
+
+- name: system-design-fundamentals
+  title: "เจาะลึก System Design Fundamentals"
+  description: "Series สำหรับ engineers ที่ต้องการเข้าใจพื้นฐานการออกแบบระบบ: ตั้งแต่ single server ไปจนถึงระบบขนาดใหญ่ ครอบคลุม database selection, load balancing, API design, authentication และ security"
