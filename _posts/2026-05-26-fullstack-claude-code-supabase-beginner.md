@@ -3,8 +3,10 @@ title: "เจาะลึก: พัฒนา Fullstack Web App ด้วย Cl
 date: 2026-05-25 00:02:00 +0700
 categories: [Engineering]
 tags: [claude-code, supabase, fullstack, web-dev, security, beginner]
-slides: false
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
