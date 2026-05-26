@@ -4,9 +4,10 @@ date: 2026-05-26 00:04:00 +0700
 categories: [Engineering]
 tags: [system-design, database, sql, nosql, acid, cap-theorem, postgresql, mongodb]
 series: system-design-fundamentals
-slides: false
+slides: true
 ---
 
+{% include slide-link.html %}
 {% include series-nav.html %}
 
 ## TL;DR
