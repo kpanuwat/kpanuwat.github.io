@@ -3,7 +3,10 @@ title: "Claude Code Workflow Tools: JavaScript Multi-Agent Orchestration ที�
 date: 2026-05-22 00:27:00 +0700
 categories: [Engineering]
 tags: [claude-code, multi-agent, workflow, javascript, orchestration, token-optimization]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 

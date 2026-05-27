@@ -3,7 +3,10 @@ title: "NotebookLM: สำรวจหัวข้อวิจัยด้วย
 date: 2026-05-22 00:02:00 +0700
 categories: [Tools]
 tags: [notebooklm, research, obsidian, knowledge-management, ai]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 

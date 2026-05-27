@@ -3,7 +3,10 @@ title: "Free Kimi K2.6 API via Cloudflare Workers AI"
 date: 2026-05-12 00:00:00 +0700
 categories: [Tools]
 tags: [cloudflare, llm, api, kimi, free-tier]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
