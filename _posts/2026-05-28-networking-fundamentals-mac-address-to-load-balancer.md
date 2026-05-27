@@ -3,7 +3,10 @@ title: "เจาะลึก Networking เบื้องต้น: จาก 
 date: 2026-05-27 00:15:00 +0700
 categories: [Engineering]
 tags: [networking, tcp-ip, dns, firewall, vpn, tls, load-balancer]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
