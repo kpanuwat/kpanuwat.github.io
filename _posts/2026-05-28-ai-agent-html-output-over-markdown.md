@@ -3,7 +3,10 @@ title: "หยุดให้ AI Agent เขียน Markdown: ทำไม HT
 date: 2026-05-27 00:16:00 +0700
 categories: [Engineering]
 tags: [ai-agents, html, markdown, llm, claude, output-formatting, developer-experience]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
