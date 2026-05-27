@@ -3,7 +3,10 @@ title: "Understand Anything vs Graphify: เปรียบเทียบ Tools
 date: 2026-05-27 00:14:00 +0700
 categories: [Tools]
 tags: [knowledge-graph, mcp, codebase, graphify, llm, local-model, ollama]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
