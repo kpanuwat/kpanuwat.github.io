@@ -3,7 +3,10 @@ title: "VILPA: ออกกำลังกาย 1-2 นาที 3 ครั้
 date: 2026-05-27 00:08:00 +0700
 categories: [Research]
 tags: [vilpa, exercise, health, heart-disease, cancer, dementia, lifestyle]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
