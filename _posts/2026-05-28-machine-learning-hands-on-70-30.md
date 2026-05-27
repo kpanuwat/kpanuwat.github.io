@@ -3,7 +3,10 @@ title: "เรียน Machine Learning อย่างมีประสิท
 date: 2026-05-27 00:11:00 +0700
 categories: [Engineering]
 tags: [machine-learning, python, pytorch, scikit-learn, mlops, deep-learning]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
