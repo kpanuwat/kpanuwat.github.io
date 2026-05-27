@@ -3,7 +3,10 @@ title: "MiroFish: Swarm Intelligence Engine ที่จำลองสังค
 date: 2026-05-27 00:13:00 +0700
 categories: [Research]
 tags: [swarm-intelligence, multi-agent, simulation, forecasting, ai-agents, knowledge-graph, oasis]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
