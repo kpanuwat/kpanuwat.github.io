@@ -3,8 +3,10 @@ title: "TestSprite: AI Testing Agent ที่ทดสอบแอปฯ แท
 date: 2026-05-27 00:09:00 +0700
 categories: [Tools]
 tags: [testing, ai, automation, mcp, claude-code, playwright, ci-cd]
-slides: false
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
