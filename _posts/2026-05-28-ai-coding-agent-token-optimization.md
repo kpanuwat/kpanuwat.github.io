@@ -3,7 +3,10 @@ title: "เทคนิคประหยัด Token สำหรับ AI Codi
 date: 2026-05-27 00:10:00 +0700
 categories: [Tools]
 tags: [token-optimization, ai-coding, claude-code, caveman, rtk, productivity, context-window]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
