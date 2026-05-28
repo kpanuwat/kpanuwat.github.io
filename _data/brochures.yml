@@ -7,3 +7,9 @@
 #   updated     (optional) — YYYY-MM-DD of last edit
 #   tags        (required) — lowercase, English, list
 #   source_post (optional) — post slug this brochure derives from
+
+- slug: hermes-agent-hyperframes-video-html
+  title: "Hermes Agent + HyperFrames: สร้างวิดีโอด้วย HTML/CSS/JS ต้นทุนต่ำ"
+  description: "เจาะลึก HyperFrames pipeline ที่เปลี่ยน HTML/CSS/JS เป็น MP4 ผ่าน Headless Chrome + FFmpeg — ควบคุมได้ทุก frame ต้นทุน $0 ต่อ render เหมาะสำหรับ Explainer, Short-form, และ Promo video ด้วย AI Agent"
+  date: 2026-05-29
+  tags: [hermes-agent, hyperframes, html-video, ai-agents, gsap, heygen, open-source]
