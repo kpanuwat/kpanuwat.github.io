@@ -1,0 +1,9 @@
+# brochures.yml — registry of HTML brochures published to /brochures/
+# Fields:
+#   slug        (required) — matches brochures/<slug>.html, no date prefix
+#   title       (required) — display title (Thai OK)
+#   description (required) — one-sentence summary (Thai OK)
+#   date        (required) — YYYY-MM-DD when created
+#   updated     (optional) — YYYY-MM-DD of last edit
+#   tags        (required) — lowercase, English, list
+#   source_post (optional) — post slug this brochure derives from
