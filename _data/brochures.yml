@@ -19,3 +19,9 @@
   description: "เจาะลึก Code Graph ที่ใช้ Tree-sitter + SQLite สร้างแผนผังความสัมพันธ์ของโค้ด สื่อสารกับ AI Agent ผ่าน MCP ลด Tool calls 70% และประหยัด Token ได้ถึง 121x เทียบกับการอ่านไฟล์แบบ file-by-file"
   date: 2026-05-29
   tags: [code-graph, knowledge-graph, tree-sitter, sqlite, mcp, ai-agents, token-optimization]
+
+- slug: agent-harness-ai-infrastructure
+  title: "Agent Harness: โครงสร้างพื้นฐานที่ทำให้ AI Agent ทำงานได้จริง"
+  description: "เจาะลึก Agent Harness ที่กำหนดกฎการทำงานของ AI Agent ด้วย 5 components หลัก — Execution Loop, Tool Validation, Context Memory, Guardrails, และ State Persistence ที่ลด Hallucination และทำให้โมเดลระดับเดิมทำงานได้ตรงเป้าหมายโดยไม่ต้องอัปเกรด"
+  date: 2026-05-30
+  tags: [agent-harness, ai-infrastructure, hallucination, execution-loop, guardrails, context-management, llm-agents]

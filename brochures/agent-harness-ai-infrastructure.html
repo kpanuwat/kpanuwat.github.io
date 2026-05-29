@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Harness: โครงสร้างพื้นฐานที่ทำให้ AI Agent ทำงานได้จริง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (mirrors marp-deck 26-token :root) ── */
+:root {
+  --ink: #1e293b;
+  --ink-dim: #475569;
+  --muted: #94a3b8;
+  --paper: #ffffff;
+  --soft: #f1f5f9;
+  --soft-2: #e2e8f0;
+  --accent: #3b82f6;
+  --accent-deep: #1e3a8a;
+  --accent-wash: #dbeafe;
+  --gold: #d4af37;
+  --danger: #dc2626;
+  --danger-wash: #fee2e2;
+  --danger-ink: #991b1b;
+  --success: #16a34a;
+  --success-wash: #dcfce7;
+  --success-ink: #14532d;
+  --warning: #f59e0b;
+  --warning-wash: #fef3c7;
+  --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 52px;
+  --page-max: 960px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9;
+  --ink-dim: #94a3b8;
+  --muted: #475569;
+  --paper: #0f172a;
+  --soft: #1e293b;
+  --soft-2: #334155;
+  --accent-wash: #1e3a8a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+}
+code, kbd, pre, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Nav bar ── */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--soft-2);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  box-shadow: var(--shadow-sm);
+}
+#nav .brand {
+  font-weight: 700; font-size: 15px; color: var(--ink);
+  margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 240px;
+}
+#nav .page-links {
+  display: flex; gap: 2px; overflow-x: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+#nav .page-links::-webkit-scrollbar { display: none; }
+#nav .page-links a {
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--ink-dim); white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+#nav .page-links a:hover,
+#nav .page-links a.active {
+  background: var(--accent-wash); color: var(--accent);
+  text-decoration: none;
+}
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button {
+  background: none; border: 1px solid var(--soft-2);
+  border-radius: var(--radius-sm); padding: 5px 10px;
+  font-size: 13px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+#nav .controls button:hover { background: var(--soft); }
+
+/* ── Sections (document scroll) ── */
+#scroll-root {
+  padding-top: var(--nav-h);
+}
+.page {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+  padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.page-inner {
+  width: 100%; max-width: var(--page-max);
+  display: flex; flex-direction: column; gap: 28px;
+}
+.page.cover {
+  min-height: calc(100vh - var(--nav-h));
+  background: linear-gradient(135deg, #0f172a 0%, var(--accent-deep) 100%);
+  color: white; justify-content: center; align-items: center; text-align: center;
+}
+.page.cover .page-inner { align-items: center; }
+
+/* ── Typography ── */
+h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+
+/* ── Prose flow (brochure density) ── */
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
+.prose-block { display: flex; flex-direction: column; gap: 0; }
+.prose-block + .prose-block { margin-top: 4px; }
+.section-label {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.page-number {
+  font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 24px;
+  align-self: flex-end;
+}
+
+/* ── Cover mark ── */
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+
+/* ── Card system ── */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+  border-left: 4px solid var(--accent);
+  box-sizing: border-box;
+}
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card h3      { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p       { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul      { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+
+/* ── Bento grid ── */
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 640px) {
+  .bento.cols-2, .bento.cols-3, .bento.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Takeaway banner ── */
+.takeaway {
+  border-left: 4px solid var(--accent);
+  background: var(--soft);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 15px; line-height: 1.6;
+}
+.takeaway b { color: var(--accent); }
+
+/* ── Steps list ── */
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.steps li .step-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--accent); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+
+/* ── Callout ── */
+.callout {
+  background: var(--accent-wash);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 15px; color: var(--accent-deep);
+  border: 1px solid var(--accent);
+}
+[data-theme="dark"] .callout { color: var(--accent-wash); border-color: var(--accent); }
+.callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+
+/* ── Inline code ── */
+code {
+  background: var(--soft-2); color: var(--danger-ink); font-size: .875em;
+  padding: 2px 6px; border-radius: 4px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6;
+}
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+kbd {
+  background: var(--soft-2); border: 1px solid var(--soft-2);
+  border-bottom-color: var(--muted); border-radius: 4px;
+  font-size: .8em; padding: 2px 7px; box-shadow: 0 1px 0 var(--muted);
+}
+
+/* ── Copy button ── */
+.copy-wrap { position: relative; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--soft-2); border: none; border-radius: 4px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+.copy-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.copy-btn.copied { background: var(--success-wash); color: var(--success-ink); }
+
+/* ── Tabs ── */
+.tabs-nav {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--soft-2); margin-bottom: 16px;
+}
+.tabs-nav button {
+  background: none; border: none; padding: 8px 14px; cursor: pointer;
+  font-size: 14px; color: var(--ink-dim); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color .15s, border-color .15s;
+}
+.tabs-nav button:hover { color: var(--ink); }
+.tabs-nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs-panel { display: none; }
+.tabs-panel.active { display: block; }
+
+/* ── Accordion ── */
+.accordion { border: 1px solid var(--soft-2); border-radius: var(--radius-sm); overflow: hidden; }
+.accordion-item { border-top: 1px solid var(--soft-2); }
+.accordion-item:first-child { border-top: none; }
+.accordion-btn {
+  width: 100%; background: none; border: none; padding: 14px 16px;
+  text-align: left; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; font-size: 15px; color: var(--ink);
+  transition: background .15s;
+}
+.accordion-btn:hover { background: var(--soft); }
+.accordion-btn::after { content: "▾"; font-size: 12px; color: var(--muted); transition: transform .2s; }
+.accordion-item.open .accordion-btn::after { transform: rotate(-180deg); }
+.accordion-body { display: none; padding: 0 16px 16px; color: var(--ink-dim); font-size: 14px; line-height: 1.7; }
+.accordion-item.open .accordion-body { display: block; }
+
+/* ── Progressive disclosure (native details) ── */
+details.disclosure {
+  border-left: 3px solid var(--accent);
+  background: var(--soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 12px 0;
+}
+details.disclosure summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  user-select: none;
+}
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after {
+  content: "▾";
+  font-size: 12px; color: var(--muted);
+  transition: transform .2s;
+  margin-left: auto;
+}
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body {
+  padding: 4px 16px 16px;
+  font-size: 14px; color: var(--ink-dim); line-height: 1.7;
+}
+details.disclosure .details-body p { font-size: 14px; }
+details.disclosure .details-body pre { margin: 8px 0; }
+
+/* ── Comparison table ── */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+
+/* ── Print ── */
+@media print {
+  #nav { display: none; }
+  #scroll-root { padding-top: 0; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .page { padding: 32px 16px; }
+  h2 { font-size: 22px; }
+  #nav .brand { max-width: 120px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav id="nav">
+  <span class="brand">Agent Harness</span>
+  <div class="page-links" id="page-links">
+    <!-- JS fills in anchors -->
+  </div>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">☀︎</button>
+    <button onclick="window.print()" title="Print / save as PDF">⎙</button>
+  </div>
+</nav>
+
+<div id="scroll-root">
+
+<!-- ════════════════════════════════════════════
+  PAGE 1: COVER
+════════════════════════════════════════════ -->
+<section class="page cover" id="p1" data-title="หน้าปก">
+  <div class="page-inner" style="align-items:center;text-align:center;gap:16px">
+    <div class="mark"></div>
+    <h1>Agent Harness</h1>
+    <p class="tag" style="font-size:18px;color:rgba(255,255,255,.8);max-width:600px">
+      โครงสร้างพื้นฐานที่กำหนดกฎการทำงานของ AI Agent — ทำให้โมเดลระดับเดิมทำงานได้ตรงเป้าหมายและลด Hallucination โดยไม่ต้องอัปเกรดโมเดล
+    </p>
+    <div class="bento cols-3" style="margin-top:24px;max-width:600px">
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">Enterprise AI Failures</p>
+        <h3 style="color:white">65%</h3>
+        <p style="color:rgba(255,255,255,.65);font-size:12px">มาจาก Harness Defects ไม่ใช่โมเดล</p>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">สูตรหลัก</p>
+        <h3 style="color:white">{Agent} = {Model} + {Harness}</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">ประหยัด Token ต้นทุน</p>
+        <h3 style="color:white">10x</h3>
+        <p style="color:rgba(255,255,255,.65);font-size:12px">ลด $3.00 → $0.30 ต่อ MTok ด้วย Harness optimization</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 2: TL;DR / OVERVIEW
+════════════════════════════════════════════ -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Overview</p>
+      <h2>Agent Harness คืออะไร และทำไมถึงสำคัญกว่าโมเดล</h2>
+      <p class="section-lead">
+        Agent Harness คือ software infrastructure ที่ล้อมรอบ AI Model และจัดการทุกอย่างยกเว้น reasoning ของโมเดลเอง —
+        ตั้งแต่การเรียกใช้เครื่องมือ การจัดเก็บ memory การควบคุม context ไปจนถึงการป้องกัน error ที่อาจลุกลาม
+        ถ้าโมเดลคือเครื่องยนต์ที่ฉลาด harness คือทั้งระบบรางรถไฟ สัญญาณไฟ และตารางเวลาเดินรถ
+        ที่ทำให้ความฉลาดนั้นถูกส่งไปยังปลายทางที่ถูกต้องในทุกครั้ง
+      </p>
+    </div>
+    <div class="bento cols-3">
+      <div class="card success">
+        <p class="label">ปัญหาที่แก้ได้</p>
+        <h3>Context Rot</h3>
+        <p>เมื่อ context window เต็ม โมเดลจะเริ่มละเลยข้อมูลสำคัญที่อยู่ตรงกลาง Harness แก้ด้วย compression และ selective retrieval</p>
+      </div>
+      <div class="card warning">
+        <p class="label">ปัญหาที่แก้ได้</p>
+        <h3>Hallucinated Tool Calls</h3>
+        <p>โมเดลอาจเรียก function ที่ไม่มีอยู่จริงหรือส่ง parameter ผิด Harness validate ทุก call ก่อน execute จริง</p>
+      </div>
+      <div class="card gold">
+        <p class="label">ปัญหาที่แก้ได้</p>
+        <h3>State Loss on Failure</h3>
+        <p>Network timeout หรือ restart ทำให้ agent ลืมงานที่ทำไปแล้วทั้งหมด Harness บันทึก state ทุก checkpoint อัตโนมัติ</p>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>💡 Key insight:</strong> ข้อมูลจาก ICML 2025 แสดงว่า agent ที่ใช้ harness มี win-rate สูงกว่าอย่างมีนัยสำคัญบนโมเดลเดียวกัน — โดยไม่เปลี่ยน model weight หรือ prompt เลย
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Harness ไม่ได้ทำให้โมเดลฉลาดขึ้น แต่ทำให้ความฉลาดที่มีอยู่แล้วถูกนำไปใช้ได้ตรงเป้าหมายทุกครั้ง</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 3: DEEP-DIVE PROTOCOL
+════════════════════════════════════════════ -->
+<section class="page" id="p3" data-title="Deep-Dive Protocol">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol</p>
+      <h2>ส่วนประกอบหลัก สมมติฐาน และสิ่งที่ต้องรู้</h2>
+      <p class="section-lead">
+        ก่อนลงลึกในรายละเอียด ส่วนนี้สรุปโครงสร้างของ Agent Harness:
+        ส่วนประกอบหลักที่ต้องเข้าใจ สมมติฐานที่ซ่อนอยู่ซึ่งผู้เริ่มต้นมักมองข้าม
+        และ insight สำคัญที่จะช่วยให้มี mental model ที่ถูกต้องตั้งแต่ต้น
+      </p>
+    </div>
+
+    <div>
+      <h3>ส่วนประกอบหลัก <span lang="en">(Components)</span></h3>
+      <div class="bento cols-3">
+        <div class="card">
+          <p class="label">Component 1</p>
+          <h3>Execution Loop</h3>
+          <p>วงจร observe-think-act ที่แปลง probabilistic reasoning ของ LLM ให้กลายเป็น deterministic action ที่ตรวจสอบได้และทำซ้ำได้</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Component 2</p>
+          <h3>Tool Integration Layer</h3>
+          <p>ชั้นเชื่อมต่อเครื่องมือภายนอกทั้งหมด พร้อม validate parameters ก่อน execute และ sanitize ผลลัพธ์ก่อนส่งกลับเข้า context</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Component 3</p>
+          <h3>Context &amp; Memory</h3>
+          <p>จัดการ working context, session state, และ long-term memory ข้ามหลาย session เพื่อให้ agent จำงานที่ทำไปแล้วได้เสมอ</p>
+        </div>
+        <div class="card success">
+          <p class="label">Component 4</p>
+          <h3>Control Flow &amp; Guardrails</h3>
+          <p>Phase-gating, timeout, budget cap, approval gate ที่ป้องกัน cascade failure และบังคับให้ agent ทำตามขั้นตอนที่กำหนด</p>
+        </div>
+        <div class="card danger">
+          <p class="label">Component 5</p>
+          <h3>Observability &amp; Persistence</h3>
+          <p>Audit log, tracing, session checkpoint ที่ทำให้ debug ได้ ติดตามต้นทุนได้ และ resume งานได้หลัง failure โดยไม่เริ่มจากศูนย์</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <svg viewBox="0 0 860 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="70" width="130" height="60" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="75" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Execution</text>
+        <text x="75" y="113" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Loop</text>
+        <path d="M140 100 L178 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#h-arr)"/>
+        <rect x="178" y="70" width="130" height="60" rx="10" fill="var(--warning-wash)" stroke="var(--warning)" stroke-width="1.5"/>
+        <text x="243" y="97" font-size="12" font-weight="700" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">Tool</text>
+        <text x="243" y="113" font-size="12" font-weight="700" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">Integration</text>
+        <path d="M308 100 L346 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#h-arr)"/>
+        <rect x="346" y="60" width="168" height="80" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="430" y="97" font-size="13" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Context &amp;</text>
+        <text x="430" y="113" font-size="13" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Memory</text>
+        <path d="M514 100 L552 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#h-arr)"/>
+        <rect x="552" y="70" width="130" height="60" rx="10" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+        <text x="617" y="97" font-size="12" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Control Flow</text>
+        <text x="617" y="113" font-size="12" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">&amp; Guardrails</text>
+        <path d="M682 100 L720 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#h-arr)"/>
+        <rect x="720" y="70" width="130" height="60" rx="10" fill="var(--danger-wash)" stroke="var(--danger)" stroke-width="1.5"/>
+        <text x="785" y="97" font-size="12" font-weight="700" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Observability</text>
+        <text x="785" y="113" font-size="12" font-weight="700" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">&amp; Persistence</text>
+        <defs>
+          <marker id="h-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">5 ส่วนประกอบหลักของ Agent Harness — แต่ละชั้นทำงานร่วมกันเพื่อแปลง probabilistic reasoning เป็น deterministic action</p>
+    </div>
+
+    <div>
+      <h3>สมมติฐานที่ซ่อนอยู่ <span lang="en">(Implicit Assumptions)</span></h3>
+      <p>สิ่งเหล่านี้คือสิ่งที่หัวข้อ Agent Harness ถือว่าผู้อ่านรู้อยู่แล้ว — แต่ในความเป็นจริง ผู้เริ่มต้นมักไม่ทราบ การเข้าใจก่อนจะช่วยหลีกเลี่ยงความสับสนในภายหลัง</p>
+      <ul>
+        <li><strong>สมมติฐานที่ 1:</strong> LLM เป็น stateless โดยธรรมชาติ — แต่ละ session เริ่มใหม่ทั้งหมดโดยไม่จำอะไรจาก session ที่แล้ว ถ้าไม่เข้าใจเรื่องนี้ จะไม่เข้าใจว่าทำไม memory management ถึงเป็นปัญหาหลักของ agent ที่ทำงานยาวนาน</li>
+        <li><strong>สมมติฐานที่ 2:</strong> Harness ≠ Framework — LangChain, CrewAI, AutoGen เป็น framework ที่ให้ components แต่ harness คือระบบ runtime ที่ assemble ทุก component และบังคับให้ทำงานถูกต้องตลอดเวลา เปรียบเหมือน framework คือกล่องเครื่องมือ แต่ harness คือสายการผลิตที่ใช้กล่องนั้น</li>
+        <li><strong>สมมติฐานที่ 3:</strong> คนส่วนใหญ่คิดว่า Hallucination แก้ได้ด้วย prompt ที่ดีขึ้น — แต่ harness แก้ที่ระดับ system โดยทำให้ behavior ที่ผิดพลาดเป็นไปไม่ได้ตั้งแต่แรก ไม่ใช่แค่บอกให้โมเดล "ระวัง"</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>สิ่งสำคัญที่ต้องรู้ <span lang="en">(Key Takeaways)</span></h3>
+      <p class="section-lead" style="font-size:15px">
+        เจ็ด insight ต่อไปนี้เรียงจาก high-level intuition ลงสู่ actionable detail
+        อ่านก่อนลงลึกเพื่อให้มี mental model ที่ถูกต้อง
+      </p>
+      <div class="bento cols-2">
+        <div class="card success">
+          <p class="label">Takeaway 1 — Big Picture</p>
+          <h3>Harness คือระบบรางรถไฟของ AI Agent</h3>
+          <p>โมเดลคือเครื่องยนต์ที่ฉลาด แต่ harness คือราง สัญญาณ และตารางเดินรถที่กำหนดว่าความฉลาดนั้นจะถูกใช้อย่างไร ถ้าไม่มีราง รถวิ่งไปทุกทิศทางโดยไม่ถึงปลายทาง</p>
+        </div>
+        <div class="card">
+          <p class="label">Takeaway 2 — Mental Model</p>
+          <h3>{Agent} = {Model} + {Harness}</h3>
+          <p>ความสามารถของ agent ไม่ได้มาจากโมเดลอย่างเดียว — harness เป็นตัวคูณที่ทำให้โมเดลระดับเดิมทำงานได้ดีขึ้นมากโดยไม่ต้องอัปเกรดหรือ fine-tune ใดๆ</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Takeaway 3 — Key Mechanism</p>
+          <h3>Initialization + Execution Loop = ความต่อเนื่อง</h3>
+          <p>Harness ทำงาน 2 phase: ตั้งค่า state ครั้งเดียว แล้ววนซ้ำ load-do-verify-save ทำให้ agent ทำงานได้ข้ามหลาย session โดยไม่สูญเสีย progress</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Takeaway 4 — Common Trap</p>
+          <h3>Prompt ดีขึ้น ≠ Hallucination หายไป</h3>
+          <p>Hallucination ที่ระดับ system เกิดจาก tool ที่ขาด validation, memory ที่เสื่อม, และ state ที่หาย — แก้ด้วย harness architecture ไม่ใช่ prompt tuning</p>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:8px">
+        <strong>💡 Takeaway 5–7:</strong>
+        <ul style="margin-top:8px;padding-left:18px">
+          <li style="margin-bottom:6px"><strong>เมื่อไหรที่ไม่ต้องการ harness:</strong> Single-turn task (summarize, Q&amp;A) ไม่ต้องการ harness — เพิ่มความซับซ้อนโดยไม่จำเป็น ใช้เมื่อ agent ต้องการ tools หรือ memory ข้ามหลาย turn</li>
+          <li style="margin-bottom:6px"><strong>เริ่มต้นอย่างไร:</strong> สร้าง Tool Layer ก่อน แล้วเพิ่ม Memory → Context Compression → Guardrails → Persistence ทีละ layer ตามปัญหาที่เจอจริง ไม่ต้องสร้างทุก component พร้อมกัน</li>
+          <li><strong>ROI ที่ซ่อนอยู่:</strong> 65% ของ enterprise AI failures ใน 2026 มาจาก Harness Defects ไม่ใช่โมเดล — ลงทุนใน harness engineering มี return สูงกว่าการ upgrade โมเดล</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="takeaway"><b>★ Mental model:</b> Harness คือ operating system ของ agent — โมเดลคือ CPU ที่ฉลาด แต่ OS คือสิ่งที่ทำให้ความฉลาดนั้นกลายเป็นงานที่เสร็จสมบูรณ์</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 4: EXECUTION LOOP & 5 COMPONENTS
+════════════════════════════════════════════ -->
+<section class="page" id="p4" data-title="Execution Loop">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — Core Architecture</p>
+      <h2>Execution Loop และ 5 ส่วนประกอบที่ทำให้ Agent ทำงานได้จริง</h2>
+      <p class="section-lead">
+        Agent Harness ทำงานผ่านวงจรที่วนซ้ำอย่างเป็นระบบ — ไม่ใช่แค่เรียก LLM แล้วรอคำตอบ
+        แต่เป็นกระบวนการที่ load state, สั่งให้โมเดลคิด, ตรวจสอบผลลัพธ์, execute ด้วยเครื่องมือจริง,
+        แล้วบันทึก progress ก่อนเริ่มรอบถัดไป วงจรนี้คือหัวใจที่แยก agent ที่ทำงานได้จริงในระยะยาว
+        ออกจาก chatbot ที่ลืมทุกอย่างหลังปิดหน้าต่าง
+      </p>
+    </div>
+
+    <div>
+      <h3>Phase 1: Initialization — ตั้งค่าหนึ่งครั้ง ใช้ได้ทุก session</h3>
+      <p>
+        ก่อนที่ agent จะเริ่มทำงานจริง harness จะรัน Initialization Phase หนึ่งครั้งเพื่อตั้งค่า environment ให้พร้อม
+        ขั้นตอนนี้สร้าง structured task list ที่เก็บไว้ใน persistent storage, initialize version control,
+        และเขียน progress files ที่ session ต่อๆ ไปจะอ่านเพื่อรู้ว่างานถึงไหนแล้ว
+        ความสำคัญของ phase นี้คือทำให้ state ของงานมีอยู่จริงนอก context window ของโมเดล
+        แม้ระบบจะ restart หรือ timeout กลางทาง งานที่ทำไปแล้วก็ไม่สูญหาย
+      </p>
+      <p>
+        ตัวอย่างที่เห็นได้ชัด: coding agent ที่ต้องสร้าง feature ใหม่จะมี task list ที่บันทึกว่า
+        "ขั้นตอน 1 เขียน unit test เสร็จแล้ว, ขั้นตอน 2 implement function อยู่ระหว่างดำเนินการ, ขั้นตอน 3 ยังไม่เริ่ม"
+        ไม่ว่า session จะถูกตัดกี่ครั้ง session ใหม่จะเริ่มต่อจากจุดที่ค้างไว้เสมอ ไม่ต้องทำงานซ้ำ
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก Initialization Pattern — สิ่งที่ต้องตั้งค่าและทำไม</summary>
+        <div class="details-body">
+          <p>
+            ใน production harness ที่ดี Initialization Phase ควรสร้าง 4 สิ่งต่อไปนี้:
+            (1) <strong>Task manifest</strong> — ไฟล์ JSON ที่แสดงทุก task พร้อม status และ dependency,
+            (2) <strong>Environment snapshot</strong> — บันทึก version ของ tools และ dependencies ที่ใช้,
+            (3) <strong>Checkpoint directory</strong> — โฟลเดอร์สำหรับเก็บ state ของแต่ละ execution step,
+            (4) <strong>Audit log</strong> — ไฟล์ที่บันทึกทุก action พร้อม timestamp เพื่อ debug ภายหลัง
+          </p>
+          <p>
+            งานวิจัยของ Anthropic ที่ publish ใน 2025 แสดงว่า agent ที่ใช้ initializer-executor architecture
+            สามารถสร้าง web application ที่ทำงานได้จริงข้ามหลาย context window —
+            เพราะ executor แต่ละตัวอ่าน task manifest และรู้ทันทีว่าต้องทำอะไรต่อ
+            โดยไม่ต้องมี handoff จากโมเดลตัวอื่น
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>Phase 2: Execution Loop — วงจรที่วนซ้ำจนงานเสร็จ</h3>
+      <p>
+        หลัง initialization Execution Loop จะทำงานซ้ำๆ จนกว่างานทั้งหมดจะเสร็จ:
+        (1) <strong>Load state</strong> — อ่าน task manifest และ checkpoint ล่าสุด,
+        (2) <strong>Plan &amp; act</strong> — โมเดลตัดสินใจขั้นตอนถัดไปและเรียก tool ที่เหมาะสม,
+        (3) <strong>Verify</strong> — harness ตรวจสอบว่าผลลัพธ์ถูกต้องก่อน mark ว่า complete,
+        (4) <strong>Save &amp; exit</strong> — บันทึก progress ก่อนปิด session เสมอ
+        วงจรนี้สำคัญเพราะ step 3 (verify) คือสิ่งที่แยก agent ที่เชื่อถือได้ออกจาก agent ที่แค่ "บอกว่าเสร็จ"
+      </p>
+      <p>
+        ตัวอย่างที่จับต้องได้: agent ที่เขียนโค้ดต้องไม่แค่เขียนฟังก์ชันเสร็จแล้วบอกว่า done
+        แต่ harness ต้อง run test suite จริง ถ้า test ล้มเหลว loop จะไม่ mark task เป็น complete
+        แต่จะวนกลับไปให้โมเดลแก้ bug จนกว่า test จะผ่านทั้งหมด
+        นี่คือความแตกต่างระหว่าง agent ที่ทำงานได้จริงกับ agent ที่แค่ดูเหมือนทำงาน
+      </p>
+
+      <div style="display:flex;justify-content:center;margin:20px 0">
+        <svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <rect x="20" y="70" width="130" height="60" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="85" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Load State</text>
+          <text x="85" y="113" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">checkpoint + tasks</text>
+          <path d="M150 100 L188 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#loop-arr)"/>
+          <rect x="188" y="60" width="140" height="80" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="258" y="97" font-size="13" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Plan &amp; Act</text>
+          <text x="258" y="113" font-size="11" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">LLM + tool calls</text>
+          <path d="M328 100 L366 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#loop-arr)"/>
+          <rect x="366" y="70" width="130" height="60" rx="10" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+          <text x="431" y="97" font-size="12" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Verify</text>
+          <text x="431" y="113" font-size="11" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">test + validate</text>
+          <path d="M496 100 L534 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#loop-arr)"/>
+          <rect x="534" y="70" width="130" height="60" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="599" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Save &amp; Exit</text>
+          <text x="599" y="113" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">persist progress</text>
+          <path d="M599 130 Q599 175 85 175 L85 130" stroke="var(--muted)" stroke-width="1.5" fill="none" stroke-dasharray="5,4" marker-end="url(#loop-arr-gray)"/>
+          <text x="340" y="170" font-size="11" fill="var(--muted)" text-anchor="middle" font-family="system-ui">next task — loop</text>
+          <path d="M431 130 Q431 155 390 155 L310 155 Q275 155 258 130" stroke="var(--danger)" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#loop-arr-red)"/>
+          <text x="360" y="150" font-size="10" fill="var(--danger)" text-anchor="middle" font-family="system-ui">verify failed — retry</text>
+          <defs>
+            <marker id="loop-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+            </marker>
+            <marker id="loop-arr-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--muted)"/>
+            </marker>
+            <marker id="loop-arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--danger)"/>
+            </marker>
+          </defs>
+          <rect x="0" y="0" width="1" height="1" fill="none"/>
+        </svg>
+      </div>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">Execution Loop — Load State → Plan &amp; Act → Verify → Save; เส้นประสีแดงคือ retry เมื่อ verify ล้มเหลว, เส้นประสีเทาคือ loop สู่ task ถัดไป</p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: ทำไม Verify Step ถึงสำคัญที่สุดใน Loop</summary>
+        <div class="details-body">
+          <p>
+            สถิติที่น่าสนใจ: ถ้า agent แต่ละ step มี accuracy 85% และต้องทำ 10 step
+            โอกาสที่ทุก step จะถูกต้องคือ (0.85)^10 ≈ 20% เท่านั้น
+            หมายความว่า 80% ของเวลา agent จะ deliver ผลลัพธ์ที่มี error อย่างน้อยหนึ่งจุด
+          </p>
+          <p>
+            Verify step แก้ปัญหานี้โดยตรวจจับ error ในแต่ละ step ก่อนที่มันจะสะสม
+            แทนที่จะรอให้งานทั้งหมดเสร็จแล้วค่อยพบว่า step 3 ผิดพลาดซึ่งทำให้ step 4-10 พังตามกัน
+            การ verify ทีละ step ตัด error propagation ได้ตั้งแต่ต้น
+          </p>
+          <p>
+            Pattern ที่เรียกว่า <strong>Plan-Execute-Verify (PEV) Loop</strong> ใช้ advanced model สำหรับ planning และ verification
+            แต่ใช้ cheaper model สำหรับ intermediate execution steps — ลดต้นทุนได้มากโดยไม่เสียคุณภาพ
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Execution Loop ที่ดีต้องมี Verify step — agent ที่ไม่ตรวจสอบผลลัพธ์ตัวเองแค่ "บอกว่าเสร็จ" แต่ไม่ได้ทำงานจริง</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 5: CONTEXT & MEMORY MANAGEMENT
+════════════════════════════════════════════ -->
+<section class="page" id="p5" data-title="Context &amp; Memory">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — Context Engineering</p>
+      <h2>Context &amp; Memory Management: แก้ปัญหา Context Rot และ Lost in the Middle</h2>
+      <p class="section-lead">
+        LLM มี context window จำกัด และยิ่งข้อมูลเยอะขึ้น โมเดลจะเริ่มละเลยสิ่งที่อยู่ตรงกลาง
+        ปรากฏการณ์นี้เรียกว่า "Lost in the Middle" และนำไปสู่ Context Rot ที่เป็นสาเหตุหนึ่งใน
+        65% ของ enterprise AI failures Harness แก้ปัญหานี้ด้วย 3 memory layer และกลยุทธ์
+        injection ที่ส่งข้อมูลที่ใช่ไปยังโมเดลในเวลาที่ใช่ แทนที่จะยัดทุกอย่างเข้าไปพร้อมกัน
+      </p>
+    </div>
+
+    <div>
+      <h3>3 ชั้นของ Memory ที่ Harness จัดการ</h3>
+      <p>
+        ระบบ memory ของ harness แบ่งเป็น 3 ชั้น ที่แต่ละชั้นมีวัตถุประสงค์และ lifecycle ต่างกัน:
+        ชั้นแรกคือ <strong>Working Context</strong> ซึ่งคือ prompt ที่ส่งให้โมเดลในแต่ละ call — มีอายุเพียง 1 request และถูก curate อย่างระมัดระวังเพื่อให้มีแต่ข้อมูลที่ relevance สูงที่สุด
+        ชั้นที่สองคือ <strong>Session State</strong> ซึ่งเป็น durable log ของ task ปัจจุบัน บันทึกเป็น JSON file
+        เพื่อให้ session ถัดไปอ่านต่อได้โดยไม่ต้องเริ่มใหม่
+        ชั้นที่สามคือ <strong>Long-term Memory</strong> ซึ่งเก็บความรู้ข้ามหลาย task เช่น pattern ที่ใช้บ่อย,
+        preference ของ user, หรือข้อมูลที่ดึงมาจาก knowledge base
+      </p>
+      <p>
+        เหตุผลที่ harness ใช้ JSON แทน Markdown สำหรับ state files: ในการทดลองจริง JSON พิสูจน์ว่า
+        reliable กว่ามากเมื่อโมเดลต้องทั้งอ่านและเขียนไฟล์ข้าม session เพราะ Markdown มี syntax ที่ ambiguous
+        ทำให้โมเดลบางครั้งตีความผิดเมื่อ parse กลับมาเป็น structured data
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: Lost in the Middle และวิธีที่ Harness แก้ไข</summary>
+        <div class="details-body">
+          <p>
+            งานวิจัยพบว่า LLM มีความสามารถในการดึงข้อมูลที่สูงที่สุดเมื่อข้อมูลนั้นอยู่ที่ต้นและท้ายของ context
+            แต่ความสามารถตกลงอย่างมีนัยสำคัญสำหรับข้อมูลที่อยู่ตรงกลาง
+            ปรากฏการณ์นี้ทำให้ agent ที่ dump ทุกอย่างเข้า context พร้อมกันทำงานได้แย่ลงเมื่องานซับซ้อนขึ้น
+          </p>
+          <p>
+            Harness แก้ปัญหานี้ด้วย 2 กลยุทธ์: (1) <strong>Compaction</strong> — summarize ข้อมูลเก่าให้สั้นลงก่อนที่
+            context จะเต็ม เก็บแค่ essence ไม่ใช่ raw conversation history ทั้งหมด
+            (2) <strong>Just-in-time injection</strong> — ดึงเฉพาะ document ที่ relevant ต่อ task ปัจจุบันเข้ามา
+            แทนที่จะ preload ทุก document ตั้งแต่ต้น การวาง critical information ที่ขอบของ context
+            (ต้นหรือท้าย) ยังช่วย attention ได้อีกด้วย
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>Context Compression: ลด Token ไม่ใช่ข้อมูล</h3>
+      <p>
+        Context Compression ทำหน้าที่ต่างจาก truncation ธรรมดา — แทนที่จะตัดข้อมูลเก่าออก
+        มันสรุปข้อมูลเหล่านั้นให้อยู่ในรูป compressed representation ที่ยังคง semantic เดิมไว้
+        แต่ใช้ token น้อยกว่ามาก เปรียบเหมือนการย่อหนังสือทั้งเล่มให้เป็นสรุป 5 หน้า
+        แทนที่จะฉีกหน้า 1-200 ออกเพราะ "ไม่มีที่วาง"
+      </p>
+      <p>
+        ผลลัพธ์ที่วัดได้จาก production systems: การใช้ Context Compression ร่วมกับ KV-cache locality
+        และ semantic routing ลดต้นทุน token จาก $3.00 ต่อ million token เหลือ $0.30
+        ซึ่งเป็นการลด 10 เท่าโดยไม่เปลี่ยนโมเดลหรือคุณภาพผลลัพธ์
+        พร้อมกับลด latency ลง 4 เท่าเนื่องจาก cache hits ที่มากขึ้น
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: KV-cache และ Semantic Routing ทำงานอย่างไร</summary>
+        <div class="details-body">
+          <p>
+            <strong>KV-cache locality</strong> ทำงานโดยรักษา prefix ของ system prompt ให้ stable ข้ามหลาย request
+            เมื่อ prefix เหมือนกัน model สามารถ reuse cached computation แทนที่จะ process ซ้ำทุกครั้ง
+            ถ้า system prompt เปลี่ยนทุก request cache จะ miss ทุกครั้งและเสีย latency
+          </p>
+          <p>
+            <strong>Semantic routing</strong> ใช้ embedding เพื่อจับคู่ query กับ relevant context documents
+            แทนที่จะใส่ทุก document เข้า prompt โดยตรง
+            harness จะ vectorize query, ค้นใน vector store, แล้วดึงเฉพาะ top-k results ที่ semantically similar
+            ทำให้ context ที่ส่งให้โมเดลมีความ relevance สูงแม้ knowledge base จะมีเนื้อหามากแค่ไหน
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Context ที่ดีไม่ใช่ context ที่เยอะที่สุด แต่คือ context ที่ relevant ที่สุดต่อ task ปัจจุบัน — harness คือระบบที่รู้จักความแตกต่างนั้น</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 6: GUARDRAILS & HALLUCINATION REDUCTION
+════════════════════════════════════════════ -->
+<section class="page" id="p6" data-title="Guardrails">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — Control &amp; Safety</p>
+      <h2>Guardrails: ลด Hallucination ที่ระดับ System ไม่ใช่ Prompt</h2>
+      <p class="section-lead">
+        วิธีที่ผู้คนส่วนใหญ่พยายามแก้ Hallucination คือเขียน prompt ที่ดีขึ้น — บอกโมเดลให้ "ระวัง"
+        หรือ "ตรวจสอบก่อนตอบ" แต่ approach นี้ไม่ scalable เพราะมันพึ่งพาความน่าเชื่อถือของโมเดลเพียงอย่างเดียว
+        Harness แก้ปัญหาในมุมที่ต่างออกไปโดยสิ้นเชิง: แทนที่จะบอกให้โมเดล "ระวัง"
+        harness สร้างระบบที่ทำให้ behavior ที่ผิดพลาดเป็น structurally impossible ตั้งแต่แรก
+      </p>
+    </div>
+
+    <div>
+      <h3>Tool Validation: ป้องกัน Hallucinated Tool Calls</h3>
+      <p>
+        Hallucination ที่พบบ่อยที่สุดในระบบ agentic ไม่ใช่โมเดลบอกข้อมูลผิด — แต่คือโมเดลพยายามเรียก
+        function ที่ไม่มีอยู่จริง หรือส่ง parameter ผิด type ให้ function ที่มีอยู่
+        ปัญหานี้เกิดเพราะโมเดลอาจ "จินตนาการ" tool ที่มันคิดว่าควรมี และเรียกมันโดยไม่รู้ว่ามันไม่มีจริง
+      </p>
+      <p>
+        Tool Validation Layer ใน harness แก้ปัญหานี้โดยสร้าง strict schema สำหรับทุก tool call
+        ก่อนที่ harness จะ execute call ใดๆ มันจะตรวจสอบ: ชื่อ function มีอยู่จริงหรือไม่,
+        parameter types ถูกต้องหรือไม่, required parameters ครบหรือไม่, และค่าอยู่ใน allowed range หรือไม่
+        ถ้า validation ล้มเหลว harness จะ return error message ที่อธิบายชัดเจนว่าผิดตรงไหนและควรแก้อย่างไร
+        โมเดลจะใช้ข้อมูลนี้แก้ call ใหม่แทนที่จะ waste token กับ broken call ที่ไม่มีวันสำเร็จ
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: วิธีที่ OpenAI และ Anthropic ออกแบบ Error Messages เพื่อสอนโมเดล</summary>
+        <div class="details-body">
+          <p>
+            OpenAI documented pattern ที่น่าสนใจ: เขียน linter error messages ที่ออกแบบมาเพื่อสอนโมเดลให้แก้ได้เอง
+            แทนที่จะบอกแค่ "ERROR: invalid parameter" harness จะ return
+            "ERROR: parameter 'timeout' ต้องเป็น integer (milliseconds) แต่ได้รับ string '30s' — ใช้ 30000 แทน"
+            ทุก failure message กลายเป็น learning context ที่ทำให้ agent แก้ได้ในรอบถัดไปโดยอัตโนมัติ
+          </p>
+          <p>
+            แนวคิดนี้ขยายไปสู่ "environment engineering" — แทนที่จะทำให้โมเดลฉลาดขึ้น
+            เราทำให้ environment ฉลาดขึ้นโดยออกแบบ API responses, error messages, และ tool schemas
+            ให้ "agent-legible" คือโมเดลอ่านแล้วรู้ทันทีว่าต้องทำอะไรต่อ
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>Approval Gates: Human-in-the-Loop สำหรับ High-risk Operations</h3>
+      <p>
+        ไม่ใช่ทุก operation ที่ควรให้ agent ทำเองโดยอัตโนมัติ Approval Gate คือ checkpoint ที่ harness
+        หยุดรอการยืนยันจากมนุษย์ก่อนดำเนินการต่อ สำหรับ operation ที่มีความเสี่ยงสูง เช่น
+        การลบข้อมูล, การ publish content, การ modify production database, หรือการส่ง external request ที่มีผล irreversible
+      </p>
+      <p>
+        ใน Supervisor Pattern ที่ใช้ใน production systems การ circuit breaker จะ trigger อัตโนมัติ
+        เมื่อ agent พยายามทำ operation ที่อยู่ใน "always-ask" list
+        ระบบจะบันทึก proposed action ทั้งหมดพร้อม context ไว้ใน audit log
+        แล้วส่ง notification ให้ผู้ดูแลระบบ approve หรือ reject ก่อนที่ harness จะ execute จริง
+        pattern นี้ทำให้ระบบ agentic สามารถทำงาน autonomous ได้ในส่วนใหญ่
+        โดยยังคงมี human oversight ในจุดที่สำคัญที่สุด
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: Budget Cap และ Phase-gating ป้องกัน Runaway Agent</summary>
+        <div class="details-body">
+          <p>
+            <strong>Budget Cap</strong> กำหนด token budget ต่อ session และ per-task
+            ถ้า agent ใช้เกิน budget harness จะหยุดและ require human review ก่อนดำเนินการต่อ
+            นี่ป้องกัน "grep-spree" — agent ที่วนหา information โดยไม่มีทิศทางจนเผาผลาญ token มหาศาล
+          </p>
+          <p>
+            <strong>Phase-gating</strong> บังคับให้ agent ทำตาม workflow ที่กำหนดไว้ล่วงหน้า
+            โดยไม่อนุญาตให้ข้ามขั้นตอน เช่น research agent ต้องผ่าน "gather → analyze → verify → report"
+            ตามลำดับ ไม่สามารถ jump ไป report โดยตรงโดยไม่ verify ก่อน
+            Phase-gating ทำให้ audit ง่าย: ทุก decision มี explicit record ว่าเกิดขึ้นที่ phase ไหน
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div class="callout warning">
+      <strong>⚠ ข้อควรระวัง:</strong> ระวัง over-guardrailing — guardrail ที่มากเกินไปทำให้ agent ทำงานช้าและต้องมี human approval บ่อยจนไม่ต่างจาก manual workflow ออกแบบ guardrail เฉพาะ high-risk operations เท่านั้น
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Harness แก้ Hallucination โดยทำให้ incorrect behavior เป็น structurally impossible — ไม่ใช่โดยบอกให้โมเดล "ระวัง" มากขึ้น</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 7: ARCHITECTURE PATTERNS
+════════════════════════════════════════════ -->
+<section class="page" id="p7" data-title="Patterns">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — Architecture Patterns</p>
+      <h2>3 รูปแบบ Harness Architecture ที่ใช้ใน Production</h2>
+      <p class="section-lead">
+        ไม่มี harness architecture ที่ดีที่สุดสำหรับทุก use case — ทางเลือกขึ้นอยู่กับ
+        ขนาดของงาน ระดับ autonomy ที่ต้องการ และ risk tolerance ของระบบ
+        ทั้ง 3 pattern ด้านล่างมี trade-off ที่ชัดเจน และแต่ละอันเหมาะกับบริบทที่ต่างกัน
+      </p>
+    </div>
+
+    <div>
+      <div class="tabs-nav" role="tablist">
+        <button class="active" onclick="switchTab(this,'pat1')" role="tab">Single-Agent Supervisor</button>
+        <button onclick="switchTab(this,'pat2')" role="tab">Initializer-Executor (แนะนำ)</button>
+        <button onclick="switchTab(this,'pat3')" role="tab">Multi-Agent Coordination</button>
+      </div>
+
+      <div id="pat1" class="tabs-panel active">
+        <h3>Single-Agent Supervisor: หนึ่ง Agent ทุกอย่าง</h3>
+        <p>
+          Pattern ที่ง่ายที่สุด: โมเดลหนึ่งตัวทำงานในวงจร loop พร้อม tools, memory, และ verification
+          Harness จัดการทุกอย่างรอบโมเดลตัวเดียว ทั้ง routing, context management และ error recovery
+          Pattern นี้เหมาะสำหรับ bounded tasks ที่มีขอบเขตชัดเจนเช่น customer support agent ที่มี knowledge base,
+          code review agent, หรือ research summarizer ที่ทำงานกับเอกสารชุดเดียว
+        </p>
+        <p>
+          ข้อดีหลักคือความเรียบง่าย — ไม่มี handoff ระหว่าง agent ทำให้ debug ง่าย และ state management ตรงไปตรงมา
+          ข้อจำกัดคือ context window ของโมเดลเดียวอาจไม่พอสำหรับงานที่ยาวมาก
+          และ bottleneck ที่ขั้นตอน reasoning หลักไม่สามารถ parallelize ได้
+        </p>
+        <div class="callout" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> Bounded tasks, customer support, code review, research summarization — งานที่มีขอบเขตชัดเจนในหนึ่ง session</div>
+      </div>
+
+      <div id="pat2" class="tabs-panel">
+        <h3>Initializer-Executor: แยก Setup ออกจาก Execution</h3>
+        <p>
+          Pattern นี้แยก agent ออกเป็น 2 ประเภทที่มีหน้าที่ต่างกัน:
+          <strong>Initializer agent</strong> ทำงานหนึ่งครั้งเพื่อสร้าง project structure, task list, และ environment ที่สมบูรณ์
+          จากนั้น <strong>Executor agents</strong> หลายตัวสามารถรัน independently แต่ละตัวทำ incremental progress
+          บน task list เดียวกัน, run tests, commit changes, และ update progress files
+          ทุก session ของ executor share project environment เดียวกันเป็น distributed memory
+        </p>
+        <p>
+          ความงามของ pattern นี้คือ executor ทุกตัวสามารถ fail แล้วรีสตาร์ทได้โดยไม่เสีย progress เลย
+          เพราะ task list บอกทุกอย่าง Anthropic ใช้ pattern นี้สาธิตการสร้าง web application
+          ที่สมบูรณ์ข้ามหลาย context window — ทีม enterprise ที่ต้องการ multi-day coding workflows
+          หรือ large-scale refactoring ควรเริ่มที่ pattern นี้ก่อน
+        </p>
+        <div class="callout success" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> Long-running projects, multi-day coding tasks, large refactoring — งานที่ต้องข้ามหลาย session และต้องการ fault tolerance สูง</div>
+      </div>
+
+      <div id="pat3" class="tabs-panel">
+        <h3>Multi-Agent Coordination: Specialist Agents ทำงานร่วมกัน</h3>
+        <p>
+          Pattern ที่ซับซ้อนที่สุด: Specialist agents หลายตัวทำงานคนละบทบาท เช่น researcher agent, writer agent,
+          reviewer agent และ coordinator agent ที่จัดการ handoff ระหว่างตัว
+          Harness ทำหน้าที่สำคัญมากในที่นี้: จัดการว่าแต่ละ agent ได้รับ context อะไร
+          โดยให้แต่ละตัวเห็นเฉพาะผลงานที่ relevant ต่อ role ของตัวเอง ไม่ใช่ประวัติทั้งหมด
+        </p>
+        <p>
+          ข้อดีคือ parallel processing ที่ทำให้งานซับซ้อนเสร็จเร็วขึ้นมาก และแต่ละ agent ถูก fine-tune
+          สำหรับ task ที่เฉพาะเจาะจง ทำให้คุณภาพสูงกว่าการให้ agent เดียวทำทุกอย่าง
+          ข้อจำกัดคือ complexity สูงมาก โดยเฉพาะในเรื่อง error recovery เมื่อ agent ตัวหนึ่ง fail
+          กลางกระบวนการ — ต้องออกแบบ retry logic และ compensation mechanism อย่างระมัดระวัง
+        </p>
+        <div class="callout" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> Complex research workflows, competitive intelligence pipelines, content production systems — งานที่ parallel processing ให้ประโยชน์ชัดเจน</div>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>เกณฑ์</th><th>Single-Agent</th><th>Initializer-Executor (แนะนำ)</th><th>Multi-Agent</th></tr></thead>
+      <tbody>
+        <tr><td>ความซับซ้อน</td><td class="check">✓ ต่ำ</td><td>ปานกลาง</td><td class="cross">✗ สูง</td></tr>
+        <tr><td>Fault Tolerance</td><td class="cross">✗ ต่ำ</td><td class="check">✓ สูง</td><td>ปานกลาง</td></tr>
+        <tr><td>Long-running tasks</td><td class="cross">✗ จำกัด</td><td class="check">✓ ดีเยี่ยม</td><td class="check">✓ ดี</td></tr>
+        <tr><td>Debug ง่าย</td><td class="check">✓ ง่ายมาก</td><td class="check">✓ ง่าย</td><td class="cross">✗ ยาก</td></tr>
+        <tr><td>Parallel processing</td><td class="cross">✗ ไม่รองรับ</td><td>บางส่วน</td><td class="check">✓ รองรับเต็มที่</td></tr>
+      </tbody>
+    </table>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> เริ่มด้วย Single-Agent ก่อน ขยับสู่ Initializer-Executor เมื่องานต้องข้ามหลาย session — Multi-Agent คือ last resort ไม่ใช่ default choice</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 8: HARNESS FRAMEWORK ECOSYSTEM & PRACTICAL GUIDE
+════════════════════════════════════════════ -->
+<section class="page" id="p8" data-title="Ecosystem">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 6 — Ecosystem &amp; Practice</p>
+      <h2>Ecosystem ของ Harness Frameworks และคู่มือเริ่มต้น</h2>
+      <p class="section-lead">
+        ใน 2026 มี framework ที่ช่วย build agent harness หลายตัว แต่ละตัวมีจุดแข็งต่างกัน
+        สิ่งสำคัญที่ต้องเข้าใจก่อนเลือกคือ framework ให้ components แต่ harness คือสิ่งที่คุณต้อง build
+        จาก components เหล่านั้น รวมถึง business logic, validation rules, และ domain-specific integrations
+        ที่เฉพาะเจาะจงกับระบบของคุณ ไม่มี framework ไหนทำ harness ให้คุณ 100% ได้
+      </p>
+    </div>
+
+    <div>
+      <h3>Framework หลักในปี 2026 และจุดแข็งของแต่ละตัว</h3>
+      <p>
+        <strong>LangGraph</strong> โดย LangChain ใช้ graph-based state machine ที่ให้ explicit control flow ผ่าน conditional edges
+        ทำให้ workflow ที่ซับซ้อนมีความชัดเจนและ debug ง่าย benchmark ปี 2026 แสดง task success rate 87%
+        ซึ่งสูงที่สุดในกลุ่ม เหมาะสำหรับทีมที่ต้องการ fine-grained control ของ execution flow
+        และ workflow ที่มีหลาย conditional branches ขึ้นอยู่กับผลลัพธ์ของแต่ละ step
+      </p>
+      <p>
+        <strong>CrewAI</strong> ใช้ role-based architecture ที่ agent แต่ละตัวมี persona ชัดเจน (researcher, writer, critic)
+        ทำให้ตั้งค่า multi-agent team ได้เร็วที่สุด average latency 1.8 วินาทีสำหรับ multi-agent execution
+        เหมาะสำหรับ content production, research pipelines, และทีมที่ต้องการ prototype ออกมาเร็ว
+        ก่อนที่จะ optimize สำหรับ production
+      </p>
+      <p>
+        <strong>AutoGen / AG2</strong> โดย Microsoft เน้น Docker-native sandboxing และ multi-turn debate pattern
+        ที่ให้ agent หลายตัว argue กันเพื่อ refine ผลลัพธ์ มี 54,000+ GitHub stars ณ เดือนพฤษภาคม 2026
+        เหมาะสำหรับ code-heavy workflows ที่ต้องการ execution isolation และทีมที่ integrate กับ Azure
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: MCP และ A2A Protocol — มาตรฐานใหม่ของ Harness Interoperability</summary>
+        <div class="details-body">
+          <p>
+            <strong>Model Context Protocol (MCP)</strong> โดย Anthropic กำหนดมาตรฐาน vertical interaction ระหว่าง agent กับ tools
+            เปรียบได้กับ "USB-C สำหรับ AI" — ทำให้ tool ที่สร้างครั้งเดียวใช้งานได้กับ harness ทุกตัว
+            โดยไม่ต้อง rewrite integration ใหม่ทุกครั้ง
+          </p>
+          <p>
+            <strong>Agent-to-Agent (A2A) Protocol</strong> โดย Linux Foundation กำหนดมาตรฐาน horizontal interaction
+            ระหว่าง agent กับ agent ข้ามต่าง framework ทำให้ agent ที่สร้างด้วย LangGraph สามารถ
+            delegate task ให้ agent ที่สร้างด้วย CrewAI ได้โดยตรง โดยไม่ต้องมี adapter พิเศษ
+            ทั้งสอง protocol รวมกันทำให้ ecosystem ของ harness เป็น vendor-independent อย่างแท้จริง
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>คู่มือเริ่มต้น: ขั้นตอนสร้าง Harness แบบ Minimal</h3>
+      <p>
+        สำหรับผู้ที่ต้องการเริ่มสร้าง agent harness จากศูนย์ วิธีที่ดีที่สุดคือเริ่มจาก minimal viable harness
+        แล้วเพิ่ม layer ตามปัญหาที่เจอจริง ไม่ใช่สร้างทุก component พร้อมกันตั้งแต่ต้น
+        ตัวอย่างด้านล่างแสดง pattern พื้นฐานของ Python harness ที่มี tool validation และ state persistence:
+      </p>
+
+      <div class="copy-wrap">
+        <pre><code>import json, os
+from pathlib import Path
+
+class AgentHarness:
+    def __init__(self, agent_fn, tools: dict, state_path: str):
+        self.agent_fn = agent_fn
+        self.tools = tools
+        self.state_path = Path(state_path)
+
+    def load_state(self) -> dict:
+        if self.state_path.exists():
+            return json.loads(self.state_path.read_text())
+        return {"tasks": [], "completed": [], "context": []}
+
+    def save_state(self, state: dict):
+        self.state_path.write_text(json.dumps(state, indent=2, ensure_ascii=False))
+
+    def execute_tool(self, name: str, params: dict):
+        if name not in self.tools:
+            return {"error": f"Tool '{name}' not found. Available: {list(self.tools)}"}
+        schema = self.tools[name]["schema"]
+        for req in schema.get("required", []):
+            if req not in params:
+                return {"error": f"Missing required param '{req}' for tool '{name}'"}
+        return self.tools[name]["fn"](**params)
+
+    def run_loop(self, task: str):
+        state = self.load_state()
+        state["tasks"].append(task)
+        for step in range(20):  # max steps = budget cap
+            action = self.agent_fn(task, state["context"])
+            if action["type"] == "done":
+                state["completed"].append(task)
+                break
+            result = self.execute_tool(action["tool"], action["params"])
+            state["context"].append({"step": step, "action": action, "result": result})
+            self.save_state(state)  # checkpoint every step</code></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+
+      <p>
+        โค้ดด้านบนแสดงโครงสร้างหลัก 4 ส่วน: <code>load_state()</code> และ <code>save_state()</code>
+        ทำหน้าที่ State Persistence — บันทึก checkpoint ทุก step เพื่อให้ resume ได้หลัง failure
+        <code>execute_tool()</code> ทำหน้าที่ Tool Validation — ตรวจสอบว่า tool มีอยู่และ parameters ถูกต้องก่อน execute จริง
+        และ <code>run_loop()</code> คือ Execution Loop ที่มี budget cap (max 20 steps) เพื่อป้องกัน runaway agent
+        ทุก step ที่รันจะถูก checkpoint ก่อนเริ่ม step ถัดไปเสมอ
+      </p>
+      <p>
+        ขั้นตอนถัดไปหลังจาก minimal harness นี้ทำงานได้แล้ว: เพิ่ม Context Compression ใน step ที่ context ยาวเกิน 4,000 tokens,
+        เพิ่ม Approval Gate สำหรับ tools ที่ทำ write operations, และเพิ่ม Observability ด้วย structured logging
+        ที่บันทึก token usage ต่อ step เพื่อ track ต้นทุน
+      </p>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> เริ่มจาก 3 บรรทัด: tool validation + state persistence + budget cap — แล้วเพิ่ม layer ตามปัญหาที่เจอจริง ไม่ใช่ตาม feature list</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 9: KEY TAKEAWAYS + REFERENCES
+════════════════════════════════════════════ -->
+<section class="page" id="p9" data-title="สรุปและอ้างอิง">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Closing — Key Takeaways</p>
+      <h2>สิ่งที่ต้องจำและขั้นตอนถัดไป</h2>
+      <p class="section-lead">
+        หลังอ่าน brochure นี้จบ คุณควรมีความเข้าใจในโครงสร้างของ Agent Harness ว่าทำไมมันถึงสำคัญกว่าที่หลายคนคิด
+        และจะเริ่มต้นสร้างหรือปรับปรุง harness ของตัวเองได้ทันที
+      </p>
+    </div>
+    <div class="bento cols-2">
+      <div>
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li><strong>Harness = Operating System ของ Agent:</strong> โมเดลคือ CPU แต่ harness คือ OS ที่แปลง probabilistic output เป็น deterministic action ที่เชื่อถือได้และทำซ้ำได้</li>
+          <li><strong>65% ของ failures มาจาก Harness ไม่ใช่โมเดล:</strong> ลงทุน optimize harness ก่อน upgrade โมเดล — มี ROI สูงกว่าและเร็วกว่า</li>
+          <li><strong>3 ชั้น Memory ที่ต้องมี:</strong> Working Context (per request), Session State (per task, JSON), Long-term Memory (across tasks) — ขาดชั้นใดชั้นหนึ่งจะทำให้ agent ลืมและ redo งานซ้ำ</li>
+          <li><strong>Verify ทุก Step ไม่ใช่ทุก Task:</strong> ถ้า step accuracy 85% และมี 10 steps โอกาสสำเร็จทั้งหมดคือ 20% เท่านั้น — verify ระหว่างทางตัด error propagation</li>
+          <li><strong>เริ่มจาก Minimal แล้วเพิ่ม Layer:</strong> Tool Validation + State Persistence + Budget Cap คือ harness ขั้นต่ำที่ใช้งานได้จริง — อย่าสร้างทุก component พร้อมกัน</li>
+          <li><strong>Framework ≠ Harness:</strong> LangGraph, CrewAI, AutoGen เป็น components ที่ดี แต่ harness คือสิ่งที่คุณต้อง build จาก business logic และ domain integrations ของตัวเอง</li>
+          <li><strong>Context Compression ลดต้นทุน 10x:</strong> KV-cache locality + semantic routing ลด $3.00 → $0.30 ต่อ MTok และลด latency 4x โดยไม่ต้องเปลี่ยนโมเดล</li>
+        </ul>
+      </div>
+      <div>
+        <h3>References</h3>
+        <ol style="font-size:13px;color:var(--ink-dim);line-height:1.9">
+          <li>Adnan Masood — <a href="https://medium.com/@adnanmasood/agent-harness-engineering-the-rise-of-the-ai-control-plane-938ead884b1d" target="_blank" rel="noopener">Agent Harness Engineering: The Rise of the AI Control Plane (2026)</a></li>
+          <li>Firecrawl Blog — <a href="https://www.firecrawl.dev/blog/what-is-an-agent-harness" target="_blank" rel="noopener">What Is an Agent Harness? The Infrastructure That Makes AI Agents Actually Work</a></li>
+          <li>Atlan — <a href="https://atlan.com/know/best-ai-agent-harness-tools-2026/" target="_blank" rel="noopener">Top AI Agent Harness Tools and Frameworks 2026: Complete Guide</a></li>
+          <li>YouTube — <a href="https://youtu.be/xIVl5X9yUWM" target="_blank" rel="noopener">Agent Harness คือโครงสร้างพื้นฐาน AI Agent (source video)</a></li>
+          <li>Hallucination Mitigation using Agentic AI — <a href="https://arxiv.org/pdf/2501.13946" target="_blank" rel="noopener">Natural Language-Based Frameworks (arXiv 2025)</a></li>
+        </ol>
+
+        <h3 style="margin-top:20px">Glossary</h3>
+        <dl style="font-size:13px;color:var(--ink-dim);line-height:1.8">
+          <dt style="font-weight:600;color:var(--ink)">Agent Harness</dt>
+          <dd style="margin:0 0 8px 12px">Software infrastructure ที่ล้อมรอบ LLM และจัดการ tool execution, memory, context, และ error recovery ทั้งหมด</dd>
+          <dt style="font-weight:600;color:var(--ink)">Context Rot</dt>
+          <dd style="margin:0 0 8px 12px">การที่ LLM เริ่มละเลยข้อมูลสำคัญเมื่อ context window เต็ม โดยเฉพาะข้อมูลที่อยู่ตรงกลาง (Lost in the Middle)</dd>
+          <dt style="font-weight:600;color:var(--ink)">Execution Loop</dt>
+          <dd style="margin:0 0 8px 12px">วงจร Load → Plan &amp; Act → Verify → Save ที่วนซ้ำจนงานเสร็จ พร้อม checkpoint ทุก step</dd>
+          <dt style="font-weight:600;color:var(--ink)">Guardrails</dt>
+          <dd style="margin:0 0 8px 12px">ระบบ validation และ approval ที่ทำให้ incorrect behavior เป็น structurally impossible แทนที่จะพึ่ง prompt</dd>
+          <dt style="font-weight:600;color:var(--ink)">MCP (Model Context Protocol)</dt>
+          <dd style="margin:0 0 8px 12px">มาตรฐาน open-source โดย Anthropic สำหรับ agent-to-tool interaction ทำให้ tool ที่สร้างครั้งเดียวใช้ได้กับ harness ทุกตัว</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="takeaway">
+      <b>★ ถ้าจำได้อย่างเดียว:</b> {Agent} = {Model} + {Harness} — ลงทุน harness ก่อน upgrade โมเดล เพราะ 65% ของ failures มาจาก infrastructure ไม่ใช่ reasoning
+    </div>
+  </div>
+</section>
+
+</div><!-- /scroll-root -->
+
+<script>
+// ── Hash-based page nav ──
+const pageLinks = document.getElementById('page-links');
+const pages = Array.from(document.querySelectorAll('.page'));
+
+pages.forEach((page) => {
+  const a = document.createElement('a');
+  a.href = '#' + page.id;
+  a.textContent = page.dataset.title || page.id;
+  pageLinks.appendChild(a);
+});
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('#page-links a').forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`#page-links a[href="#${e.target.id}"]`);
+      if (active) {
+        active.classList.add('active');
+        active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      }
+    }
+  });
+}, { root: null, threshold: 0.3 });
+pages.forEach(p => obs.observe(p));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); jumpSection(1); }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); jumpSection(-1); }
+});
+function jumpSection(dir) {
+  const active = document.querySelector('#page-links a.active');
+  const links = Array.from(document.querySelectorAll('#page-links a'));
+  const idx = links.indexOf(active);
+  const next = links[idx + dir];
+  if (next) next.click();
+}
+
+// ── Theme toggle ──
+const themeBtn = document.getElementById('theme-btn');
+const root = document.documentElement;
+const saved = localStorage.getItem('brochure-theme');
+if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
+themeBtn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  localStorage.setItem('brochure-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
+});
+
+// ── Tabs ──
+function switchTab(btn, panelId) {
+  const tabsNav = btn.closest('.tabs-nav');
+  tabsNav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tabs-panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(panelId);
+  if (target) target.classList.add('active');
+}
+
+// ── Accordion ──
+function toggleAccordion(btn) {
+  btn.closest('.accordion-item').classList.toggle('open');
+}
+
+// ── Copy button ──
+function copyCode(btn) {
+  const pre = btn.closest('.copy-wrap').querySelector('pre code');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
