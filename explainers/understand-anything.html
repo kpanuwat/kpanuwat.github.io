@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understand Anything — Knowledge Graph Plugin สำหรับ Claude Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens ── */
+:root {
+  --ink: #1e293b;
+  --ink-dim: #475569;
+  --muted: #94a3b8;
+  --paper: #ffffff;
+  --soft: #f1f5f9;
+  --soft-2: #e2e8f0;
+  --accent: #3b82f6;
+  --accent-deep: #1e3a8a;
+  --accent-wash: #dbeafe;
+  --gold: #d4af37;
+  --danger: #dc2626;
+  --danger-wash: #fee2e2;
+  --danger-ink: #991b1b;
+  --success: #16a34a;
+  --success-wash: #dcfce7;
+  --success-ink: #14532d;
+  --warning: #f59e0b;
+  --warning-wash: #fef3c7;
+  --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 52px;
+  --page-max: 960px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9;
+  --ink-dim: #94a3b8;
+  --muted: #475569;
+  --paper: #0f172a;
+  --soft: #1e293b;
+  --soft-2: #334155;
+  --accent-wash: #1e3a8a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe;
+  --danger-wash: #450a0a;  --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+}
+code, kbd, pre, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Nav bar ── */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--soft-2);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  box-shadow: var(--shadow-sm);
+}
+#nav .brand {
+  font-weight: 700; font-size: 15px; color: var(--ink);
+  margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 240px;
+}
+#nav .page-links {
+  display: flex; gap: 2px; overflow-x: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+#nav .page-links::-webkit-scrollbar { display: none; }
+#nav .page-links a {
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--ink-dim); white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+#nav .page-links a:hover,
+#nav .page-links a.active {
+  background: var(--accent-wash); color: var(--accent);
+  text-decoration: none;
+}
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button {
+  background: none; border: 1px solid var(--soft-2);
+  border-radius: var(--radius-sm); padding: 5px 10px;
+  font-size: 13px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+#nav .controls button:hover { background: var(--soft); }
+
+/* ── Sections ── */
+#scroll-root { padding-top: var(--nav-h); }
+.page {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+  padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.page-inner {
+  width: 100%; max-width: var(--page-max);
+  display: flex; flex-direction: column; gap: 28px;
+}
+.page.cover {
+  min-height: calc(100vh - var(--nav-h));
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1d4ed8 100%);
+  color: white; justify-content: center; align-items: center; text-align: center;
+}
+.page.cover .page-inner { align-items: center; }
+
+/* ── Typography ── */
+h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+
+/* ── Prose flow ── */
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
+.prose-block { display: flex; flex-direction: column; gap: 0; }
+.section-label {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.page-number {
+  font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 24px;
+  align-self: flex-end;
+}
+
+/* ── Cover mark ── */
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+
+/* ── Cheat sheet image band ── */
+.cheatsheet { display:flex; flex-direction:column; align-items:center; gap:10px; min-height:0; }
+.cheatsheet img { max-width:100%; max-height:78vh; width:auto; height:auto;
+  object-fit:contain; border-radius:var(--radius); box-shadow:var(--shadow-md); background:var(--paper); }
+.cheatsheet svg { width:100%; height:auto; }
+.cheatsheet figcaption { font-size:13px; color:var(--muted); text-align:center; }
+
+/* ── Card system ── */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+  border-left: 4px solid var(--accent);
+  box-sizing: border-box;
+}
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card h3      { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p       { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul      { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+
+/* ── Bento grid ── */
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 640px) {
+  .bento.cols-2, .bento.cols-3, .bento.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Takeaway banner ── */
+.takeaway {
+  border-left: 4px solid var(--accent);
+  background: var(--soft);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 15px; line-height: 1.6;
+}
+.takeaway b { color: var(--accent); }
+
+/* ── Steps list ── */
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.steps li .step-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--accent); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+
+/* ── Callout ── */
+.callout {
+  background: var(--accent-wash);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 15px; color: var(--accent-deep);
+  border: 1px solid var(--accent);
+}
+.callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+
+/* ── Inline code ── */
+code {
+  background: var(--soft-2); color: var(--danger-ink); font-size: .875em;
+  padding: 2px 6px; border-radius: 4px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6;
+}
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+kbd {
+  background: var(--soft-2); border: 1px solid var(--soft-2);
+  border-bottom-color: var(--muted); border-radius: 4px;
+  font-size: .8em; padding: 2px 7px; box-shadow: 0 1px 0 var(--muted);
+}
+
+/* ── Copy button ── */
+.copy-wrap { position: relative; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--soft-2); border: none; border-radius: 4px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+.copy-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.copy-btn.copied { background: var(--success-wash); color: var(--success-ink); }
+
+/* ── Tabs ── */
+.tabs-nav {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--soft-2); margin-bottom: 16px;
+}
+.tabs-nav button {
+  background: none; border: none; padding: 8px 14px; cursor: pointer;
+  font-size: 14px; color: var(--ink-dim); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color .15s, border-color .15s;
+}
+.tabs-nav button:hover { color: var(--ink); }
+.tabs-nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs-panel { display: none; }
+.tabs-panel.active { display: block; }
+
+/* ── Progressive disclosure ── */
+details.disclosure {
+  border-left: 3px solid var(--accent);
+  background: var(--soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 12px 0;
+}
+details.disclosure summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  user-select: none;
+}
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after {
+  content: "▾";
+  font-size: 12px; color: var(--muted);
+  transition: transform .2s;
+  margin-left: auto;
+}
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body {
+  padding: 4px 16px 16px;
+  font-size: 14px; color: var(--ink-dim); line-height: 1.7;
+}
+details.disclosure .details-body p { font-size: 14px; }
+details.disclosure .details-body pre { margin: 8px 0; }
+
+/* ── Comparison table ── */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+
+/* ── Print ── */
+@media print {
+  #nav { display: none; }
+  #scroll-root { padding-top: 0; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .page { padding: 32px 16px; }
+  h2 { font-size: 22px; }
+  #nav .brand { max-width: 120px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav id="nav">
+  <span class="brand">Understand Anything — Knowledge Graph</span>
+  <div class="page-links" id="page-links"></div>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">☀︎</button>
+    <button onclick="window.print()" title="Print / save as PDF">⎙</button>
+  </div>
+</nav>
+
+<div id="scroll-root">
+
+<!-- PAGE 1: COVER -->
+<section class="page cover" id="p1" data-title="หน้าปก">
+  <div class="page-inner" style="align-items:center;text-align:center;gap:16px">
+    <div class="mark"></div>
+    <h1>Understand Anything</h1>
+    <p class="tag" style="font-size:22px;color:rgba(255,255,255,.9);max-width:640px;font-weight:600">
+      Knowledge Graph Plugin สำหรับ Claude Code — เข้าใจ Codebase ซับซ้อนใน 10 นาที
+    </p>
+    <p style="font-size:16px;color:rgba(255,255,255,.7);max-width:580px;margin-top:4px">
+      แปลงโค้ดสูงสุด 200,000 ไฟล์เป็น Knowledge Graph แบบ interactive ที่ AI agent และทีมนักพัฒนา
+      สามารถสำรวจ ค้นหา และ query ได้ในเวลาจริง รองรับ Claude Code, Codex, Cursor, Copilot, Gemini CLI และอีกกว่า 10 platforms
+    </p>
+    <div class="bento cols-3" style="margin-top:24px;max-width:580px">
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">GitHub Stars</p>
+        <h3 style="color:white">44,700+</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">AI Agents</p>
+        <h3 style="color:white">6 Specialized</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">Onboarding</p>
+        <h3 style="color:white">10 นาที</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 1b: CHEAT SHEET -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <div class="page-inner">
+    <figure class="cheatsheet">
+      <img src="assets/understand-anything/cheatsheet.png" alt="Understand Anything cheat sheet">
+      <figcaption>ภาพสรุปแบบ cheat sheet — บันทึกไว้ดูซ้ำได้</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- PAGE 2: OVERVIEW -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Overview</p>
+      <h2>Understand Anything คืออะไร และทำไมถึงเป็นที่นิยม</h2>
+      <p class="section-lead">
+        Understand Anything คือ plugin สำหรับ Claude Code (และ AI agent อื่น ๆ) ที่แก้ปัญหาพื้นฐานของการทำงานกับโค้ดขนาดใหญ่:
+        AI เห็นโค้ดเป็นแค่ "text ธรรมดา" ที่ขาดโครงสร้างและความหมาย แต่ plugin นี้แปลงโค้ดทั้งโปรเจกต์ให้กลายเป็น Knowledge Graph
+        ที่เชื่อมโยงไฟล์ ฟังก์ชัน คลาส และ dependency ทั้งหมดไว้ด้วยกัน พร้อมเพิ่ม business logic และ semantic meaning
+        ทำให้ทั้ง AI agent และนักพัฒนาเข้าใจโปรเจกต์ได้ลึกและเร็วขึ้นอย่างมีนัยสำคัญ
+      </p>
+    </div>
+
+    <div class="bento cols-3">
+      <div class="card success">
+        <p class="label">ปัญหาที่แก้</p>
+        <h3>Context Engineering</h3>
+        <p>แทนที่ AI จะค้น raw files ด้วยคำสำคัญ — graph ให้ AI รู้ว่าไฟล์ไหนเชื่อมกับไฟล์ไหน
+          และแต่ละส่วนทำหน้าที่อะไรในระบบ ลด hallucination และ incorrect suggestions</p>
+      </div>
+      <div class="card warning">
+        <p class="label">วิธีทำงาน</p>
+        <h3>Scan → Map → Teach</h3>
+        <p>3 ขั้นตอนหลัก: สแกนโครงสร้าง (Tree-sitter), เติมความหมาย (6 LLM agents),
+          แล้วแสดงผ่าน interactive dashboard ที่นักพัฒนาสำรวจได้ด้วยตา</p>
+      </div>
+      <div class="card gold">
+        <p class="label">ผลลัพธ์</p>
+        <h3>Portable Knowledge Graph</h3>
+        <p><code>.understand-anything/knowledge-graph.json</code> — commit ลง repo ได้
+          ทีมใหม่ clone แล้วใช้ได้เลยโดยไม่ต้อง scan ซ้ำ ประหยัดทั้งเวลาและ token</p>
+      </div>
+    </div>
+
+    <div class="bento cols-2">
+      <div class="card">
+        <p class="label">สำหรับนักพัฒนา</p>
+        <h3>Onboarding ใน 10 นาที</h3>
+        <p>Dashboard พร้อม guided tour ที่เรียงลำดับตาม dependency ให้นักพัฒนาใหม่เดินผ่านโปรเจกต์
+          ได้อย่างมีระบบ แทนที่จะงมหา docs ที่อาจล้าสมัยหรือถามคนในทีมซ้ำ ๆ</p>
+      </div>
+      <div class="card">
+        <p class="label">สำหรับ AI Agent</p>
+        <h3>Architecturally-Aware Suggestions</h3>
+        <p>Agent ที่ query knowledge graph แทนการค้น raw text สร้างโค้ดที่สอดคล้องกับ
+          architecture จริง รู้ว่าควรเรียก service ไหน ผ่าน layer ไหน ไม่สร้าง circular dependency โดยไม่ตั้งใจ</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>ปัญหาที่ซ่อนอยู่:</strong> โค้ดในรูปแบบ text ไม่มีโครงสร้างที่สื่อ purpose, ownership,
+      หรือ system-level connections — Understand Anything สร้างโครงสร้างนั้นขึ้นมาโดยตรง
+      แล้วทำให้ทั้ง AI และคนเข้าถึงได้ผ่าน interface เดียวกัน
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Understand Anything = แปลง codebase จาก "text" เป็น "แผนที่" — ทั้ง AI และทีมนำทางได้โดยไม่หลง</div>
+  </div>
+</section>
+
+<!-- PAGE 3: DEEP-DIVE PROTOCOL -->
+<section class="page" id="p3" data-title="Deep-Dive Protocol">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol</p>
+      <h2>ส่วนประกอบหลัก สมมติฐานที่ซ่อนอยู่ และ Key Takeaways</h2>
+      <p class="section-lead">
+        ก่อนลงลึกในรายละเอียดแต่ละหัวข้อ ส่วนนี้สร้าง mental model ที่ถูกต้องตั้งแต่ต้น:
+        ระบบประกอบด้วย 7 ส่วนหลักที่ทำงานร่วมกัน มีสมมติฐานที่ผู้เริ่มต้นมักข้ามไป 4 ข้อ
+        และมี insight ที่สำคัญ 7 ข้อ ถ้าเข้าใจตั้งแต่ต้นจะประหยัดเวลาและค่าใช้จ่ายได้มาก
+      </p>
+    </div>
+
+    <div>
+      <h3>ส่วนประกอบหลัก <span lang="en">(Architecture Components)</span></h3>
+      <div class="bento cols-3">
+        <div class="card">
+          <p class="label">Parsing Layer</p>
+          <h3>Tree-sitter Parser</h3>
+          <p>ดึงโครงสร้างแบบ deterministic — imports, exports, call sites, class definitions
+            ผลลัพธ์ reproducible เสมอ: โค้ดเดิม → edges เดิม ไม่พึ่ง LLM จึงเชื่อถือได้ 100%</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Semantic Layer</p>
+          <h3>LLM Enrichment</h3>
+          <p>6 specialized agents เติม "ความหมาย" บนโครงสร้างที่ Tree-sitter สร้าง:
+            summaries, business tags, layer labels, domain flows — ส่วนที่ซอฟต์แวร์ "รู้" ว่าแต่ละชิ้นทำ "อะไร"</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Graph Store</p>
+          <h3>knowledge-graph.json</h3>
+          <p>artifact แบบ portable ที่ commit ลง repo ได้ เก็บ nodes (files/functions/classes),
+            edges (imports/calls/inheritance), fingerprints สำหรับ incremental update</p>
+        </div>
+        <div class="card success">
+          <p class="label">Visualization</p>
+          <h3>Interactive Dashboard</h3>
+          <p>Local web app รัน pan/zoom graph, fuzzy+semantic search, guided tours,
+            dependency path finder, persona-adaptive detail level, domain overlay</p>
+        </div>
+        <div class="card">
+          <p class="label">Business Layer</p>
+          <h3>Domain Overlay</h3>
+          <p>แมปโค้ดไปยัง business process flows เช่น payment pipeline, user lifecycle
+            ทำให้ PM และ non-technical stakeholders เข้าใจระบบผ่าน domain language แทน file paths</p>
+        </div>
+        <div class="card danger">
+          <p class="label">Freshness</p>
+          <h3>Incremental Update</h3>
+          <p>post-commit hook (<code>--auto-update</code>) re-scan เฉพาะไฟล์ที่เปลี่ยน
+            ตรวจด้วย fingerprint hash ไม่ต้อง full scan ทุกครั้ง ลด token cost ของการ maintain graph</p>
+        </div>
+        <div class="card" style="grid-column: 1 / -1">
+          <p class="label">AI Integration</p>
+          <h3>Command Interface</h3>
+          <p>8 slash commands (<code>/understand</code>, <code>/understand-chat</code>, <code>/understand-onboard</code>, ฯลฯ)
+            ให้ทั้ง agent และนักพัฒนา query graph ในรูปแบบ natural language หรือ structural queries ได้โดยตรง</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG Component Map -->
+    <div>
+      <h3>แผนภาพสถาปัตยกรรม</h3>
+      <svg viewBox="0 0 820 240" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;border-radius:8px;background:#f8fafc;padding:8px">
+        <!-- Input -->
+        <rect x="20" y="90" width="120" height="60" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="80" y="115" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a8a">Code Files</text>
+        <text x="80" y="130" text-anchor="middle" font-size="10" fill="#475569">200k files max</text>
+        <!-- Arrow 1 -->
+        <path d="M140 120 L175 120" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- Tree-sitter -->
+        <rect x="175" y="90" width="130" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="240" y="115" text-anchor="middle" font-size="11" font-weight="600" fill="#92400e">Tree-sitter</text>
+        <text x="240" y="130" text-anchor="middle" font-size="10" fill="#78350f">parse structure</text>
+        <!-- Arrow 2 -->
+        <path d="M305 120 L340 120" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- 6 LLM Agents -->
+        <rect x="340" y="60" width="160" height="120" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
+        <text x="420" y="85" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">6 LLM Agents</text>
+        <text x="420" y="102" text-anchor="middle" font-size="9" fill="#166534">project-scanner</text>
+        <text x="420" y="117" text-anchor="middle" font-size="9" fill="#166534">file-analyzer (x5 parallel)</text>
+        <text x="420" y="132" text-anchor="middle" font-size="9" fill="#166534">architecture-analyzer</text>
+        <text x="420" y="147" text-anchor="middle" font-size="9" fill="#166534">tour-builder / graph-reviewer</text>
+        <text x="420" y="162" text-anchor="middle" font-size="9" fill="#166534">domain-analyzer</text>
+        <!-- Arrow 3 -->
+        <path d="M500 120 L535 120" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- knowledge-graph.json -->
+        <rect x="535" y="85" width="140" height="70" rx="8" fill="#fdf2f8" stroke="#9333ea" stroke-width="1.5"/>
+        <text x="605" y="112" text-anchor="middle" font-size="11" font-weight="600" fill="#581c87">knowledge-graph</text>
+        <text x="605" y="127" text-anchor="middle" font-size="10" fill="#6b21a8">.json (portable)</text>
+        <text x="605" y="142" text-anchor="middle" font-size="9" fill="#7c3aed">commit to repo</text>
+        <!-- Arrow 4 -->
+        <path d="M675 120 L705 120" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+        <!-- Dashboard -->
+        <rect x="705" y="85" width="110" height="70" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="760" y="112" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a8a">Dashboard</text>
+        <text x="760" y="127" text-anchor="middle" font-size="10" fill="#1d4ed8">+ /commands</text>
+        <text x="760" y="142" text-anchor="middle" font-size="9" fill="#1e40af">local web app</text>
+        <!-- Stage labels -->
+        <text x="240" y="195" text-anchor="middle" font-size="10" fill="#94a3b8">SCAN</text>
+        <text x="420" y="205" text-anchor="middle" font-size="10" fill="#94a3b8">MAP (add meaning)</text>
+        <text x="760" y="195" text-anchor="middle" font-size="10" fill="#94a3b8">TEACH</text>
+        <!-- Arrow marker -->
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/>
+          </marker>
+        </defs>
+      </svg>
+      <p style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px">
+        สถาปัตยกรรม 3 ขั้น: Scan (Tree-sitter) → Map (6 LLM agents) → Teach (Dashboard + commands)
+      </p>
+    </div>
+
+    <div>
+      <h3>สมมติฐานที่ซ่อนอยู่ (Implicit Assumptions)</h3>
+      <ul>
+        <li><strong>ต้องการ Claude Max หรือเทียบเท่า</strong> — pipeline ใช้ ~200,000 tokens สำหรับ codebase ขนาดกลาง free tier และ smaller models จะล้มกลางคัน ทำให้ graph ไม่สมบูรณ์</li>
+        <li><strong>Knowledge Graph เป็น snapshot ที่จุดเวลาหนึ่ง</strong> — ไฟล์ <code>.json</code> ไม่อัปเดตอัตโนมัติ ต้องตั้ง post-commit hook หรือ re-scan เมื่อโค้ดเปลี่ยนมาก หรือ graph จะเก่าลง</li>
+        <li><strong>คุณภาพขึ้นกับความสามารถของ LLM</strong> — โค้ดที่ obfuscated, minified, หรือซับซ้อนผิดปกติจะได้ summaries ที่ไม่แม่นยำ ผู้ใช้ต้องประเมิน graph ก่อนเชื่อถือ</li>
+        <li><strong>Dashboard รันบน localhost</strong> — ไม่ใช่ cloud service เปิดผ่าน <code>/understand-dashboard</code> แล้วจะเปิด browser ของเครื่องท้องถิ่น ไม่มี URL ที่แชร์ได้โดยตรง</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Key Takeaways (intuition → actionable)</h3>
+      <div class="bento cols-2">
+        <div class="card compact">
+          <p class="label">01</p>
+          <h3>AI เห็นโค้ดเป็น text ธรรมดา</h3>
+          <p>Knowledge Graph เพิ่มโครงสร้างและความหมายที่ขาดหายไป ทำให้ AI สร้างโค้ดที่ถูกต้องตาม architecture</p>
+        </div>
+        <div class="card compact">
+          <p class="label">02</p>
+          <h3>Tree-sitter + LLM = reliable + meaningful</h3>
+          <p>การแยกส่วน structural (deterministic) ออกจาก semantic (probabilistic) ทำให้ graph น่าเชื่อถือและมีความหมายในเวลาเดียวกัน</p>
+        </div>
+        <div class="card compact">
+          <p class="label">03</p>
+          <h3>6 agents ทำงาน parallel ได้</h3>
+          <p>file-analyzer รัน 5 concurrent batches ทำให้ scan โปรเจกต์ใหญ่เร็วกว่า sequential อย่างมีนัยสำคัญ</p>
+        </div>
+        <div class="card compact">
+          <p class="label">04</p>
+          <h3>Commit graph.json = ทีมใช้ได้เลย</h3>
+          <p>knowledge-graph.json ใน repo ทำให้ทีมใหม่ข้ามขั้นตอน scan ซ้ำ — เหมือน lock file ของ dependency แต่สำหรับ semantic map</p>
+        </div>
+        <div class="card compact">
+          <p class="label">05</p>
+          <h3>Dashboard = guided learning path</h3>
+          <p>ไม่ใช่แค่ visualization — guided tour + dependency path finder ช่วยลด onboarding จากสัปดาห์เหลือ 10 นาที</p>
+        </div>
+        <div class="card compact">
+          <p class="label">06</p>
+          <h3>ต้นทุนสูง ใช้ครั้งเดียว คุ้มระยะยาว</h3>
+          <p>30+ นาที ~200k tokens สำหรับ scan ครั้งแรก แต่ทุก query, tour, และ onboarding หลังจากนั้นใช้ graph ที่มีอยู่แล้ว</p>
+        </div>
+        <div class="card compact" style="grid-column:1/-1">
+          <p class="label">07</p>
+          <h3>เหมาะกับ AI agent ไม่ใช่แค่คน</h3>
+          <p>Agent ที่อ่าน knowledge graph สร้าง architecturally-aware code แทนที่จะ hallucinate file paths — use case ที่ใหญ่กว่า onboarding สำหรับทีมที่ใช้ AI-assisted development</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 4: MULTI-AGENT PIPELINE -->
+<section class="page" id="p4" data-title="Pipeline">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — Multi-Agent Pipeline</p>
+      <h2>Pipeline ทำงานอย่างไร: จาก Code ถึง Knowledge Graph</h2>
+      <p class="section-lead">
+        หัวใจของ Understand Anything คือ multi-agent pipeline ที่ประสานงานระหว่าง static analysis และ LLM reasoning
+        อย่างมีระบบ ไม่ใช่แค่ส่งโค้ดทั้งหมดให้ LLM อ่านทีเดียว แต่แบ่งงานออกเป็น 6 specialized agents
+        ที่แต่ละตัวมีหน้าที่เฉพาะ ทำงานบางส่วนแบบ parallel เพื่อลดเวลา และสุดท้ายรวมผลลัพธ์เป็น
+        knowledge graph ที่สมบูรณ์และตรวจสอบแล้ว
+      </p>
+    </div>
+
+    <h3>3 ขั้นตอนหลัก: Scan → Map → Teach</h3>
+    <p>ก่อนที่จะเข้าใจแต่ละ agent ต้องเข้าใจว่า pipeline แบ่งออกเป็น 3 ขั้นใหญ่ ๆ ที่มีหน้าที่ต่างกันชัดเจน ขั้นแรกคือ <strong>Scan</strong> ที่ใช้ Tree-sitter parser ดึงโครงสร้างแบบ deterministic โดยไม่พึ่ง LLM ทำให้เร็วและ reproducible ขั้นที่สองคือ <strong>Map</strong> ที่ LLM agents เข้ามาเติมความหมาย semantic ลงบนโครงสร้างที่ดึงมา และขั้นสุดท้าย <strong>Teach</strong> ที่แสดงผลผ่าน dashboard interactive ให้ทั้งคนและ AI เข้าถึงได้</p>
+
+    <p>การแยก Scan ออกจาก Map เป็นการตัดสินใจออกแบบที่สำคัญ เพราะ Tree-sitter ให้ความแม่นยำสูงกว่า LLM ในการ parse syntax และ extract structural relationships โดยเฉพาะสำหรับ edge cases เช่น dynamic imports, decorator patterns, หรือ metaclass inheritance ที่ LLM มักตีความผิด ผลคือ edges ใน graph มีความน่าเชื่อถือสูงกว่าแนวทางที่ใช้ LLM อ่านโค้ดทั้งหมดเพียงอย่างเดียว</p>
+
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>project-scanner — ค้นหาและจัดหมวดหมู่ไฟล์</strong>
+          <p>scan ทั้งโปรเจกต์ detect ภาษาและ framework ที่ใช้ (รองรับ 26+ types) กรองไฟล์ที่ไม่จำเป็น (.gitignore, build artifacts, node_modules) สร้าง file inventory ที่ agents อื่นจะ process ต่อ</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <strong>file-analyzer — ดึง symbols และสร้าง graph edges (parallel x5)</strong>
+          <p>agent ตัวนี้รัน 5 instance พร้อมกัน แต่ละ instance รับ batch ของ 20-30 ไฟล์ ใช้ Tree-sitter extract functions, classes, imports แล้ว LLM เติม summary และ semantic tags ผลลัพธ์คือ nodes และ edges หลักของ graph</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <strong>architecture-analyzer — แยกชั้นสถาปัตยกรรม</strong>
+          <p>วิเคราะห์ nodes ทั้งหมดแล้ว assign layer label: API, Service, Data, UI, หรือ Utility color-code ใน dashboard ตาม layer นี้ ช่วยให้เห็นภาพรวม architectural boundaries ในทันที</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <strong>tour-builder — สร้าง guided walkthrough</strong>
+          <p>เรียงลำดับ nodes ตาม dependency (topological sort) แล้วสร้าง learning path ที่นักพัฒนาใหม่สามารถเดินผ่านได้ทีละขั้น เหมือน "tutorial ที่สร้างจากโค้ดจริง" ไม่ใช่เอกสารที่คนเขียนขึ้นเอง</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <strong>graph-reviewer — ตรวจสอบความสมบูรณ์</strong>
+          <p>validate ว่า nodes ทุกตัวมี summary, edges มี referential integrity (ไม่มี dangling references), และ layer assignments สอดคล้องกัน ถ้าพบปัญหา trigger re-analysis สำหรับส่วนนั้น</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <strong>domain-analyzer — แมปโค้ดกับ business domains</strong>
+          <p>ดึง business process flows ออกมา เช่น "ระบบ payment ประกอบด้วย service A → B → C → D" ทำให้เห็น end-to-end flows ข้าม files และ layers ตอบคำถาม "ถ้าอยากเพิ่ม feature X ต้องแตะโค้ดส่วนไหนบ้าง"</p>
+        </div>
+      </li>
+    </ul>
+
+    <details class="disclosure">
+      <summary>เจาะลึก: Tree-sitter vs. LLM — ทำงานด้วยกันอย่างไร?</summary>
+      <div class="details-body">
+        <p>Tree-sitter เป็น parser generator ที่สร้าง deterministic parse tree จากโค้ด ผลลัพธ์เดิมทุกครั้งสำหรับโค้ดเดิม ไม่ว่าจะรันกี่ครั้ง ซึ่งตรงกับสิ่งที่ต้องการสำหรับ structural graph edges เช่น "file A import function f จาก file B" ความสัมพันธ์แบบนี้ไม่ต้องการ interpretation ต้องการความถูกต้อง</p>
+        <p>LLM เข้ามาในส่วนที่ต้องการ interpretation: "function นี้ทำอะไร", "file นี้อยู่ใน layer ไหน", "business domain ของ module นี้คืออะไร" ความหมายเหล่านี้ไม่มีใน syntax tree โดยตรง ต้องการ reasoning จาก context</p>
+        <p>การแยกนี้ทำให้ graph มีคุณสมบัติที่สำคัญ: โครงสร้าง (edges) reliable เสมอ ส่วน semantics (labels, summaries) ดีเท่ากับ LLM ที่ใช้ ทีมสามารถอัปเกรด LLM แล้วรัน <code>/understand</code> ใหม่เพื่อได้ summaries ที่ดีขึ้นโดยไม่เสีย structural correctness ที่มีอยู่</p>
+        <pre><code># Tree-sitter ดึง structural facts
+"imports": ["./auth/middleware", "@stripe/stripe-js"],
+"exports": ["PaymentService", "handleWebhook"],
+"calls": ["stripe.charges.create", "db.transactions.insert"],
+
+# LLM เติม semantic meaning
+"summary": "Stripe payment processor — handles charge creation and webhook validation",
+"layer": "Service",
+"domain": "payment-pipeline",
+"tags": ["payment", "stripe", "webhook", "critical-path"]</code></pre>
+      </div>
+    </details>
+
+    <details class="disclosure">
+      <summary>เจาะลึก: Incremental Update ทำงานอย่างไร?</summary>
+      <div class="details-body">
+        <p>ทุก node ใน knowledge graph มี fingerprint hash ที่คำนวณจาก content ของไฟล์นั้น เมื่อ hook รัน (หลัง git commit) pipeline จะ compare fingerprints ปัจจุบันกับ graph ที่มีอยู่ ไฟล์ที่ hash ไม่เปลี่ยนจะ skip การ re-analyze ทั้งหมด</p>
+        <p>สิ่งที่ต้อง re-analyze มีสองกรณี: ไฟล์ที่เปลี่ยน content (fingerprint ต่าง) และไฟล์ที่ import ไฟล์ที่เปลี่ยน (เพราะ edges อาจเปลี่ยน) ทำให้ incremental scan มักแตะแค่ 5-15% ของ graph แทนที่จะ full scan ลด cost ลงอย่างมากสำหรับโปรเจกต์ที่ active development</p>
+        <p>ตั้ง auto-update ด้วย: <code>git config core.hooksPath .understand-anything/hooks</code></p>
+      </div>
+    </details>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> ไม่ใช่แค่ "ส่งโค้ดให้ AI อ่าน" — pipeline แบ่งงานให้ถูกเครื่องมือ: Tree-sitter สำหรับโครงสร้าง, LLM สำหรับความหมาย ผลคือ graph ที่ reliable ทั้งสองด้าน</div>
+  </div>
+</section>
+
+<!-- PAGE 5: KNOWLEDGE GRAPH STRUCTURE -->
+<section class="page" id="p5" data-title="Knowledge Graph">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — Knowledge Graph Structure</p>
+      <h2>โครงสร้างของ Knowledge Graph และวิธีใช้เป็น Team Asset</h2>
+      <p class="section-lead">
+        ผลลัพธ์สุดท้ายของ pipeline คือไฟล์ <code>.understand-anything/knowledge-graph.json</code> ที่เก็บทุกสิ่งที่ต้องรู้เกี่ยวกับ codebase
+        ในรูปแบบที่ structured และ queryable โครงสร้างนี้ไม่ใช่แค่ output ที่อ่านแล้วทิ้ง แต่เป็น
+        artifact ที่มีคุณค่าระยะยาว commit ลง repository ได้ และทีมทั้งหมดใช้ร่วมกันได้โดยไม่ต้อง
+        scan ซ้ำ ทำให้ cost ในการ maintain มีแค่ incremental updates
+      </p>
+    </div>
+
+    <h3>โครงสร้าง JSON: Nodes, Edges, และ Metadata</h3>
+
+    <p>Knowledge graph ประกอบด้วย 3 ส่วนหลักที่ทำงานร่วมกัน ส่วนแรกคือ <strong>Nodes</strong> ที่แทน entities ทุกชนิดในโค้ด ส่วนที่สองคือ <strong>Edges</strong> ที่แทนความสัมพันธ์ระหว่าง nodes และส่วนที่สามคือ <strong>Metadata</strong> ระดับ project ที่เก็บข้อมูล architectural overview และ domain map</p>
+
+    <div class="copy-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>{
+  "nodes": {
+    "src/services/payment.ts": {
+      "type": "file",
+      "layer": "Service",
+      "domain": "payment-pipeline",
+      "summary": "Stripe payment processor — charge creation and webhook validation",
+      "tags": ["payment", "stripe", "webhook", "critical-path"],
+      "symbols": ["PaymentService", "handleWebhook", "validateSignature"],
+      "fingerprint": "sha256:a4f2...",
+      "language": "TypeScript"
+    },
+    "PaymentService": {
+      "type": "class",
+      "file": "src/services/payment.ts",
+      "summary": "Main payment service class — wraps Stripe SDK with business validation",
+      "methods": ["createCharge", "refund", "getHistory"],
+      "layer": "Service"
+    }
+  },
+  "edges": [
+    { "from": "src/api/checkout.ts", "to": "src/services/payment.ts",
+      "type": "imports", "symbol": "PaymentService" },
+    { "from": "PaymentService.createCharge", "to": "stripe.charges.create",
+      "type": "calls" }
+  ],
+  "metadata": {
+    "architecture": { "layers": ["API", "Service", "Data", "UI", "Utility"] },
+    "domains": [
+      { "name": "payment-pipeline",
+        "steps": ["checkout.ts", "payment.ts", "transaction.ts", "notification.ts"] }
+    ],
+    "stats": { "files": 847, "functions": 4123, "classes": 312, "edges": 8941 }
+  }
+}</code></pre>
+    </div>
+
+    <h3>Architectural Layers — color-coded ใน Dashboard</h3>
+
+    <p>ทุก node ได้รับ layer label จาก architecture-analyzer ซึ่งเป็นพื้นฐานของการแสดงสีใน dashboard และยังช่วยให้ query แบบ "แสดงเฉพาะ Service layer" หรือ "ค้นหาทุก file ใน Data layer ที่ connect กับ API layer" ทำได้ทันที layer ที่รองรับมี 5 ประเภทหลัก แต่สามารถ customize เพิ่มได้ในโปรเจกต์ที่มีสถาปัตยกรรมพิเศษ</p>
+
+    <div class="bento cols-3">
+      <div class="card" style="border-left-color:#3b82f6">
+        <p class="label" style="color:#1d4ed8">API Layer</p>
+        <h3>Route Handlers</h3>
+        <p>Controllers, route handlers, middleware — จุดเข้าสู่ระบบจากภายนอก</p>
+      </div>
+      <div class="card" style="border-left-color:#16a34a">
+        <p class="label" style="color:#15803d">Service Layer</p>
+        <h3>Business Logic</h3>
+        <p>Services, use cases, domain objects — กฎ business อยู่ที่นี่</p>
+      </div>
+      <div class="card" style="border-left-color:#9333ea">
+        <p class="label" style="color:#7e22ce">Data Layer</p>
+        <h3>Repositories / ORM</h3>
+        <p>Database access, query builders, migrations — abstraction ของ data persistence</p>
+      </div>
+      <div class="card" style="border-left-color:#f59e0b">
+        <p class="label" style="color:#b45309">UI Layer</p>
+        <h3>Components / Views</h3>
+        <p>React components, templates, client-side logic — ส่วนที่ user เห็น</p>
+      </div>
+      <div class="card" style="border-left-color:#94a3b8">
+        <p class="label">Utility Layer</p>
+        <h3>Helpers / Utils</h3>
+        <p>Shared utilities, formatters, validators — ใช้ร่วมกันข้ามทุก layer</p>
+      </div>
+      <div class="card gold">
+        <p class="label">Domain Overlay</p>
+        <h3>Business Flows</h3>
+        <p>ชั้น cross-cutting ที่แมป business process ข้าม layers เช่น "checkout flow" ที่ผ่าน API → Service → Data</p>
+      </div>
+    </div>
+
+    <h3>Knowledge Graph เป็น Team Asset — วิธีใช้อย่างมีประสิทธิภาพ</h3>
+
+    <p>ประโยชน์ที่ใหญ่ที่สุดอย่างหนึ่งของ knowledge graph คือมันเป็น artifact ที่ shareable และ versionable ในรูปแบบเดียวกับโค้ดเอง การ commit <code>knowledge-graph.json</code> ลง repository ทำให้ทีมทั้งหมดมี semantic map เดียวกัน และเมื่อโค้ดเปลี่ยน การรัน incremental update จะสร้าง diff ที่ reviewable ใน PR ได้ เหมือนกับที่ <code>package-lock.json</code> ทำให้ dependency graph สามารถ review ได้</p>
+
+    <details class="disclosure">
+      <summary>เจาะลึก: Large Graphs (10MB+) และ git-lfs</summary>
+      <div class="details-body">
+        <p>โปรเจกต์ขนาดใหญ่ (100k+ files, 50k+ functions) จะสร้าง knowledge-graph.json ที่ใหญ่กว่า 10MB ซึ่งเป็น threshold ที่ git เริ่ม complain เกี่ยวกับ file size</p>
+        <p>วิธีจัดการ: ใช้ git-lfs (Large File Storage) track ไฟล์นี้:</p>
+        <pre><code>git lfs install
+git lfs track "*.understand-anything/knowledge-graph.json"
+git add .gitattributes</code></pre>
+        <p>ไฟล์ intermediate (ผลลัพธ์ระหว่าง agents) และ <code>diff-overlay.json</code> ไม่ควร commit เพราะเป็น temporary artifacts ที่ regenerate ได้ ให้ add เฉพาะ <code>knowledge-graph.json</code> และ <code>tours/</code> ถ้ามี</p>
+      </div>
+    </details>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> <code>knowledge-graph.json</code> คือ "lock file ของ semantic map" — commit, review, และ update เหมือน artifact ที่มีคุณค่า ไม่ใช่แค่ output ที่ generate แล้วทิ้ง</div>
+  </div>
+</section>
+
+<!-- PAGE 6: DASHBOARD & COMMANDS -->
+<section class="page" id="p6" data-title="Dashboard & Commands">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — Dashboard &amp; Commands</p>
+      <h2>Interactive Dashboard และ Command Interface</h2>
+      <p class="section-lead">
+        หลังจาก scan เสร็จ การโต้ตอบกับ knowledge graph ทำได้ 2 ทาง: ผ่าน interactive web dashboard
+        ที่ออกแบบสำหรับการสำรวจด้วยสายตา และผ่าน slash commands ที่ทั้งนักพัฒนาและ AI agent ใช้
+        query และสั่งงานได้โดยตรงจาก terminal หรือ chat interface ทั้งสองทางเข้าถึง knowledge graph
+        เดียวกัน แต่ optimize สำหรับ use case ที่ต่างกัน
+      </p>
+    </div>
+
+    <h3>Interactive Dashboard — สำรวจด้วยสายตา</h3>
+
+    <p>Dashboard เปิดด้วย <code>/understand-dashboard</code> แล้วจะ launch browser ไปที่ local server รัน interactive graph visualization ที่มีฟีเจอร์หลายอย่างที่ทำงานร่วมกัน ฟีเจอร์แรกคือ bird's-eye view ที่แสดง architecture ทั้งหมดเป็น node graph สี จาก color legend ตาม layer — เปิดแล้วเห็นภาพรวมในทันทีว่าโปรเจกต์ประกอบด้วยส่วนไหนบ้างและส่วนไหนใหญ่กว่าส่วนไหน</p>
+
+    <p>เมื่อ click เข้า node จะเห็น side panel ที่แสดง AI-generated summary, semantic tags, architectural layer, business domain, รายการ function/class ที่อยู่ใน file นั้น และ visual ของ dependency edges เข้า-ออก สามารถ click ต่อไปยัง node ที่เชื่อมกันได้เหมือนการเดินใน graph ด้วย hyperlinks</p>
+
+    <p>ฟีเจอร์ที่โดดเด่นเป็นพิเศษคือ <strong>Guided Tour</strong> — AI สร้าง learning path ที่เรียงลำดับตาม dependency topology ให้นักพัฒนาใหม่เดินผ่าน codebase ตั้งแต่ foundation ไปถึง high-level features ทีละขั้น แต่ละขั้นใน tour มี context explanation ที่เขียนโดย AI จาก graph data ไม่ใช่ template สำเร็จรูป</p>
+
+    <p>และ <strong>Dependency Path Finder</strong> ที่รับ 2 nodes แล้ว highlight shortest path ระหว่างกัน ใช้สำหรับ debugging data flow ("ข้อมูลเดินทางจาก API request ไปถึง database query อย่างไร?") หรือ impact analysis ("ถ้าเปลี่ยน signature ของ function นี้ จะกระทบ caller ไหนบ้าง?")</p>
+
+    <div class="bento cols-2">
+      <div class="card success">
+        <p class="label">Bird's-Eye View</p>
+        <h3>Architecture Overview</h3>
+        <p>pan/zoom graph ทั้งโปรเจกต์ color-coded ตาม layer มี legend และ search ที่ filter nodes แบบ real-time ทำให้เห็น boundaries ชัดเจน</p>
+      </div>
+      <div class="card warning">
+        <p class="label">Guided Tour</p>
+        <h3>Dependency-Ordered Walkthrough</h3>
+        <p>AI-generated learning path ที่เรียงตาม topological order — เดิน codebase ได้อย่างมีระบบ ไม่ต้องเดาว่าควรอ่านไฟล์ไหนก่อน</p>
+      </div>
+      <div class="card">
+        <p class="label">Semantic Search</p>
+        <h3>Fuzzy + Vector Search</h3>
+        <p>ค้นหาด้วยภาษาธรรมชาติ เช่น "which parts handle authentication" แล้วได้ file list ที่ relate จัดเรียงตาม relevance</p>
+      </div>
+      <div class="card gold">
+        <p class="label">Dependency Path Finder</p>
+        <h3>Impact Analysis</h3>
+        <p>เลือก 2 nodes → highlight shortest path ระหว่างกัน ใช้ debug data flows และ analyze ripple effects ก่อน refactor</p>
+      </div>
+    </div>
+
+    <h3>Command Reference — ใช้จาก Claude Code และ AI Agents</h3>
+
+    <p>นอกจาก visual dashboard ทุก functionality เข้าถึงได้ผ่าน slash commands ที่ทั้งนักพัฒนา (พิมพ์ใน chat) และ AI agent (เรียก programmatically) ใช้ได้ commands เหล่านี้ query knowledge graph ที่มีอยู่ ไม่ต้อง re-scan ทุกครั้ง ทำให้ตอบสนองเร็ว</p>
+
+    <table>
+      <thead>
+        <tr><th>Command</th><th>หน้าที่</th><th>Use Case</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>/understand</code></td><td>สร้างหรือ update knowledge graph</td><td>ครั้งแรก หรือหลัง major refactor</td></tr>
+        <tr><td><code>/understand-dashboard</code></td><td>เปิด interactive web UI</td><td>สำรวจ architecture ด้วยสายตา</td></tr>
+        <tr><td><code>/understand-chat</code></td><td>Natural language Q&amp;A บน graph</td><td>"explain how payment flow works"</td></tr>
+        <tr><td><code>/understand-explain</code></td><td>Deep-dive ไฟล์หรือฟังก์ชันเฉพาะ</td><td>เข้าใจโค้ดชิ้นใดชิ้นหนึ่งอย่างละเอียด</td></tr>
+        <tr><td><code>/understand-onboard</code></td><td>สร้าง onboarding guide สำหรับทีม</td><td>นักพัฒนาใหม่หรือ contractor</td></tr>
+        <tr><td><code>/understand-diff</code></td><td>วิเคราะห์ impact ของการเปลี่ยนแปลงปัจจุบัน</td><td>ก่อน commit หรือ PR review</td></tr>
+        <tr><td><code>/understand-domain</code></td><td>Extract business domains และ flows</td><td>สร้าง domain documentation</td></tr>
+        <tr><td><code>/understand-knowledge</code></td><td>วิเคราะห์ wiki/knowledge base</td><td>โปรเจกต์ที่มี Karpathy-style LLM wikis</td></tr>
+      </tbody>
+    </table>
+
+    <details class="disclosure">
+      <summary>เจาะลึก: Persona-Adaptive UI ทำงานอย่างไร?</summary>
+      <div class="details-body">
+        <p>Dashboard มี role selector ที่ปรับ detail level ตาม persona ที่เลือก:</p>
+        <ul>
+          <li><strong>Junior Developer</strong> — แสดง summaries ที่อ่านง่าย, hide low-level details, เน้น guided tour</li>
+          <li><strong>Senior Developer</strong> — แสดง full technical details, call chains, type signatures</li>
+          <li><strong>Product Manager</strong> — แสดง domain overlay, business flows, feature areas แทนที่จะเป็น file structure</li>
+          <li><strong>AI Agent</strong> — output แบบ structured JSON ที่ agent นำไป parse และใช้ต่อได้</li>
+        </ul>
+        <p>การปรับ persona ไม่เปลี่ยน underlying graph แค่เปลี่ยนวิธีแสดงผล ทำให้ทุกคนในทีมใช้ tool เดียวกันได้โดยไม่ต้องมี duplicate dashboards</p>
+      </div>
+    </details>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Dashboard สำหรับคน, Commands สำหรับ AI — knowledge graph เดียวกัน เข้าถึงได้ทั้งสองทาง ทีมทุกคนใช้ได้ตาม workflow ของตัวเอง</div>
+  </div>
+</section>
+
+<!-- PAGE 7: USE CASES -->
+<section class="page" id="p7" data-title="Use Cases">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — Practical Use Cases</p>
+      <h2>Use Cases จริง: จาก Onboarding ถึง AI-Assisted Development</h2>
+      <p class="section-lead">
+        Understand Anything แก้ปัญหาที่ทีมพัฒนาเจอบ่อย 3 กลุ่มหลัก ได้แก่ การ onboard นักพัฒนาใหม่อย่างรวดเร็ว
+        การทำ impact analysis ก่อน refactor หรือ merge PR และการ feed AI agent ด้วย context ที่ถูกต้อง
+        แทนที่จะเป็น raw code snippets ทั้งสามกรณีนี้มีพื้นฐานเดียวกันคือการใช้ knowledge graph
+        เป็น single source of truth ของ codebase understanding
+      </p>
+    </div>
+
+    <h3>Use Case 1: Developer Onboarding อย่างรวดเร็ว</h3>
+
+    <p>โปรเจกต์ขนาดใหญ่ที่มีโค้ดหลายแสนบรรทัด เมื่อนักพัฒนาใหม่เข้ามามักใช้เวลา 2-3 สัปดาห์แรกในการเข้าใจโครงสร้างพอที่จะทำงานได้อิสระ ปัญหาหลักคือ documentation มักล้าสมัย โค้ดเปลี่ยนแต่ docs ไม่ตาม senior ต้องเสียเวลาตอบคำถามซ้ำ ๆ และนักพัฒนาใหม่ไม่รู้ว่าควรอ่านไฟล์ไหนก่อน</p>
+
+    <p>Understand Anything แก้ปัญหานี้ด้วยการสร้าง guided tour จากโค้ดจริง ซึ่งสะท้อนสถานะปัจจุบันของ codebase เสมอ ไม่ใช่เอกสารที่เขียนแล้วลืมอัปเดต นักพัฒนาใหม่รัน <code>/understand-onboard</code> แล้วได้ document ที่อธิบาย architecture, การตัดสินใจออกแบบที่สำคัญ, และ learning path สำหรับโปรเจกต์นั้นโดยเฉพาะ</p>
+
+    <div class="callout success">
+      <strong>ตัวอย่างจริง:</strong> Google Cloud Platform microservices-demo (Online Boutique) ที่มีหลายสิบ microservices —
+      Understand Anything scan และ commit knowledge graph ลง fork ทำให้นักพัฒนาใหม่เปิด dashboard แล้วเห็น
+      ทุก service และ dependency ในทันที พร้อม guided tour ที่เริ่มจาก frontend ไปถึง backend services ทีละขั้น
+    </div>
+
+    <h3>Use Case 2: Pre-Refactoring Impact Analysis</h3>
+
+    <p>การเปลี่ยน function signature, การย้าย module, หรือการแก้ไข core abstraction ล้วนมีความเสี่ยงที่จะ break ส่วนอื่น ๆ ของระบบ โดยเฉพาะในโปรเจกต์ขนาดใหญ่ที่ไม่มีคนคนเดียวรู้ full dependency tree ในหัว</p>
+
+    <p>คำสั่ง <code>/understand-diff</code> วิเคราะห์การเปลี่ยนแปลงปัจจุบัน (unstaged หรือ staged changes) แล้ว overlay บน knowledge graph เพื่อแสดงว่าส่วนไหนของระบบจะได้รับผลกระทบ ไล่ตาม call chain และ import tree เพื่อหา cascading effects ที่อาจไม่ obvious ทำให้นักพัฒนาตัดสินใจได้ดีขึ้นก่อน commit</p>
+
+    <h3>Use Case 3: Context Engineering สำหรับ AI Agents</h3>
+
+    <p>เมื่อ AI agent ได้รับ task เช่น "add rate limiting to the API" ปัญหาที่พบบ่อยคือ agent ไม่รู้ว่าควรแก้ไขที่ไฟล์ไหน ควรใช้ pattern อะไรที่สอดคล้องกับ codebase ที่มีอยู่ หรือการเปลี่ยนแปลงจะกระทบส่วนไหนบ้าง ผลคือ agent อาจสร้างโค้ดที่ถูกต้องเชิง syntax แต่ไม่สอดคล้องกับ architecture หรือ duplicate functionality ที่มีอยู่แล้ว</p>
+
+    <p>ด้วย knowledge graph agent สามารถ query ก่อนทำงาน: "ค้นหา files ที่เกี่ยวข้องกับ API middleware", "แสดง call chain จาก route handler ไปถึง response", "ส่วนไหนมีอยู่แล้วที่คล้ายกัน?" จากนั้น generate โค้ดโดยมี architectural context ที่ถูกต้อง ทำให้ suggestions มี quality สูงขึ้นและลด back-and-forth ระหว่างนักพัฒนากับ AI</p>
+
+    <details class="disclosure">
+      <summary>เจาะลึก: /understand-onboard สร้างอะไรบ้าง?</summary>
+      <div class="details-body">
+        <p>คำสั่ง <code>/understand-onboard</code> สร้าง structured document ที่ประกอบด้วย:</p>
+        <ul>
+          <li><strong>Project Overview</strong> — สรุป codebase ทั้งหมดใน 3-5 ย่อหน้า เขียนจาก knowledge graph summaries</li>
+          <li><strong>Architecture Diagram</strong> — diagram ของ layers และ key relationships</li>
+          <li><strong>Learning Path</strong> — ordered list ของ files/modules ที่ควรอ่านเรียงตาม dependency order</li>
+          <li><strong>Key Concepts</strong> — technical concepts และ design decisions ที่สำคัญ พร้อม pointer ไปยัง code</li>
+          <li><strong>Development Guide</strong> — วิธีตั้ง development environment และ common workflows</li>
+          <li><strong>Domain Map</strong> — อธิบาย business domains และ process flows ในภาษาที่อ่านง่าย</li>
+        </ul>
+        <p>document นี้ save เป็น <code>.understand-anything/onboarding-guide.md</code> ที่ commit ลง repo ได้ และ regenerate ด้วย <code>/understand-onboard --refresh</code> เมื่อ codebase เปลี่ยนมาก</p>
+      </div>
+    </details>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> 3 use cases หลัก — onboarding ที่ auto-update, impact analysis ก่อน refactor, และ context สำหรับ AI agent — ทั้งหมดใช้ knowledge graph เดียวกัน สร้างครั้งเดียว ประโยชน์หลายด้าน</div>
+  </div>
+</section>
+
+<!-- PAGE 8: LIMITATIONS -->
+<section class="page" id="p8" data-title="ข้อจำกัด">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 6 — Limitations &amp; When to Use</p>
+      <h2>ข้อจำกัด ต้นทุนที่แท้จริง และเมื่อไหรควร (และไม่ควร) ใช้</h2>
+      <p class="section-lead">
+        Understand Anything ไม่ใช่เครื่องมือที่เหมาะกับทุก use case การเข้าใจข้อจำกัดและต้นทุนที่แท้จริงก่อนตัดสินใจใช้
+        จะช่วยให้ประเมินได้ว่าคุ้มค่าหรือไม่สำหรับโปรเจกต์ของคุณ ประเด็นหลักมี 4 ด้าน:
+        token cost ของการ scan ครั้งแรก, การ maintain freshness ของ graph, คุณภาพที่ขึ้นกับ LLM,
+        และ constraint ของ local-only architecture
+      </p>
+    </div>
+
+    <h3>ต้นทุนการ Scan ครั้งแรก</h3>
+
+    <p>นี่คือข้อจำกัดที่สำคัญที่สุดและต้องวางแผนล่วงหน้า การ scan โปรเจกต์ขนาดกลาง เช่น Google Online Boutique ที่เป็น microservices demo ใช้เวลาประมาณ 30 นาทีและ consume ~200,000 tokens โปรเจกต์ที่ใหญ่กว่า polyglot มากกว่า หรือมี deep dependency trees จะใช้ทั้งเวลาและ tokens มากกว่านี้อย่างมีนัยสำคัญ</p>
+
+    <p>ต้นทุนนี้ต้องใช้ model ที่มี context window ใหญ่และ reasoning capability สูง เช่น Claude Max หรือ GPT-4 Turbo free tier และ smaller models จะ fail กลางคัน ทำให้ graph ไม่สมบูรณ์ นี่ไม่ใช่ bug แต่เป็น architectural requirement ของ pipeline</p>
+
+    <div class="callout warning">
+      <strong>ต้องวางแผน:</strong> scan ครั้งแรกควรรันในช่วงที่มีเวลา ไม่ใช่ตอน deadline
+      และควรคำนวณ token cost ก่อน สำหรับโปรเจกต์ใหญ่มาก อาจ cost มากกว่า $5-20 ในครั้งแรก
+      แต่ incremental updates หลังจากนั้นถูกกว่ามาก
+    </div>
+
+    <h3>Graph Staleness — ความท้าทายของการ Maintain Freshness</h3>
+
+    <p>Knowledge graph เป็น snapshot ที่จุดเวลาหนึ่ง เมื่อโค้ดเปลี่ยน graph ค่อย ๆ เก่าลง ปัญหานี้ไม่ unique กับ Understand Anything — documentation และ architecture diagrams ทั้งหลายเผชิญปัญหาเดียวกัน แต่ Understand Anything มีเครื่องมือจัดการได้ดีกว่า: incremental update hooks ที่ตรวจ fingerprint และ re-analyze เฉพาะส่วนที่เปลี่ยน</p>
+
+    <p>ทีมที่ใช้ Understand Anything อย่างมีประสิทธิภาพมักตั้ง post-commit hook เพื่อให้ graph update อัตโนมัติหลังทุก commit และกำหนด policy ว่า full re-scan ทำเมื่อไหร่ เช่น หลัง major refactor, ก่อน release, หรือ monthly สำหรับ active codebase</p>
+
+    <h3>LLM Quality Dependency</h3>
+
+    <p>คุณภาพของ summaries, tags, และ domain mappings ขึ้นตรงกับ LLM ที่ใช้ในการ scan โค้ดที่ซับซ้อนผิดปกติ เช่น heavily templated C++ meta-programming, DSL implementations, หรือ auto-generated code จาก protobuf อาจได้ summaries ที่ไม่แม่นยำ ผู้ใช้ควรตรวจสอบ graph manually โดยเฉพาะในส่วนที่ critical</p>
+
+    <div class="bento cols-2">
+      <div class="card success">
+        <p class="label">ควรใช้เมื่อ</p>
+        <h3>โปรเจกต์ที่เหมาะสม</h3>
+        <ul>
+          <li>Codebase ใหญ่ (10k+ lines) ที่ไม่มีคนคนเดียวรู้ทั้งหมด</li>
+          <li>ทีมขยาย onboard บ่อย หรือมี contractor เข้าออก</li>
+          <li>ใช้ AI agent ทำ code changes บ่อย</li>
+          <li>Pre-refactoring impact analysis มีมูลค่าสูง</li>
+          <li>Documentation ล้าสมัยและยากจะ maintain</li>
+        </ul>
+      </div>
+      <div class="card danger">
+        <p class="label">ไม่คุ้มค่าเมื่อ</p>
+        <h3>โปรเจกต์ที่ไม่เหมาะ</h3>
+        <ul>
+          <li>Codebase เล็ก (&lt;5k lines) ที่ทีมรู้ทุกส่วน</li>
+          <li>ใช้ free-tier LLM หรือ smaller models เท่านั้น</li>
+          <li>โปรเจกต์ที่โค้ดเปลี่ยนเร็วมาก graph จะเก่าก่อนคุ้ม</li>
+          <li>Codebase ที่ heavily obfuscated หรือ auto-generated ทั้งหมด</li>
+          <li>ทีมเล็ก 1-2 คนที่รู้โค้ดทุกบรรทัดอยู่แล้ว</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> ต้นทุนสูงในครั้งแรก แต่ incremental updates ถูกกว่ามาก — คุ้มสำหรับโปรเจกต์ใหญ่ที่ทีมขยายบ่อย ไม่คุ้มสำหรับ codebase เล็กที่ทีมรู้ทุกส่วนอยู่แล้ว</div>
+  </div>
+</section>
+
+<!-- PAGE 9: TAKEAWAYS + REFERENCES -->
+<section class="page" id="p9" data-title="สรุป">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Key Takeaways &amp; References</p>
+      <h2>สิ่งที่ต้องจำ และแหล่งข้อมูลสำหรับศึกษาต่อ</h2>
+    </div>
+
+    <div>
+      <h3>Key Takeaways</h3>
+      <ul>
+        <li><strong>AI เห็นโค้ดเป็น text ธรรมดา</strong> — Understand Anything แปลง codebase ให้มีโครงสร้างและความหมาย ทำให้ AI สร้างโค้ดที่ถูกต้องตาม architecture มากขึ้น และลด hallucination</li>
+        <li><strong>Tree-sitter + LLM hybrid</strong> — แยกส่วน structural (deterministic, reliable) ออกจาก semantic (probabilistic, meaningful) ทำให้ graph มีคุณภาพทั้งสองด้านพร้อมกัน</li>
+        <li><strong>6 specialized agents ทำงาน parallel</strong> — แต่ละ agent มีหน้าที่เฉพาะ file-analyzer รัน 5 concurrent instances ลดเวลา scan อย่างมีนัยสำคัญ</li>
+        <li><strong>knowledge-graph.json เป็น team asset</strong> — commit ลง repo ทีมใหม่ใช้ได้เลย เหมือน lock file ของ semantic map ที่ review ได้ใน PR</li>
+        <li><strong>3 use cases หลัก</strong> — rapid onboarding, pre-refactoring impact analysis, และ context สำหรับ AI agent ทั้งหมดใช้ graph เดียวกัน</li>
+        <li><strong>ต้นทุนสูงในครั้งแรก</strong> — ~200k tokens, 30+ นาที ต้องการ Claude Max หรือเทียบเท่า แต่ incremental updates ถูกกว่ามาก</li>
+        <li><strong>เหมาะกับโปรเจกต์ใหญ่ที่ทีมขยายบ่อย</strong> — ROI สูงสุดเมื่อ onboarding บ่อย ใช้ AI agent ทำ changes บ่อย หรือต้องทำ impact analysis บ่อยก่อน refactor</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Installation</h3>
+      <div class="copy-wrap">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code># Claude Code (ง่ายที่สุด)
+/plugin marketplace add Lum1104/Understand-Anything
+/plugin install understand-anything
+
+# One-line installer (macOS/Linux — รองรับ Cursor, Codex, Gemini CLI, ฯลฯ)
+curl -fsSL https://raw.githubusercontent.com/Lum1104/Understand-Anything/main/install.sh | bash
+
+# หลัง install: scan codebase แรก
+/understand
+
+# เปิด dashboard
+/understand-dashboard</code></pre>
+      </div>
+    </div>
+
+    <div>
+      <h3>References</h3>
+      <ol>
+        <li>GitHub Repository — <a href="https://github.com/Lum1104/Understand-Anything" target="_blank" rel="noopener noreferrer">Lum1104/Understand-Anything</a> (44.7k stars, v2.5.0)</li>
+        <li>Better Stack Guide — <a href="https://betterstack.com/community/guides/ai/understand-anything/" target="_blank" rel="noopener noreferrer">Understand Anything: AI-Generated Knowledge Graphs for Large Codebases</a></li>
+        <li>Mervin Praison — <a href="https://mer.vin/2026/05/understand-anything-codebase-knowledge-graphs-for-claude-code-and-ai-agents/" target="_blank" rel="noopener noreferrer">Codebase Knowledge Graphs for Claude Code and AI Agents</a></li>
+        <li>YouTube Walkthrough — <a href="https://youtu.be/ssA0rxe5pjc" target="_blank" rel="noopener noreferrer">ปลั๊กอิน Claude Code ที่เข้าใจทั้งโปรเจคในหน้าเดียว</a></li>
+      </ol>
+
+      <h3 style="margin-top:24px">Glossary</h3>
+      <dl style="font-size:13px;color:var(--ink-dim);line-height:1.8">
+        <dt style="font-weight:600;color:var(--ink)">Knowledge Graph</dt>
+        <dd style="margin:0 0 8px 12px">กราฟที่มี nodes แทน entities (files, functions, classes) และ edges แทน relationships (imports, calls, inheritance) พร้อม metadata เช่น summaries และ tags</dd>
+        <dt style="font-weight:600;color:var(--ink)">Tree-sitter</dt>
+        <dd style="margin:0 0 8px 12px">Parser generator ที่สร้าง parse tree จากโค้ดแบบ deterministic รองรับ 100+ ภาษา ใช้สำหรับ structural analysis ที่ต้องการความน่าเชื่อถือ 100%</dd>
+        <dt style="font-weight:600;color:var(--ink)">Incremental Update</dt>
+        <dd style="margin:0 0 8px 12px">การ re-analyze เฉพาะส่วนที่เปลี่ยนในโค้ด โดยตรวจ fingerprint hash ของแต่ละไฟล์ ลด token cost ลงอย่างมากเมื่อเทียบกับ full scan</dd>
+        <dt style="font-weight:600;color:var(--ink)">Domain Overlay</dt>
+        <dd style="margin:0 0 8px 12px">ชั้นที่แมป code entities ไปยัง business process flows ข้าม architectural layers เช่น "checkout flow" ที่ผ่าน API → Service → Data</dd>
+        <dt style="font-weight:600;color:var(--ink)">Guided Tour</dt>
+        <dd style="margin:0 0 8px 12px">Learning path ที่ AI สร้างจาก knowledge graph เรียงลำดับตาม dependency topology ให้นักพัฒนาใหม่เดินผ่าน codebase ได้อย่างมีระบบ</dd>
+        <dt style="font-weight:600;color:var(--ink)">Dependency Path Finder</dt>
+        <dd style="margin:0 0 8px 12px">ฟีเจอร์ใน dashboard ที่รับ 2 nodes แล้ว highlight shortest dependency path ระหว่างกัน ใช้สำหรับ debugging และ impact analysis</dd>
+        <dt style="font-weight:600;color:var(--ink)">Architectural Layer</dt>
+        <dd style="margin:0 0 8px 12px">การจัดกลุ่ม code entities ตาม role: API, Service, Data, UI, Utility แต่ละ layer มีสีเฉพาะใน dashboard และสามารถ filter/search ตาม layer ได้</dd>
+      </dl>
+    </div>
+
+    <div class="takeaway">
+      <b>★ ถ้าจำได้อย่างเดียว:</b> Understand Anything แปลง codebase จาก "text ที่ AI อ่านทีเดียว" เป็น
+      "Knowledge Graph ที่ทั้ง AI และทีมนำทางได้ตลอดเวลา" — scan ครั้งเดียว ประโยชน์ระยะยาว
+    </div>
+  </div>
+</section>
+
+</div><!-- /scroll-root -->
+
+<script>
+// ── Hash-based page nav ──
+const scrollRoot = document.getElementById('scroll-root');
+const pageLinks = document.getElementById('page-links');
+const pages = Array.from(document.querySelectorAll('.page'));
+
+pages.forEach((page, i) => {
+  const a = document.createElement('a');
+  a.href = '#' + page.id;
+  a.textContent = page.dataset.title || ('p' + (i + 1));
+  pageLinks.appendChild(a);
+});
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('#page-links a').forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`#page-links a[href="#${e.target.id}"]`);
+      if (active) {
+        active.classList.add('active');
+        active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      }
+    }
+  });
+}, { root: null, threshold: 0.3 });
+pages.forEach(p => obs.observe(p));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); jumpSection(1); }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); jumpSection(-1); }
+});
+function jumpSection(dir) {
+  const active = document.querySelector('#page-links a.active');
+  const links = Array.from(document.querySelectorAll('#page-links a'));
+  const idx = links.indexOf(active);
+  const next = links[idx + dir];
+  if (next) next.click();
+}
+
+// ── Theme toggle ──
+const themeBtn = document.getElementById('theme-btn');
+const root = document.documentElement;
+const saved = localStorage.getItem('explainer-theme');
+if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
+themeBtn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  localStorage.setItem('explainer-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
+});
+
+// ── Copy button ──
+function copyCode(btn) {
+  const pre = btn.closest('.copy-wrap').querySelector('pre code');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
