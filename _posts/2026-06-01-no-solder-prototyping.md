@@ -1,6 +1,6 @@
 ---
 title: "ระบบต้นแบบไร้บัดกรี (No-Solder Prototyping) — Qwiic, Grove & STEMMA QT"
-date: 2026-05-31 06:01:00 +0700
+date: 2026-05-30 06:33:00 +0700
 categories: [Explainers]
 tags: [electronics, prototyping, qwiic, grove, stemma, i2c, iot, maker]
 layout: explainer-redirect
