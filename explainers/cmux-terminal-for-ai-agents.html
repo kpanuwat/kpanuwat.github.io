@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cmux — Terminal สำหรับ AI Agents บน macOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (mirrors marp-deck 26-token :root) ── */
+:root {
+  --ink: #1e293b;
+  --ink-dim: #475569;
+  --muted: #94a3b8;
+  --paper: #ffffff;
+  --soft: #f1f5f9;
+  --soft-2: #e2e8f0;
+  --accent: #3b82f6;
+  --accent-deep: #1e3a8a;
+  --accent-wash: #dbeafe;
+  --gold: #d4af37;
+  --danger: #dc2626;
+  --danger-wash: #fee2e2;
+  --danger-ink: #991b1b;
+  --success: #16a34a;
+  --success-wash: #dcfce7;
+  --success-ink: #14532d;
+  --warning: #f59e0b;
+  --warning-wash: #fef3c7;
+  --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 52px;
+  --page-max: 960px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9;
+  --ink-dim: #94a3b8;
+  --muted: #475569;
+  --paper: #0f172a;
+  --soft: #1e293b;
+  --soft-2: #334155;
+  --accent-wash: #1e3a8a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe;
+  --danger-wash: #450a0a;  --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+}
+code, kbd, pre, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Nav bar ── */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--soft-2);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  box-shadow: var(--shadow-sm);
+}
+#nav .brand {
+  font-weight: 700; font-size: 15px; color: var(--ink);
+  margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 240px;
+}
+#nav .page-links {
+  display: flex; gap: 2px; overflow-x: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+#nav .page-links::-webkit-scrollbar { display: none; }
+#nav .page-links a {
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--ink-dim); white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+#nav .page-links a:hover,
+#nav .page-links a.active {
+  background: var(--accent-wash); color: var(--accent);
+  text-decoration: none;
+}
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button {
+  background: none; border: 1px solid var(--soft-2);
+  border-radius: var(--radius-sm); padding: 5px 10px;
+  font-size: 13px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+#nav .controls button:hover { background: var(--soft); }
+
+/* ── Sections (document scroll) ── */
+#scroll-root {
+  padding-top: var(--nav-h);
+}
+.page {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+  padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.page-inner {
+  width: 100%; max-width: var(--page-max);
+  display: flex; flex-direction: column; gap: 28px;
+}
+.page.cover {
+  min-height: calc(100vh - var(--nav-h));
+  background: linear-gradient(135deg, #0f172a 0%, var(--accent-deep) 100%);
+  color: white; justify-content: center; align-items: center; text-align: center;
+}
+.page.cover .page-inner { align-items: center; }
+
+/* ── Typography ── */
+h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+
+/* ── Prose flow ── */
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
+.prose-block { display: flex; flex-direction: column; gap: 0; }
+.section-label {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.page-number {
+  font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 24px;
+  align-self: flex-end;
+}
+
+/* ── Cover mark ── */
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+
+/* ── Cheat sheet image band ── */
+.cheatsheet { display:flex; flex-direction:column; align-items:center; gap:10px; min-height:0; }
+.cheatsheet img { max-width:100%; max-height:78vh; width:auto; height:auto;
+  object-fit:contain; border-radius:var(--radius); box-shadow:var(--shadow-md); background:var(--paper); }
+.cheatsheet svg { width:100%; height:auto; }
+.cheatsheet figcaption { font-size:13px; color:var(--muted); text-align:center; }
+
+/* ── Card system ── */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+  border-left: 4px solid var(--accent);
+  box-sizing: border-box;
+}
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card h3      { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p       { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul      { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+
+/* ── Bento grid ── */
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 640px) {
+  .bento.cols-2, .bento.cols-3, .bento.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Takeaway banner ── */
+.takeaway {
+  border-left: 4px solid var(--accent);
+  background: var(--soft);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 15px; line-height: 1.6;
+}
+.takeaway b { color: var(--accent); }
+
+/* ── Steps list ── */
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.steps li .step-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--accent); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+
+/* ── Callout ── */
+.callout {
+  background: var(--accent-wash);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 15px; color: var(--accent-deep);
+  border: 1px solid var(--accent);
+}
+.callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+
+/* ── Inline code ── */
+code {
+  background: var(--soft-2); color: var(--danger-ink); font-size: .875em;
+  padding: 2px 6px; border-radius: 4px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6;
+}
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+kbd {
+  background: var(--soft-2); border: 1px solid var(--soft-2);
+  border-bottom-color: var(--muted); border-radius: 4px;
+  font-size: .8em; padding: 2px 7px; box-shadow: 0 1px 0 var(--muted);
+}
+
+/* ── Copy button ── */
+.copy-wrap { position: relative; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--soft-2); border: none; border-radius: 4px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+.copy-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.copy-btn.copied { background: var(--success-wash); color: var(--success-ink); }
+
+/* ── Tabs ── */
+.tabs-nav {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--soft-2); margin-bottom: 16px;
+}
+.tabs-nav button {
+  background: none; border: none; padding: 8px 14px; cursor: pointer;
+  font-size: 14px; color: var(--ink-dim); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color .15s, border-color .15s;
+}
+.tabs-nav button:hover { color: var(--ink); }
+.tabs-nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs-panel { display: none; }
+.tabs-panel.active { display: block; }
+
+/* ── Accordion ── */
+.accordion { border: 1px solid var(--soft-2); border-radius: var(--radius-sm); overflow: hidden; }
+.accordion-item { border-top: 1px solid var(--soft-2); }
+.accordion-item:first-child { border-top: none; }
+.accordion-btn {
+  width: 100%; background: none; border: none; padding: 14px 16px;
+  text-align: left; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; font-size: 15px; color: var(--ink);
+  transition: background .15s;
+}
+.accordion-btn:hover { background: var(--soft); }
+.accordion-btn::after { content: "▾"; font-size: 12px; color: var(--muted); transition: transform .2s; }
+.accordion-item.open .accordion-btn::after { transform: rotate(-180deg); }
+.accordion-body { display: none; padding: 0 16px 16px; color: var(--ink-dim); font-size: 14px; line-height: 1.7; }
+.accordion-item.open .accordion-body { display: block; }
+
+/* ── Progressive disclosure (native <details>) ── */
+details.disclosure {
+  border-left: 3px solid var(--accent);
+  background: var(--soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 12px 0;
+}
+details.disclosure summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  user-select: none;
+}
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after {
+  content: "▾";
+  font-size: 12px; color: var(--muted);
+  transition: transform .2s;
+  margin-left: auto;
+}
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body {
+  padding: 4px 16px 16px;
+  font-size: 14px; color: var(--ink-dim); line-height: 1.7;
+}
+details.disclosure .details-body p { font-size: 14px; }
+details.disclosure .details-body pre { margin: 8px 0; }
+
+/* ── Comparison table ── */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+
+/* ── Print ── */
+@media print {
+  #nav { display: none; }
+  #scroll-root { padding-top: 0; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .page { padding: 32px 16px; }
+  h2 { font-size: 22px; }
+  #nav .brand { max-width: 120px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav id="nav">
+  <span class="brand">cmux — Terminal สำหรับ AI Agents</span>
+  <div class="page-links" id="page-links"></div>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">☀︎</button>
+    <button onclick="window.print()" title="Print / save as PDF">⎙</button>
+  </div>
+</nav>
+
+<div id="scroll-root">
+
+<!-- PAGE 1: COVER -->
+<section class="page cover" id="p1" data-title="หน้าปก">
+  <div class="page-inner" style="align-items:center;text-align:center;gap:16px">
+    <div class="mark"></div>
+    <h1>cmux</h1>
+    <p class="tag" style="font-size:22px;color:rgba(255,255,255,.9);max-width:620px;font-weight:600">
+      Terminal สำหรับ AI Agents บน macOS
+    </p>
+    <p style="font-size:16px;color:rgba(255,255,255,.7);max-width:560px;margin-top:4px">
+      Native Swift app ที่ให้ AI agent ควบคุม UI ของตัวเองผ่าน CLI, browser, และ notification rings
+      — รองรับ Claude Code, Codex, Gemini CLI และทุก agent ที่รันบน command line
+    </p>
+    <div class="bento cols-3" style="margin-top:24px;max-width:580px">
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">GitHub Stars</p>
+        <h3 style="color:white">18,800+</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">ราคา</p>
+        <h3 style="color:white">ฟรี (AGPL)</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">Platform</p>
+        <h3 style="color:white">macOS Only</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 1b: CHEAT SHEET IMAGE -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <div class="page-inner">
+    <figure class="cheatsheet">
+      <img src="assets/cmux-terminal-for-ai-agents/cheatsheet.png" alt="cmux terminal cheat sheet">
+      <figcaption>ภาพสรุปแบบ cheat sheet — บันทึกไว้ดูซ้ำได้</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- PAGE 2: OVERVIEW / TL;DR -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Overview</p>
+      <h2>cmux คืออะไร และทำไมนักพัฒนา AI ถึงต้องสนใจ</h2>
+      <p class="section-lead">
+        cmux (อ่านว่า "see-mux") คือ terminal app บน macOS ที่ถูกสร้างขึ้นมาตั้งแต่ต้นเพื่อ AI coding agents
+        โดยเฉพาะ ไม่ใช่ terminal ทั่วไปที่ถูก patch ให้รองรับ AI ในภายหลัง ความแตกต่างหลักคือ cmux ให้
+        agent ควบคุม UI ของตัวเอง — เปิด pane ใหม่ สั่ง browser ทำงาน รับ-ส่ง notification — ทั้งหมดผ่าน
+        shell commands ธรรมดา ผลคือนักพัฒนาสามารถดูแล AI agent หลายตัวพร้อมกันได้โดยไม่จมอยู่กับ
+        terminal ที่รก และไม่พลาดเมื่อ agent ต้องการความสนใจ
+      </p>
+    </div>
+    <div class="bento cols-3">
+      <div class="card success">
+        <p class="label">ความเร็วระดับ Native</p>
+        <h3>Swift + libghostty</h3>
+        <p>เขียนด้วย Swift + AppKit ใช้ libghostty ของ Ghostty เป็น rendering engine
+          ทำให้เร็วและเบากว่า Electron หลายเท่า ไม่มี web layer ไม่มี overhead พิเศษ</p>
+      </div>
+      <div class="card warning">
+        <p class="label">Agent Control API</p>
+        <h3>cmux CLI + Unix Socket</h3>
+        <p>agent สั่ง <code>cmux new-split</code>, <code>cmux browser snapshot</code>,
+          หรือ <code>cmux notify</code> ได้เหมือน shell command ธรรมดา
+          GUI ตอบสนองทันทีผ่าน Unix domain socket</p>
+      </div>
+      <div class="card gold">
+        <p class="label">Multi-Agent Visibility</p>
+        <h3>Notification Rings</h3>
+        <p>เมื่อ agent ทำงานเสร็จหรือต้องการ input วงแหวนแจ้งเตือนปรากฏรอบ pane นั้น
+          ไม่ต้องจ้องหน้าจอตลอด ทำงานอื่นได้ระหว่างรอ</p>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>💡 Core insight:</strong> cmux เปลี่ยน terminal จาก "ที่รัน command" เป็น
+      "workspace ที่ AI agent ควบคุมตัวเองได้" — ความแตกต่างนี้เล็กในรูปลักษณ์ แต่ใหญ่มากในทางปฏิบัติ
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> cmux = terminal ที่ AI agent ควบคุม UI ของตัวเองได้ผ่าน shell commands — ไม่ใช่แค่รัน agent</div>
+  </div>
+</section>
+
+<!-- PAGE 3: DEEP-DIVE PROTOCOL -->
+<section class="page" id="p3" data-title="Deep-Dive Protocol">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol</p>
+      <h2>ส่วนประกอบหลัก สมมติฐานที่ซ่อนอยู่ และสิ่งที่ต้องเข้าใจ</h2>
+      <p class="section-lead">
+        ก่อนลงลึก ส่วนนี้สร้าง mental model ที่ถูกต้องตั้งแต่ต้น:
+        cmux ประกอบด้วยชั้นสถาปัตยกรรม 6 ชั้นที่ทำงานร่วมกัน มีสมมติฐานที่ซ่อนอยู่หลายอย่างที่ผู้เริ่มต้น
+        มักข้ามไป และมี 7 insight ที่ถ้าเข้าใจตั้งแต่ต้นจะประหยัดเวลาไปได้มาก
+      </p>
+    </div>
+
+    <div>
+      <h3>ส่วนประกอบหลัก <span lang="en">(Architecture Components)</span></h3>
+      <div class="bento cols-3">
+        <div class="card">
+          <p class="label">Rendering Layer</p>
+          <h3>libghostty</h3>
+          <p>Ghostty's terminal rendering library — GPU-accelerated, เร็วเท่า native app
+            cmux ใช้เป็น library ไม่ใช่ fork ดังนั้นจึงยังอ่าน Ghostty config ได้</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Layout Engine</p>
+          <h3>Bonsplit</h3>
+          <p>จัดการ Workspace → Surface (tab) → Pane (split) hierarchy ทำ animation
+            smooth และ drag-and-drop reorder ได้ agent ใช้ surface ID เพื่อ target pane ที่ถูกต้อง</p>
+        </div>
+        <div class="card gold">
+          <p class="label">IPC Bus</p>
+          <h3>Unix Domain Socket + CLI</h3>
+          <p>agent รัน <code>cmux</code> command → CLI ส่ง JSON → socket → GUI อัพเดททันที
+            เร็วกว่า HTTP เพราะเป็น local IPC ไม่ผ่านเครือข่าย</p>
+        </div>
+        <div class="card success">
+          <p class="label">Feedback System</p>
+          <h3>Notification Rings</h3>
+          <p>ทำงานจาก OSC 9/99/777 escape sequences (auto) หรือ <code>cmux notify</code> (manual)
+            แสดง visual ring รอบ pane + badge + macOS notification พร้อมกัน</p>
+        </div>
+        <div class="card">
+          <p class="label">Browser Engine</p>
+          <h3>WebKit Pane</h3>
+          <p>Safari-grade browser ฝังใน pane — <code>cmux browser snapshot</code>
+            คืน DOM tree แบบ text-based พร้อม element refs (e10, e14) ให้ agent สั่ง click/fill</p>
+        </div>
+        <div class="card danger">
+          <p class="label">Orchestration</p>
+          <h3>Sub-Agent Layer</h3>
+          <p>Primary agent ใช้ <code>cmux send</code> + <code>cmux new-split</code>
+            spawn sub-agents ใน pane แยก assign งาน อ่าน output แล้วปิด pane เมื่อเสร็จ</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG Architecture Map — ASCII labels only -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <svg viewBox="0 0 860 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ddp-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <!-- Agent box -->
+        <rect x="10" y="65" width="140" height="70" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="80" y="97" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">AI Agent</text>
+        <text x="80" y="115" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Claude Code / Codex</text>
+        <!-- Arrow 1 -->
+        <path d="M150 100 L200 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#ddp-arr)"/>
+        <text x="175" y="92" font-size="10" fill="var(--muted)" text-anchor="middle" font-family="system-ui">cmux CLI</text>
+        <!-- Socket box -->
+        <rect x="200" y="55" width="160" height="90" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="280" y="93" font-size="13" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Unix Socket</text>
+        <text x="280" y="111" font-size="11" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">JSON IPC (local)</text>
+        <!-- Arrow 2 -->
+        <path d="M360 100 L410 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#ddp-arr)"/>
+        <!-- cmux GUI box -->
+        <rect x="410" y="40" width="200" height="120" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="510" y="90" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">cmux GUI</text>
+        <text x="510" y="108" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Bonsplit + libghostty</text>
+        <text x="510" y="124" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">WebKit Browser</text>
+        <!-- Arrow 3 -->
+        <path d="M610 100 L660 100" stroke="var(--success)" stroke-width="2" marker-end="url(#ddp-arr)"/>
+        <!-- Notification box -->
+        <rect x="660" y="65" width="185" height="70" rx="10" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+        <text x="752" y="97" font-size="13" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Notification Ring</text>
+        <text x="752" y="115" font-size="10" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">OSC 9/99/777 + macOS</text>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">
+        ขั้นตอนการสื่อสาร: AI Agent → cmux CLI → Unix Domain Socket (IPC) → cmux GUI อัพเดท UI → Notification Ring แจ้งผู้ใช้
+      </p>
+    </div>
+
+    <div>
+      <h3>สมมติฐานที่ซ่อนอยู่ <span lang="en">(Implicit Assumptions)</span></h3>
+      <p>สิ่งเหล่านี้คือสิ่งที่ documentation ถือว่าผู้อ่านรู้แล้ว แต่ผู้เริ่มต้นมักข้ามไป
+        การเข้าใจสมมติฐานเหล่านี้ตั้งแต่ต้นจะหลีกเลี่ยงความสับสนได้มาก</p>
+      <ul>
+        <li><strong>Agent ไม่ใช้ cmux API อัตโนมัติ:</strong> การที่ agent รันใน cmux ไม่ได้หมายความว่ามันจะใช้ <code>cmux notify</code> หรือ <code>cmux browser</code> เอง คุณต้องบอก agent ว่ามีเครื่องมือเหล่านี้อยู่ ผ่าน system prompt หรือ Claude Code hooks</li>
+        <li><strong>cmux ≠ Ghostty fork:</strong> cmux เป็น Swift app แยกต่างหากที่ใช้ libghostty เป็น rendering library เท่านั้น ไม่ใช่ branch หรือ plugin ของ Ghostty — อ่าน Ghostty config ได้แต่ feature อื่นๆ เป็นของ cmux เอง</li>
+        <li><strong>Unix socket = local only:</strong> agent API ของ cmux ทำงานผ่าน Unix domain socket ซึ่งเป็น local IPC เท่านั้น agent ต้องรันบนเครื่อง Mac เดียวกัน ไม่มี remote agent control</li>
+        <li><strong>macOS only โดย design:</strong> ไม่ใช่ limitation ชั่วคราว — Swift + AppKit เลือกโดยเจตนาเพื่อ performance และ macOS integration ไม่มีแผน port ไป Linux/Windows ใน near-term</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>สิ่งสำคัญที่ต้องรู้ก่อนลงลึก <span lang="en">(Key Takeaways)</span></h3>
+      <div class="bento cols-2">
+        <div class="card success">
+          <p class="label">Takeaway 1 — Big Picture</p>
+          <h3>cmux เปลี่ยน terminal เป็น controllable workspace</h3>
+          <p>ความแตกต่างจาก terminal ทั่วไปไม่ใช่แค่ feature เพิ่มขึ้น แต่เป็น paradigm shift
+            — agent ไม่ใช่แค่รัน command แต่ควบคุม workspace ของตัวเองได้</p>
+        </div>
+        <div class="card">
+          <p class="label">Takeaway 2 — Mental Model</p>
+          <h3>Workspace → Surface → Pane คือ 3 ชั้นที่ต้องรู้</h3>
+          <p>Workspace = project หรือ context หนึ่งอัน, Surface = tab ภายใน workspace,
+            Pane = split ภายใน surface ทุก cmux command ต้องระบุ target surface ID</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Takeaway 3 — Common Trap</p>
+          <h3>อย่าสับสน cmux กับ tmux</h3>
+          <p>ชื่อคล้ายกันแต่ต่างกันสิ้นเชิง tmux = multiplexer ที่รันใน terminal ใดก็ได้,
+            cmux = native macOS app ที่มี GUI, browser, และ socket API ในตัว</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Takeaway 4 — Actionable</p>
+          <h3>browser snapshot คือ superpower ที่คนมองข้าม</h3>
+          <p>แทนที่จะ guess CSS selector, <code>cmux browser snapshot</code> คืน DOM refs เช่น e10, e14
+            ที่ agent ใช้ click/fill ได้ทันที ทำให้ web automation เชื่อถือได้มากขึ้น</p>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:8px">
+        <strong>💡 Takeaways 5–7:</strong>
+        <strong>5)</strong> Notification rings ทำงานอัตโนมัติถ้า terminal emit OSC sequences — Claude Code ทำได้ด้วย hooks
+        <strong>6)</strong> Sub-agent orchestration ไม่ต้องเขียน code — ใช้ cmux send + new-split ล้วนๆ
+        <strong>7)</strong> ฟรีและ open source (AGPL) ไม่มี subscription — ดาวน์โหลดจาก cmux.com ได้ทันที
+      </div>
+    </div>
+
+    <div class="takeaway"><b>★ Mental model:</b> cmux = Swift terminal ที่ให้ AI agent ควบคุม UI ผ่าน socket API — ทุก feature รอบ concept นี้</div>
+  </div>
+</section>
+
+<!-- PAGE 4: TECH STACK & ARCHITECTURE -->
+<section class="page" id="p4" data-title="สถาปัตยกรรม">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — Deep Dive</p>
+      <h2>สถาปัตยกรรมและ Tech Stack: ทำไมถึงเร็วและ native จริงๆ</h2>
+      <p class="section-lead">
+        หนึ่งในคำถามแรกที่นักพัฒนาถามเมื่อเห็น cmux คือ "มันต่างจาก terminal ทั่วไปยังไง?" คำตอบอยู่ที่
+        การเลือก tech stack อย่างพิถีพิถัน แทนที่จะสร้างบน Electron (ซึ่งง่ายกว่าและ cross-platform) ทีม
+        Manaflow AI เลือกใช้ Swift + AppKit เป็นฐาน ผลคือ terminal ที่ lightweight, responsive, และรวมเข้ากับ
+        macOS ได้อย่างลึกซึ้ง — ทั้งระบบ notification, keybindings, และ accessibility
+      </p>
+    </div>
+
+    <h3>libghostty — Rendering Engine ที่ยืมมาจาก Ghostty</h3>
+    <p>
+      Ghostty เป็น terminal emulator ที่รู้จักกันดีในเรื่องความเร็วและ GPU-accelerated rendering
+      cmux ไม่ได้ fork Ghostty แต่ใช้ <strong>libghostty</strong> ซึ่งเป็น core library ของ Ghostty
+      เป็น rendering engine — เหมือนกับที่ browser อื่นๆ ใช้ WebKit โดยไม่ต้อง fork Safari
+      ความสัมพันธ์นี้สำคัญมากเพราะ cmux ได้รับ GPU-accelerated rendering โดยไม่ต้องเขียน terminal emulator
+      เองตั้งแต่ต้น และยังอ่าน config จาก <code>~/.config/ghostty/config</code> ได้ด้วย ทำให้ผู้ที่ใช้
+      Ghostty อยู่แล้วย้ายมา cmux ได้โดยไม่ต้อง reconfigure keybindings ใหม่ทั้งหมด
+    </p>
+    <p>
+      ในทางปฏิบัติ libghostty ทำให้ cmux render text และ graphics ได้ smooth แม้ตอนที่มี
+      หลาย pane รันพร้อมกัน ใน Electron-based terminal การมี 6-8 agent instances พร้อมกัน
+      มักทำให้ RAM สูงขึ้น 500MB-1GB+ ใน cmux ตัวเลขนี้ต่ำกว่ามากเพราะไม่มี Chromium instance
+    </p>
+
+    <details class="disclosure">
+      <summary>เจาะลึก libghostty — ทำงานอย่างไรภายใน?</summary>
+      <div class="details-body">
+        <p>libghostty ใช้ Metal (macOS graphics API) สำหรับ GPU rendering ทำให้ text rendering
+          ไม่ block main thread เหมือน CPU-based terminal ผลคือ scrollback buffer ขนาดใหญ่
+          หรือ output ที่หนักๆ จาก AI agent ไม่ทำให้ UI หยุดตอบสนอง</p>
+        <p>cmux อ่าน Ghostty config format ได้ตรงๆ เช่น font settings, color scheme, และ
+          keybindings สำหรับ terminal operations cmux-specific features (workspaces, notifications)
+          มี config แยกใน Settings ของ app</p>
+      </div>
+    </details>
+
+    <h3>Bonsplit — Layout Engine สำหรับ Multi-Pane Workspace</h3>
+    <p>
+      การจัดการ layout ของ cmux ใช้ library ชื่อ <strong>Bonsplit</strong> ซึ่งรับผิดชอบ hierarchy ทั้งหมด:
+      Workspace (กลุ่ม surfaces), Surface (tab หนึ่งอัน), และ Pane (split ภายใน surface)
+      Bonsplit ทำให้การ drag-and-drop panes, split แนวตั้งและแนวนอน, และการ animate layout changes
+      ทำงานได้ smooth ซึ่งสำคัญมากเมื่อ agent กำลัง spawn panes ใหม่หลายอันในเวลาสั้นๆ
+    </p>
+    <p>
+      ทุก pane ใน Bonsplit มี unique surface ID (เช่น <code>surface:7</code>, <code>surface:8</code>)
+      ซึ่ง agent ใช้เพื่อ target command ไปยัง pane ที่ถูกต้อง ถ้า agent ต้องการส่ง text ไปยัง
+      sub-agent ใน surface 8 ก็แค่รัน <code>cmux send --surface surface:8 "task here"</code>
+      ไม่ต้องทำ screen scraping หรือ grep output
+    </p>
+
+    <h3>WebKit — Browser Engine ใน Terminal Pane</h3>
+    <p>
+      cmux ฝัง WebKit (Safari's browser engine) เป็น pane type พิเศษ เมื่อ agent รัน
+      <code>cmux new-pane --type browser --url https://example.com</code> จะได้ full browser
+      ที่รองรับ DevTools, JavaScript, และ form interactions ทุกอย่าง ไม่ใช่แค่ text renderer
+    </p>
+    <p>
+      สิ่งที่ทำให้ browser pane ทรงพลังจริงๆ คือ <code>cmux browser snapshot</code> command ซึ่งคืน
+      simplified DOM tree ในรูป text พร้อม short references เช่น <code>e10</code> สำหรับ input fields,
+      <code>e14</code> สำหรับ buttons agent ใช้ references เหล่านี้แทน XPath หรือ CSS selectors
+      ที่ขึ้นอยู่กับ HTML structure ที่เปลี่ยนได้ ทำให้ web automation เชื่อถือได้มากขึ้น
+    </p>
+
+    <!-- SVG: Tech Stack Layers -->
+    <div style="display:flex;justify-content:center;margin:20px 0">
+      <svg viewBox="0 0 760 280" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <!-- Layer 4: User -->
+        <rect x="20" y="10" width="720" height="50" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="380" y="40" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Developer + AI Agent (Claude Code, Codex, Gemini CLI, ...)</text>
+        <!-- Arrow down -->
+        <path d="M380 60 L380 80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr4)"/>
+        <!-- Layer 3: cmux App + cmux CLI -->
+        <rect x="20" y="80" width="340" height="60" rx="8" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="190" y="105" font-size="13" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">cmux App (Swift + AppKit)</text>
+        <text x="190" y="123" font-size="11" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Bonsplit layout + Unix Socket API</text>
+        <rect x="400" y="80" width="340" height="60" rx="8" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="570" y="105" font-size="13" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">cmux CLI</text>
+        <text x="570" y="123" font-size="11" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Agent command interface</text>
+        <!-- Arrows -->
+        <path d="M190 140 L190 160" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr4)"/>
+        <path d="M570 140 L570 160" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr4)"/>
+        <!-- Layer 2: Libraries -->
+        <rect x="20" y="160" width="220" height="60" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="130" y="185" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">libghostty</text>
+        <text x="130" y="203" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">GPU terminal rendering</text>
+        <rect x="260" y="160" width="220" height="60" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="370" y="185" font-size="13" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">WebKit</text>
+        <text x="370" y="203" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Browser pane engine</text>
+        <rect x="500" y="160" width="240" height="60" rx="8" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+        <text x="620" y="185" font-size="13" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">macOS APIs</text>
+        <text x="620" y="203" font-size="11" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Notifications + AppKit</text>
+        <!-- Bottom label -->
+        <text x="380" y="250" font-size="11" fill="var(--muted)" text-anchor="middle" font-family="system-ui">Foundation Layer</text>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--muted)">
+      ชั้น Tech Stack ของ cmux: ผู้ใช้และ agent อยู่บนสุด, Swift app เป็นกลาง, libghostty + WebKit + macOS APIs เป็นฐาน
+    </p>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> cmux เร็วเพราะ native Swift ไม่ใช่ Electron — libghostty render GPU, WebKit ทำ browser, Bonsplit จัดการ panes</div>
+  </div>
+</section>
+
+<!-- PAGE 5: WINDOW MANAGEMENT — WORKSPACE, SURFACE, PANE -->
+<section class="page" id="p5" data-title="Window Management">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — Deep Dive</p>
+      <h2>Workspace, Surface, Pane: ระบบจัดการหน้าต่างที่ออกแบบมาสำหรับ Multi-Agent</h2>
+      <p class="section-lead">
+        เมื่อทำงานกับ AI agents หลายตัวพร้อมกัน สิ่งที่สร้างความสับสนมากที่สุดคือการจัดการ context
+        agent ตัวไหนกำลังทำงานอะไร อยู่ที่ directory ไหน มี error ไหม? cmux แก้ปัญหานี้ด้วย
+        hierarchy 3 ชั้นที่ให้แต่ละ agent มี "บ้าน" ของตัวเอง และ sidebar ที่แสดง context สำคัญ
+        ของแต่ละ workspace ได้ทันทีโดยไม่ต้องสลับไปดู
+      </p>
+    </div>
+
+    <h3>Hierarchy 3 ชั้น: Workspace → Surface → Pane</h3>
+    <p>
+      ใน cmux ทุกอย่างอยู่ใน hierarchy ที่ชัดเจน <strong>Workspace</strong> คือกลุ่มใหญ่สุด
+      เปรียบเหมือน "project" หนึ่งอัน เช่น workspace "frontend" กับ "backend" ใน sidebar
+      แต่ละ workspace มี icon วงกลมที่แสดงสถานะ notification และ metadata ของ workspace นั้น
+    </p>
+    <p>
+      ภายใน workspace แต่ละอัน จะมี <strong>Surface</strong> ซึ่งเปรียบเหมือน tab ใน browser
+      แต่ละ surface รัน session แยกกันอิสระ เก็บ working directory, environment variables,
+      และ history ของตัวเอง เมื่อ agent สร้าง surface ใหม่ด้วย <code>cmux new-pane</code>
+      มันจะได้ surface ID ที่ unique เช่น <code>surface:7</code> ซึ่ง agent อื่นหรือ primary agent
+      ใช้ส่ง command มาได้โดยตรง
+    </p>
+    <p>
+      ใน surface หนึ่งอัน สามารถ split เป็น <strong>Panes</strong> ได้ทั้งแนวตั้งและแนวนอน
+      pane แต่ละอันรัน terminal session หรือ browser session แยกกัน ทำให้เห็น
+      agent กำลัง run tests ใน pane หนึ่ง ในขณะที่ pane ข้างๆ แสดง browser ที่กำลัง verify output
+    </p>
+
+    <!-- SVG: Workspace Hierarchy -->
+    <div style="display:flex;justify-content:center;margin:20px 0">
+      <svg viewBox="0 0 760 260" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <!-- Workspace box -->
+        <rect x="10" y="10" width="740" height="240" rx="12" fill="none" stroke="var(--soft-2)" stroke-width="2" stroke-dasharray="6,4"/>
+        <text x="30" y="35" font-size="12" font-weight="700" fill="var(--muted)" font-family="system-ui">WORKSPACE: frontend-project</text>
+        <!-- Surface 1 -->
+        <rect x="30" y="50" width="330" height="185" rx="8" fill="var(--soft)" stroke="var(--accent)" stroke-width="1.5"/>
+        <text x="195" y="75" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Surface: 7</text>
+        <!-- Pane 1A -->
+        <rect x="45" y="90" width="140" height="130" rx="6" fill="var(--paper)" stroke="var(--soft-2)" stroke-width="1"/>
+        <text x="115" y="150" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Pane A</text>
+        <text x="115" y="167" font-size="10" fill="var(--muted)" text-anchor="middle" font-family="system-ui">Terminal (Agent)</text>
+        <!-- Pane 1B -->
+        <rect x="205" y="90" width="140" height="130" rx="6" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="1"/>
+        <text x="275" y="150" font-size="11" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Pane B</text>
+        <text x="275" y="167" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">WebKit Browser</text>
+        <!-- Surface 2 -->
+        <rect x="390" y="50" width="345" height="185" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="562" y="75" font-size="12" font-weight="700" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Surface: 8</text>
+        <!-- Pane 2A -->
+        <rect x="405" y="90" width="145" height="130" rx="6" fill="var(--paper)" stroke="var(--soft-2)" stroke-width="1"/>
+        <text x="477" y="150" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Pane A</text>
+        <text x="477" y="167" font-size="10" fill="var(--muted)" text-anchor="middle" font-family="system-ui">Sub-Agent 1</text>
+        <!-- Pane 2B -->
+        <rect x="570" y="90" width="145" height="130" rx="6" fill="var(--paper)" stroke="var(--soft-2)" stroke-width="1"/>
+        <text x="642" y="150" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Pane B</text>
+        <text x="642" y="167" font-size="10" fill="var(--muted)" text-anchor="middle" font-family="system-ui">Sub-Agent 2</text>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--muted)">
+      ตัวอย่าง Workspace เดียวที่มี 2 Surfaces แต่ละ Surface มี 2 Panes — รองรับ agent 3+ ตัวทำงานพร้อมกัน
+    </p>
+
+    <h3>Vertical Sidebar — Context ที่มองเห็นได้โดยไม่ต้อง switch</h3>
+    <p>
+      sidebar แนวตั้งทางซ้ายของ cmux ไม่ใช่แค่รายชื่อ tab — มันแสดง context สำคัญของแต่ละ workspace:
+      <strong>git branch ปัจจุบัน</strong>, <strong>สถานะ PR</strong> ที่เชื่อมอยู่, <strong>listening ports</strong>
+      ที่ process กำลังใช้, และ <strong>latest notification text</strong> จาก agent ใน workspace นั้น
+      ทำให้นักพัฒนาสามารถ monitor หลาย agent พร้อมกันโดยมองที่ sidebar เดียว โดยไม่ต้องสลับ context
+    </p>
+    <p>
+      เมื่อ agent ใน workspace ใดส่ง notification มา icon วงกลมของ workspace นั้นจะแสดง badge
+      และถ้า agent emit OSC 9 escape sequence หรือเรียก <code>cmux notify "task complete"</code>
+      ระบบจะแสดง notification ring สว่างรอบ pane นั้นและส่ง macOS notification ด้วย
+      ทำให้ทำงานอื่นในขณะที่รอ agent ทำงานได้โดยมั่นใจว่าจะไม่พลาดเมื่อมีอะไรสำคัญ
+    </p>
+
+    <details class="disclosure">
+      <summary>เจาะลึก cmux CLI commands สำหรับ workspace management</summary>
+      <div class="details-body">
+        <p>คำสั่งหลักที่ agent ใช้ในการจัดการ workspace:</p>
+        <div class="copy-wrap">
+          <pre><code># ดู workspaces ทั้งหมด
+cmux list-workspaces
+
+# สร้าง workspace ใหม่
+cmux new-workspace --name "my-project"
+
+# split surface แนวนอน (side-by-side)
+cmux new-split --direction right
+
+# สร้าง pane ใหม่ใน surface ใหม่ (tab)
+cmux new-pane
+
+# ปิด surface ที่ระบุ
+cmux close-surface --surface surface:7
+
+# อ่าน screen output จาก surface ที่ระบุ
+cmux read-screen --surface surface:8</code></pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <p>command <code>new-split</code> กับ <code>new-pane</code> ต่างกัน: <code>new-split</code> แยก surface
+          ปัจจุบันออกเป็น 2 ส่วน ส่วน <code>new-pane</code> สร้าง surface ใหม่แยกต่างหาก
+          ทั้งสองคืน surface ID ที่ agent ใช้ target ใน command ถัดไป</p>
+      </div>
+    </details>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Workspace→Surface→Pane hierarchy ทำให้ agent หลายตัวมี context ของตัวเอง sidebar แสดงสถานะทุกตัวโดยไม่ต้อง switch</div>
+  </div>
+</section>
+
+<!-- PAGE 6: cmux CLI + AGENT USAGE GUIDE -->
+<section class="page" id="p6" data-title="cmux CLI">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — Hands-on Guide</p>
+      <h2>cmux CLI: ภาษาที่ Agent ใช้สื่อสารกับ Terminal</h2>
+      <p class="section-lead">
+        cmux CLI คือชุด shell commands ที่ agent รันได้เหมือน command ทั่วไป แต่ผลลัพธ์คือการเปลี่ยนแปลง
+        UI ของ cmux ทันที ไม่ใช่แค่พิมพ์ text ลง terminal ก่อนใช้งาน agent ต้องรู้ว่ามีเครื่องมือเหล่านี้อยู่
+        ผ่าน system prompt หรือ Claude Code hooks เมื่อ agent รู้แล้ว มันจะใช้ cmux เป็น "arm" ที่ควบคุม
+        environment ของตัวเองได้อย่างอิสระ
+      </p>
+    </div>
+
+    <h3>ติดตั้งและเริ่มต้นใช้งาน</h3>
+    <p>
+      cmux เป็น native macOS app ติดตั้งโดยดาวน์โหลด <code>.dmg</code> จาก <a href="https://cmux.com" target="_blank" rel="noopener noreferrer">cmux.com</a>
+      ลาก app ไปยัง Applications folder และเปิดใช้งาน เมื่อเปิดครั้งแรก cmux จะติดตั้ง
+      <code>cmux</code> CLI ใน PATH โดยอัตโนมัติ ทำให้ทุก terminal session ที่รันใน cmux เรียกใช้
+      <code>cmux --help</code> ได้ทันที ไม่ต้องติดตั้งแยก
+    </p>
+    <p>
+      สิ่งสำคัญที่ต้องรู้: <code>cmux</code> CLI ใช้ได้ภายใน cmux เท่านั้น เพราะมันสื่อสารผ่าน
+      Unix domain socket ที่ cmux app สร้างขึ้น ถ้ารัน cmux command ใน terminal อื่น (iTerm2, Terminal.app)
+      จะได้รับ error เพราะไม่มี socket รอรับ
+    </p>
+
+    <h3>Commands ที่ใช้บ่อยในการทำงานกับ Agent</h3>
+    <p>
+      commands ของ cmux แบ่งเป็น 5 กลุ่มหลัก: workspace management, pane/surface management,
+      interaction (ส่งข้อความไปยัง pane อื่น), browser control, และ feedback
+      ด้านล่างคือ commands ที่ agent ใช้บ่อยที่สุดในการทำงานจริง
+    </p>
+
+    <div class="bento cols-2">
+      <div>
+        <h4>Workspace &amp; Pane Management</h4>
+        <div class="copy-wrap">
+          <pre><code># สร้าง pane ใหม่แนวนอน
+cmux new-split --direction right
+
+# สร้าง browser pane
+cmux new-pane --type browser \
+  --url https://localhost:3000
+
+# ปิด pane ที่เสร็จแล้ว
+cmux close-surface --surface surface:9
+
+# highlight pane เพื่อดึงความสนใจ
+cmux trigger-flash --surface surface:7</code></pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+      </div>
+      <div>
+        <h4>Interaction &amp; Feedback</h4>
+        <div class="copy-wrap">
+          <pre><code># ส่งข้อความไปยัง pane อื่น (sub-agent)
+cmux send --surface surface:8 \
+  "Analyze this module for bugs"
+
+# กด Enter เพื่อ submit command
+cmux send-key --surface surface:8 Return
+
+# อ่าน output จาก pane
+cmux read-screen --surface surface:8
+
+# ส่ง notification + badge
+cmux notify "Analysis complete — 3 issues found"</code></pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <p>
+      คำสั่ง <code>cmux send</code> ส่งข้อความไปยัง stdin ของ pane ที่ระบุ ซึ่งเหมือนกับการพิมพ์ใน terminal นั้น
+      แต่ทำโดย programmatically ส่วน <code>cmux send-key Return</code> simulate การกด Enter
+      ทั้งสองต้องคู่กันเสมอเมื่อต้องการ execute command ใน sub-agent
+    </p>
+
+    <h3>ตัวอย่างจริง: Agent ค้นหาข้อมูลและสรุปผล</h3>
+    <p>
+      ตัวอย่างด้านล่างแสดง workflow ที่ primary agent ใช้ cmux เปิด browser ค้นหาข้อมูล
+      จาก web แล้วนำผลมาประมวลผลต่อ ทั้งหมดรันใน cmux workspace เดียว ไม่ต้อง
+      สลับออกไปทำงานในแอปอื่น
+    </p>
+    <div class="copy-wrap">
+      <pre><code># 1. เปิด browser pane ไปยัง URL ที่ต้องการ
+cmux new-pane --type browser --url https://docs.example.com
+
+# 2. รอให้ page โหลดเสร็จ
+cmux browser wait --event loaded
+
+# 3. ดู DOM structure เพื่อหา element refs
+cmux browser snapshot
+# ได้ output เช่น: e5=search-input, e12=submit-btn
+
+# 4. ค้นหาด้วย element refs ที่ได้จาก snapshot
+cmux browser type --ref e5 --text "AI agents deployment"
+cmux browser click --ref e12
+
+# 5. รอ navigation เสร็จ แล้ว snapshot อีกรอบ
+cmux browser wait --event loaded
+cmux browser snapshot
+
+# 6. แจ้งเมื่อเสร็จ
+cmux notify "Web research complete — ready to summarize"</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>
+      เหตุผลที่ใช้ element refs จาก snapshot แทน CSS selectors คือ refs เหล่านี้
+      ถูก assign โดย cmux ตาม DOM ปัจจุบัน ไม่ขึ้นอยู่กับ class names หรือ IDs ที่อาจเปลี่ยนได้
+      ทำให้ automation เสถียรกว่า ถ้า element ที่ต้องการหายไปจาก DOM, cmux จะแจ้ง error
+      แทนที่จะ click ผิดที่โดยไม่รู้ตัว
+    </p>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> cmux CLI คือ "arm" ของ agent — ใช้ new-split สร้างพื้นที่, send ส่งงาน, browser snapshot + click ทำ web automation, notify แจ้งเมื่อเสร็จ</div>
+  </div>
+</section>
+
+<!-- PAGE 7: MULTI-AGENT ORCHESTRATION -->
+<section class="page" id="p7" data-title="Multi-Agent">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — Deep Dive</p>
+      <h2>Multi-Agent Orchestration: Primary Agent ควบคุม Sub-Agents ได้อย่างไร</h2>
+      <p class="section-lead">
+        งานพัฒนา software จริงๆ มักซับซ้อนเกินกว่าที่ agent ตัวเดียวจะจัดการได้ดี
+        cmux แก้ปัญหานี้ด้วยการให้ primary agent spawn sub-agents ใน pane แยก มอบหมาย
+        งาน รออ่าน output แล้วรวมผล ทั้งหมดนี้ทำได้ด้วย shell commands ธรรมดา
+        ไม่ต้องเขียน orchestration code หรือ framework พิเศษ
+      </p>
+    </div>
+
+    <h3>Pattern: Primary Agent สร้างและควบคุม Sub-Agents</h3>
+    <p>
+      ลองนึกภาพว่าต้องการ refactor codebase ขนาดใหญ่ primary agent อาจแบ่งงานดังนี้:
+      sub-agent 1 รับผิดชอบอ่านและเข้าใจ architecture, sub-agent 2 วิเคราะห์ dependencies
+      และ potential issues ส่วน primary agent รอ output จากทั้งสอง สรุปผล แล้วตัดสินใจว่าจะ refactor
+      ส่วนไหนก่อน pattern นี้ทำงานได้โดยไม่ต้องมี orchestration framework — ใช้ cmux shell commands ล้วนๆ
+    </p>
+
+    <div class="copy-wrap">
+      <pre><code># Primary agent: สร้าง 2 sub-agent panes พร้อมกัน
+# Split surface ปัจจุบันแนวนอน
+cmux new-split --direction right   # ได้ surface:7
+
+# Split surface:7 แนวตั้ง
+cmux new-split --direction down --surface surface:7  # ได้ surface:8
+
+# Launch sub-agents ใน pane ที่สร้าง
+cmux send --surface surface:7 "claude"
+cmux send-key --surface surface:7 Return
+
+cmux send --surface surface:8 "claude"
+cmux send-key --surface surface:8 Return
+
+# มอบหมายงานแยกกัน
+cmux send --surface surface:7 \
+  "Read all files in ./src and describe the architecture"
+cmux send-key --surface surface:7 Return
+
+cmux send --surface surface:8 \
+  "Analyze all imports in ./src and map dependencies"
+cmux send-key --surface surface:8 Return
+
+# รอ output (primary agent ทำงานอื่นได้ระหว่างนี้)
+# เมื่อ sub-agents เสร็จ อ่าน output
+cmux read-screen --surface surface:7
+cmux read-screen --surface surface:8
+
+# ปิด panes หลังเสร็จ
+cmux close-surface --surface surface:7
+cmux close-surface --surface surface:8</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>
+      สิ่งสำคัญที่ต้องเข้าใจใน pattern นี้: primary agent ไม่ได้รอแบบ blocking —
+      หลังส่ง task ให้ sub-agents แล้ว มันสามารถทำงานอื่นต่อได้ใน pane ของตัวเอง
+      เมื่อต้องการผล ค่อย <code>cmux read-screen</code> อ่าน output
+      นี่คือ parallel execution จริงๆ ไม่ใช่ sequential
+    </p>
+
+    <details class="disclosure">
+      <summary>เจาะลึก: sub-agent รู้ได้อย่างไรว่าตัวเองรันใน cmux?</summary>
+      <div class="details-body">
+        <p>cmux set environment variable <code>CMUX_SURFACE</code> ใน session ของทุก pane
+          ทำให้ sub-agent สามารถตรวจสอบได้ว่ารันใน cmux หรือไม่ด้วย <code>$CMUX_SURFACE</code>
+          และรู้ surface ID ของตัวเองเพื่อส่ง notification กลับมาได้</p>
+        <p>ยิ่งไปกว่านั้น agent สามารถ discover capabilities ทั้งหมดที่มีได้ด้วย <code>cmux --help</code>
+          ซึ่ง Claude Code ถูก train ให้รู้ว่าควรเรียก <code>cmux --help</code> เมื่อรันใน cmux
+          เพื่อ discover available commands — นี่คือ zero-config experience ที่ทีม cmux ตั้งใจออกแบบ</p>
+      </div>
+    </details>
+
+    <h3>Notification System: รู้เมื่อ Agent เสร็จโดยไม่ต้องจ้องหน้าจอ</h3>
+    <p>
+      เมื่อ agent หลายตัวทำงานพร้อมกัน ปัญหาหลักคือจะรู้ได้อย่างไรว่า agent ตัวไหนเสร็จ
+      หรือต้องการ input? cmux แก้ด้วย <strong>notification ring system</strong> ที่ทำงานได้ 2 วิธี:
+    </p>
+    <p>
+      <strong>วิธีที่ 1 — Automatic (OSC escape sequences):</strong> terminal emulator
+      หลายอันรองรับการ emit OSC 9 (เช่น iTerm2 style) เมื่อ process เสร็จ Claude Code
+      มี hook ที่ emit sequence เหล่านี้ได้โดยอัตโนมัติ ทำให้ cmux แสดง notification ring
+      ทันทีที่ task เสร็จโดยไม่ต้อง modify agent code
+    </p>
+    <p>
+      <strong>วิธีที่ 2 — Manual (cmux notify):</strong> agent call <code>cmux notify "message"</code>
+      ได้โดยตรง เหมาะสำหรับ custom checkpoints เช่น "phase 1 of analysis complete" หรือ
+      "waiting for user input" notification จะแสดงใน ring รอบ pane นั้น + badge ใน sidebar
+      + macOS desktop notification พร้อมกันทั้งหมด
+    </p>
+
+    <div class="callout success">
+      <strong>Claude Code Hook ที่แนะนำ:</strong> เพิ่ม hook ใน Claude Code settings เพื่อให้
+      Claude Code emit <code>cmux notify</code> อัตโนมัติเมื่อ task หรือ subtask เสร็จ
+      ทำให้ไม่ต้อง instruct Claude Code ทุกครั้ง — <a href="https://cmux.com/docs/notifications#integration-examples" target="_blank" rel="noopener noreferrer">ดูตัวอย่าง hooks ที่ cmux docs</a>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> primary agent spawn sub-agents ด้วย cmux send + new-split, notification rings แจ้งเมื่อเสร็จ — parallel execution โดยไม่ต้องเขียน orchestration code</div>
+  </div>
+</section>
+
+<!-- PAGE 8: COMPARISON + FAQ -->
+<section class="page" id="p8" data-title="เปรียบเทียบ & FAQ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 6 — Comparison &amp; FAQ</p>
+      <h2>cmux เทียบกับ tmux, Ghostty, และ iTerm2: เลือกอะไรในสถานการณ์ไหน</h2>
+      <p class="section-lead">
+        เมื่อพูดถึง terminal บน macOS มีหลายตัวเลือกที่แต่ละคนคุ้นเคยต่างกัน
+        คำถามที่ถามบ่อยที่สุดคือ "ต้องเปลี่ยนมาใช้ cmux ไหม?" คำตอบขึ้นอยู่กับ workflow
+        ถ้าทำงานกับ AI agents เป็นหลัก cmux มีข้อได้เปรียบชัดเจน แต่ถ้า workflow ยังเป็น
+        manual programming เป็นหลัก terminal ที่คุ้นเคยอยู่อาจดีพอแล้ว
+      </p>
+    </div>
+
+    <div>
+      <div class="tabs-nav" role="tablist">
+        <button class="active" onclick="switchTab(this,'t1')" role="tab">cmux (แนะนำ)</button>
+        <button onclick="switchTab(this,'t2')" role="tab">tmux</button>
+        <button onclick="switchTab(this,'t3')" role="tab">Ghostty / iTerm2</button>
+      </div>
+      <div id="t1" class="tabs-panel active">
+        <h3>cmux — Native macOS App สำหรับ AI Agent Era</h3>
+        <p>cmux ออกแบบมาโดยเฉพาะสำหรับ AI agents บน macOS ข้อได้เปรียบหลักคือ
+          socket API ที่ให้ agent ควบคุม UI ได้, browser pane ใน built-in,
+          notification rings สำหรับ multi-agent monitoring, และ vertical sidebar
+          ที่แสดง git/PR/port context ของแต่ละ workspace</p>
+        <p>ข้อจำกัดที่ต้องรู้ก่อนเลือก: macOS เท่านั้น ไม่มี Linux/Windows version
+          agent ต้องได้รับการบอกว่า cmux API มีอยู่ ไม่ใช่ automatic
+          ถ้าใช้ agent น้อยหรือใช้แบบ sequential (ทีละตัว) ข้อได้เปรียบของ cmux
+          จะไม่ชัดเจนมากนัก</p>
+        <div class="callout success" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong>
+          นักพัฒนาที่ใช้ Claude Code / Codex / Gemini CLI เป็นประจำ, ต้องการรัน agents หลายตัวพร้อมกัน,
+          หรือต้องการ browser automation ใน workflow เดียวกับ terminal</div>
+      </div>
+      <div id="t2" class="tabs-panel">
+        <h3>tmux — Terminal Multiplexer ที่ใช้ได้ทุก Platform</h3>
+        <p>tmux รันใน terminal ใดก็ได้และทำงานได้บน Linux, macOS, และ Windows (WSL)
+          เป็นเครื่องมือที่นักพัฒนา backend และ DevOps รู้จักดี และมี ecosystem ของ
+          plugins (tmux-plugins, tpm) ที่ใหญ่มาก ถ้าทำงานบน remote server หรือ SSH
+          เป็นหลัก tmux ยังคงเป็นตัวเลือกที่ดีที่สุด</p>
+        <p>ข้อจำกัดสำหรับ AI agent workflow: tmux ไม่มี socket API ที่ agent ควบคุม GUI ได้,
+          ไม่มี browser pane, และ notification ต้องทำผ่าน bell หรือ script แยก
+          การ monitor หลาย agent พร้อมกันต้องอาศัย manual ดูมากกว่า</p>
+        <div class="callout warning" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong>
+          งานบน remote server / SSH, cross-platform workflow, หรือทีมที่ invest ใน tmux config มาแล้วมาก</div>
+      </div>
+      <div id="t3" class="tabs-panel">
+        <h3>Ghostty / iTerm2 — Excellent Terminals ที่ไม่ได้ออกแบบสำหรับ Agent</h3>
+        <p>Ghostty และ iTerm2 เป็น terminals ที่ดีมากในฐานะ "terminal สำหรับมนุษย์" —
+          Ghostty เร็วมาก, iTerm2 มี features เยอะและ mature มาก ทั้งสองทำงานได้ดีกับ
+          AI agents ในฐานะ "ที่รัน" แต่ agents ไม่สามารถควบคุม UI ของ terminal เหล่านี้ได้
+          ไม่มี socket API สำหรับ agent</p>
+        <p>ถ้า workflow ยังเป็น manual เป็นหลัก และใช้ agent เป็นครั้งคราว Ghostty หรือ iTerm2
+          ก็ตอบโจทย์ได้ดี cmux จะ shine เมื่อ agent เป็น primary worker ไม่ใช่ assistant</p>
+        <div class="callout" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong>
+          นักพัฒนาที่ใช้ terminal แบบ manual เป็นหลัก, ต้องการ terminal ที่ stable และ mature,
+          หรือยังไม่ได้ shift ไปสู่ AI-driven workflow เต็มตัว</div>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>Feature</th><th>cmux</th><th>tmux</th><th>Ghostty/iTerm2</th></tr></thead>
+      <tbody>
+        <tr><td>Agent Socket API</td><td class="check">✓ เต็มรูปแบบ</td><td class="cross">✗ ไม่มี</td><td class="cross">✗ ไม่มี</td></tr>
+        <tr><td>Built-in Browser Pane</td><td class="check">✓ WebKit</td><td class="cross">✗ ไม่มี</td><td class="cross">✗ ไม่มี</td></tr>
+        <tr><td>Notification Rings</td><td class="check">✓ visual + macOS</td><td>△ bell only</td><td>△ badge only</td></tr>
+        <tr><td>macOS Native</td><td class="check">✓ Swift + AppKit</td><td class="cross">✗ cross-platform</td><td class="check">✓ native</td></tr>
+        <tr><td>Linux / Windows</td><td class="cross">✗ macOS only</td><td class="check">✓ ทุก platform</td><td>△ macOS/Linux</td></tr>
+        <tr><td>ราคา</td><td class="check">ฟรี (AGPL)</td><td class="check">ฟรี (ISC)</td><td class="check">ฟรี (MIT)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="accordion">
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">Agent ที่ฉันใช้อยู่จะทำงานกับ cmux ได้ไหม?</button>
+        <div class="accordion-body">
+          <p>ได้เลย — cmux เป็น terminal ดังนั้น agent ใดที่รันใน terminal ก็ทำงานใน cmux ได้
+            ไม่ต้องแก้ code หรือ config อะไรพิเศษ Claude Code, Codex CLI, OpenCode, Gemini CLI,
+            Kiro, Aider, Goose, Amp, Cline, และทุก agent ที่รัน command line ทำงานได้ออกนอกกล่อง</p>
+          <p>ส่วน features พิเศษของ cmux เช่น browser pane, notification API, และ multi-pane control
+            จะทำงานได้เมื่อ agent รู้ว่ามี cmux CLI อยู่ ซึ่งต้องบอกผ่าน system prompt หรือ configure hooks
+            Claude Code มีการรองรับ cmux โดยตรงผ่าน integration examples ที่ cmux docs</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">cmux กิน RAM มากไหม เมื่อรัน agent หลายตัวพร้อมกัน?</button>
+        <div class="accordion-body">
+          <p>cmux เบากว่า Electron-based terminals มากเพราะใช้ libghostty (GPU-accelerated, native)
+            แทนที่จะ embed Chromium ในทางปฏิบัติ cmux app เองกิน RAM น้อย ส่วนที่กิน RAM คือ
+            agent processes เช่น Claude Code instances ซึ่งเป็น memory cost ของ agent ไม่ใช่ cmux</p>
+          <p>ถ้ารัน Claude Code 4-6 instances พร้อมกัน RAM usage ส่วนใหญ่จะมาจาก Claude Code processes
+            ไม่ใช่ cmux terminal เอง cmux เพิ่ม overhead เพียงเล็กน้อยต่อ pane</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">จะย้ายจาก tmux มา cmux ต้องเปลี่ยนอะไรบ้าง?</button>
+        <div class="accordion-body">
+          <p>การย้ายไม่ได้ต้องเริ่มต้นใหม่ทั้งหมด cmux ยังเป็น terminal ดังนั้น shell scripts,
+            dotfiles, และ aliases ทั้งหมดใช้ได้เหมือนเดิม สิ่งที่เปลี่ยนคือวิธีจัดการ windows:
+            แทนที่ tmux prefix + c สำหรับ new window, ใน cmux ใช้ keyboard shortcut ของ app หรือ
+            <code>cmux new-pane</code> command</p>
+          <p>Ghostty config (keybindings สำหรับ terminal) อ่านได้ตรงๆ cmux-specific shortcuts
+            (workspaces, splits) customise ได้ใน Settings สิ่งที่ต้องเรียนใหม่คือ cmux CLI
+            commands สำหรับ agent control ซึ่งไม่มี equivalent ใน tmux</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">ถ้าไม่ใช้ AI agents บ่อย cmux ยังมีประโยชน์ไหม?</button>
+        <div class="accordion-body">
+          <p>ยัง — cmux ยังเป็น terminal ที่ดีมากสำหรับนักพัฒนาทั่วไป vertical sidebar พร้อม
+            git branch/PR context มีประโยชน์แม้ทำงาน manual notification system ใช้ได้กับ
+            long-running commands ใดก็ได้ไม่ใช่แค่ AI agents</p>
+          <p>แต่ถ้าจุดสำคัญของคุณคือ performance ล้วนๆ (ไม่ใช้ agent เลย) Ghostty อาจ
+            ให้ raw terminal performance ที่ดีพอๆ กัน ในราคา "simpler app" ที่ focus
+            กว่า cmux ให้ value สูงสุดเมื่อ agent integration คือ priority</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>⚠ ข้อควรรู้:</strong> cmux macOS only — ถ้า team ใช้ Linux หรือ Windows WSL บางส่วน
+      ไม่สามารถ standardize บน cmux ได้ทั้งทีม ต้องพิจารณา workflow ที่ cross-platform ด้วย
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> เลือก cmux ถ้า AI agent คือ primary workflow บน macOS; tmux ถ้าต้อง cross-platform; Ghostty/iTerm2 ถ้ายังทำงาน manual เป็นหลัก</div>
+  </div>
+</section>
+
+<!-- PAGE 9: KEY TAKEAWAYS + REFERENCES -->
+<section class="page" id="p9" data-title="สรุปและอ้างอิง">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Closing — Key Takeaways</p>
+      <h2>สิ่งที่ต้องจำและขั้นตอนถัดไป</h2>
+      <p class="section-lead">
+        cmux แสดงให้เห็นว่า terminal ในยุค AI agents ต้องการมากกว่าแค่ "ที่รัน command"
+        — ต้องเป็น workspace ที่ agent ควบคุมได้, แจ้งได้, และทำงานร่วมกันได้
+        7 ประเด็นด้านล่างคือ insight สำคัญที่ใช้เป็น mental model สำหรับ AI-native development
+      </p>
+    </div>
+    <div class="bento cols-2">
+      <div>
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li><strong>cmux ≠ terminal ธรรมดา:</strong> มันคือ workspace ที่ agent ควบคุม UI ตัวเองได้ผ่าน CLI — paradigm shift ที่เล็กในรูป แต่ใหญ่มากใน capability</li>
+          <li><strong>libghostty คือ renderer ไม่ใช่ fork:</strong> cmux เป็น Swift app แยกที่ยืม rendering engine มา — อ่าน Ghostty config ได้แต่เป็น app คนละตัวสิ้นเชิง</li>
+          <li><strong>Workspace→Surface→Pane ต้องจำ:</strong> ทุก cmux command target surface ID ที่ถูกต้อง — เข้าใจ hierarchy นี้ก่อนจะใช้ multi-agent ได้เต็มที่</li>
+          <li><strong>browser snapshot คือ key insight:</strong> <code>cmux browser snapshot</code> คืน element refs (e10, e14) ที่ agent ใช้ click/fill — ทำให้ web automation เชื่อถือได้จริงๆ</li>
+          <li><strong>notification hooks ควรตั้งตั้งแต่ต้น:</strong> configure Claude Code hooks ให้ emit <code>cmux notify</code> เมื่อ task เสร็จ — ไม่ต้องบอก agent ทุกครั้ง</li>
+          <li><strong>sub-agent orchestration ไม่ต้องเขียน code:</strong> ใช้ cmux send + new-split ล้วนๆ primary agent ทำงานอื่นได้ระหว่างรอ sub-agent — parallel จริงๆ</li>
+          <li><strong>ฟรีและ open source (AGPL):</strong> ไม่มี subscription ไม่มี lock-in ติดตั้งจาก cmux.com ได้เลย source code อยู่บน GitHub (manaflow-ai/cmux)</li>
+        </ul>
+      </div>
+      <div>
+        <h3>References</h3>
+        <ol style="font-size:13px;color:var(--ink-dim);line-height:1.9">
+          <li>YouTube — <a href="https://youtu.be/8jDXI4_rJOE" target="_blank" rel="noopener noreferrer">This 100% open-source terminal is insane… just watch</a></li>
+          <li>cmux Official Site — <a href="https://cmux.com" target="_blank" rel="noopener noreferrer">cmux.com</a></li>
+          <li>GitHub — <a href="https://github.com/manaflow-ai/cmux" target="_blank" rel="noopener noreferrer">manaflow-ai/cmux (Ghostty-based macOS terminal)</a></li>
+          <li>Better Stack — <a href="https://betterstack.com/community/guides/ai/cmux-terminal/" target="_blank" rel="noopener noreferrer">cmux: Native macOS Terminal for AI Coding Agents</a></li>
+          <li>DEV Community — <a href="https://dev.to/neuraldownload/cmux-the-terminal-built-for-ai-coding-agents-3l7h" target="_blank" rel="noopener noreferrer">cmux: The Terminal Built for AI Coding Agents</a></li>
+        </ol>
+
+        <h3 style="margin-top:20px">Glossary</h3>
+        <dl style="font-size:13px;color:var(--ink-dim);line-height:1.8">
+          <dt style="font-weight:600;color:var(--ink)">Surface</dt>
+          <dd style="margin:0 0 8px 12px">Tab หนึ่งอันภายใน Workspace — รัน terminal หรือ browser session อิสระ มี unique ID เช่น surface:7</dd>
+          <dt style="font-weight:600;color:var(--ink)">Pane</dt>
+          <dd style="margin:0 0 8px 12px">ส่วน split ภายใน Surface — แต่ละ pane รัน session แยก Workspace หนึ่งอาจมีหลาย surfaces แต่ละ surface มีหลาย panes</dd>
+          <dt style="font-weight:600;color:var(--ink)">libghostty</dt>
+          <dd style="margin:0 0 8px 12px">Ghostty's rendering library ที่ cmux ใช้สำหรับ GPU-accelerated terminal rendering — ไม่ใช่ Ghostty fork</dd>
+          <dt style="font-weight:600;color:var(--ink)">OSC 9/99/777</dt>
+          <dd style="margin:0 0 8px 12px">Terminal escape sequences มาตรฐานที่ process ส่งเพื่อ trigger notification — cmux รับ sequences เหล่านี้และแสดง notification ring</dd>
+          <dt style="font-weight:600;color:var(--ink)">Unix Domain Socket</dt>
+          <dd style="margin:0 0 8px 12px">IPC mechanism ที่ cmux CLI ใช้สื่อสารกับ cmux GUI — เร็วมากเพราะเป็น local-only ไม่ผ่านเครือข่าย</dd>
+          <dt style="font-weight:600;color:var(--ink)">Bonsplit</dt>
+          <dd style="margin:0 0 8px 12px">Layout engine ของ cmux ที่จัดการ Workspace/Surface/Pane hierarchy รวมถึง animations และ drag-and-drop</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="takeaway">
+      <b>★ ถ้าจำได้อย่างเดียว:</b> cmux ให้ AI agent ควบคุม terminal ได้ผ่าน socket API — เปิด browser, spawn agents, ส่ง notifications ทั้งหมดด้วย shell commands
+    </div>
+  </div>
+</section>
+
+</div><!-- /scroll-root -->
+
+<script>
+// ── Hash-based page nav ──
+const scrollRoot = document.getElementById('scroll-root');
+const pageLinks = document.getElementById('page-links');
+const pages = Array.from(document.querySelectorAll('.page'));
+
+pages.forEach((page, i) => {
+  const a = document.createElement('a');
+  a.href = '#' + page.id;
+  a.textContent = page.dataset.title || ('p' + (i + 1));
+  pageLinks.appendChild(a);
+});
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('#page-links a').forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`#page-links a[href="#${e.target.id}"]`);
+      if (active) {
+        active.classList.add('active');
+        active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      }
+    }
+  });
+}, { root: null, threshold: 0.3 });
+pages.forEach(p => obs.observe(p));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); jumpSection(1); }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); jumpSection(-1); }
+});
+function jumpSection(dir) {
+  const active = document.querySelector('#page-links a.active');
+  const links = Array.from(document.querySelectorAll('#page-links a'));
+  const idx = links.indexOf(active);
+  const next = links[idx + dir];
+  if (next) next.click();
+}
+
+// ── Theme toggle ──
+const themeBtn = document.getElementById('theme-btn');
+const root = document.documentElement;
+const saved = localStorage.getItem('explainer-theme');
+if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
+themeBtn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  localStorage.setItem('explainer-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
+});
+
+// ── Tabs ──
+function switchTab(btn, panelId) {
+  const tabsNav = btn.closest('.tabs-nav');
+  tabsNav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tabs-panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(panelId);
+  if (target) target.classList.add('active');
+}
+
+// ── Accordion ──
+function toggleAccordion(btn) {
+  const item = btn.closest('.accordion-item');
+  item.classList.toggle('open');
+}
+
+// ── Copy button ──
+function copyCode(btn) {
+  const pre = btn.closest('.copy-wrap').querySelector('pre code');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
