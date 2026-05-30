@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTK-GPS & DePIN: ความแม่นยำระดับเซนติเมตรจากเครือข่ายกระจายศูนย์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1e293b; --ink-dim: #475569; --muted: #94a3b8;
+  --paper: #ffffff; --soft: #f1f5f9; --soft-2: #e2e8f0;
+  --accent: #3b82f6; --accent-deep: #1e3a8a; --accent-wash: #dbeafe;
+  --gold: #d4af37; --danger: #dc2626; --danger-wash: #fee2e2; --danger-ink: #991b1b;
+  --success: #16a34a; --success-wash: #dcfce7; --success-ink: #14532d;
+  --warning: #f59e0b; --warning-wash: #fef3c7; --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px; --radius-sm: 8px;
+  --nav-h: 52px; --page-max: 960px; --sidebar-w: 240px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9; --ink-dim: #94a3b8; --muted: #475569;
+  --paper: #0f172a; --soft: #1e293b; --soft-2: #334155;
+  --accent-wash: #1e3a8a; --accent-deep: #bfdbfe;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --danger-wash: #450a0a; --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.65; font-size: 16px; }
+code, kbd, pre, .mono { font-family: 'JetBrains Mono','Fira Code',ui-monospace,monospace; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+#progress-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 3px; background: var(--accent); transform-origin: left; transform: scaleX(0); transition: transform .1s linear; pointer-events: none; }
+#nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h); background: var(--paper); border-bottom: 1px solid var(--soft-2); display: flex; align-items: center; padding: 0 16px; box-shadow: var(--shadow-sm); }
+#sidebar-toggle { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--ink); padding: 4px 8px; margin-right: 8px; border-radius: var(--radius-sm); line-height: 1; flex-shrink: 0; transition: background .15s; }
+#sidebar-toggle:hover { background: var(--soft); }
+#nav .brand { font-weight: 700; font-size: 15px; color: var(--ink); margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button { background: none; border: 1px solid var(--soft-2); border-radius: var(--radius-sm); padding: 5px 10px; font-size: 13px; cursor: pointer; color: var(--ink-dim); transition: background .15s; }
+#nav .controls button:hover { background: var(--soft); }
+#sidebar { position: fixed; top: var(--nav-h); left: 0; bottom: 0; width: var(--sidebar-w); background: var(--soft); border-right: 1px solid var(--soft-2); overflow-y: auto; overflow-x: hidden; padding: 16px 0 40px; z-index: 90; transition: transform .25s ease; scrollbar-width: thin; scrollbar-color: var(--soft-2) transparent; }
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--soft-2); border-radius: 2px; }
+#sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 89; background: rgba(15,23,42,.4); }
+.toc-group { margin-bottom: 2px; }
+.toc-group-label { display: block; padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--ink-dim); cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+.toc-group-label:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-group-label.active { color: var(--accent); font-weight: 700; }
+.toc-subs { padding: 0; list-style: none; margin-bottom: 4px; }
+.toc-sub { display: block; padding: 5px 16px 5px 30px; font-size: 12px; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+.toc-sub:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-sub.active { color: var(--accent); font-weight: 600; background: var(--accent-wash); border-right: 2px solid var(--accent); }
+#scroll-root { padding-top: var(--nav-h); margin-left: var(--sidebar-w); }
+.page { scroll-margin-top: calc(var(--nav-h) + 16px); padding: 64px 24px; display: flex; flex-direction: column; align-items: center; }
+.page-inner { width: 100%; max-width: var(--page-max); display: flex; flex-direction: column; gap: 28px; }
+.page.cover { min-height: calc(100vh - var(--nav-h)); background: linear-gradient(135deg, #0f172a 0%, var(--accent-deep) 100%); color: white; justify-content: center; align-items: center; text-align: center; }
+.page.cover .page-inner { align-items: center; }
+.page-foot { display: flex; justify-content: space-between; align-items: center; padding-top: 32px; margin-top: 8px; border-top: 1px solid var(--soft-2); }
+.page-foot .pf-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); background: var(--soft); border: 1px solid var(--soft-2); font-size: 13px; color: var(--ink-dim); cursor: pointer; transition: background .15s, color .15s; text-decoration: none; white-space: nowrap; }
+.page-foot .pf-btn:hover { background: var(--accent-wash); color: var(--accent); text-decoration: none; }
+.page-foot .pf-next { margin-left: auto; }
+h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
+.section-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+.cheatsheet { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.cheatsheet img { max-width: 100%; max-height: 78vh; width: auto; height: auto; object-fit: contain; border-radius: var(--radius); box-shadow: var(--shadow-md); background: var(--paper); }
+.cheatsheet figcaption { font-size: 13px; color: var(--muted); text-align: center; }
+.card { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 18px 20px; border-left: 4px solid var(--accent); }
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card h3      { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p       { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul      { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 640px) { .bento.cols-2,.bento.cols-3,.bento.cols-4 { grid-template-columns: 1fr; } }
+.takeaway { border-left: 4px solid var(--accent); background: var(--soft); padding: 14px 18px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 15px; line-height: 1.6; }
+.takeaway b { color: var(--accent); }
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li { display: flex; gap: 14px; align-items: flex-start; background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px; }
+.steps li .step-num { width: 28px; height: 28px; flex-shrink: 0; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+.callout { background: var(--accent-wash); border-radius: var(--radius-sm); padding: 16px 20px; font-size: 15px; color: var(--accent-deep); border: 1px solid var(--accent); }
+.callout.danger  { background: var(--danger-wash);  border-color: var(--danger);  color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+code { background: var(--soft-2); color: var(--danger-ink); font-size: .875em; padding: 2px 6px; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 16px 20px; border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+kbd { background: var(--soft-2); border: 1px solid var(--soft-2); border-bottom-color: var(--muted); border-radius: 4px; font-size: .8em; padding: 2px 7px; box-shadow: 0 1px 0 var(--muted); }
+.copy-wrap { position: relative; }
+.copy-btn { position: absolute; top: 8px; right: 8px; background: var(--soft-2); border: none; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink-dim); transition: background .15s; }
+.copy-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.copy-btn.copied { background: var(--success-wash); color: var(--success-ink); }
+.tabs-nav { display: flex; gap: 2px; border-bottom: 2px solid var(--soft-2); margin-bottom: 16px; }
+.tabs-nav button { background: none; border: none; padding: 8px 14px; cursor: pointer; font-size: 14px; color: var(--ink-dim); border-bottom: 2px solid transparent; margin-bottom: -2px; border-radius: var(--radius-sm) var(--radius-sm) 0 0; transition: color .15s, border-color .15s; }
+.tabs-nav button:hover { color: var(--ink); }
+.tabs-nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs-panel { display: none; }
+.tabs-panel.active { display: block; }
+.accordion { border: 1px solid var(--soft-2); border-radius: var(--radius-sm); overflow: hidden; }
+.accordion-item { border-top: 1px solid var(--soft-2); }
+.accordion-item:first-child { border-top: none; }
+.accordion-btn { width: 100%; background: none; border: none; padding: 14px 16px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: var(--ink); transition: background .15s; }
+.accordion-btn:hover { background: var(--soft); }
+.accordion-btn::after { content: "▾"; font-size: 12px; color: var(--muted); transition: transform .2s; }
+.accordion-item.open .accordion-btn::after { transform: rotate(-180deg); }
+.accordion-body { display: none; padding: 0 16px 16px; color: var(--ink-dim); font-size: 14px; line-height: 1.7; }
+.accordion-item.open .accordion-body { display: block; }
+details.disclosure { border-left: 3px solid var(--accent); background: var(--soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 12px 0; }
+details.disclosure summary { list-style: none; padding: 12px 16px; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 8px; user-select: none; }
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after { content: "▾"; font-size: 12px; color: var(--muted); transition: transform .2s; margin-left: auto; }
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body { padding: 4px 16px 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.7; }
+details.disclosure .details-body p { font-size: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+@media print { #nav,#sidebar,#sidebar-overlay,#progress-bar,.page-foot { display: none; } #scroll-root { padding-top: 0; margin-left: 0; } .page { page-break-after: always; } }
+@media (max-width: 768px) { #sidebar { transform: translateX(-100%); box-shadow: none; } #sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); } #sidebar-overlay.open { display: block; } #scroll-root { margin-left: 0; } }
+@media (max-width: 480px) { .page { padding: 32px 16px; } h2 { font-size: 22px; } #nav .brand { font-size: 13px; } }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav">
+  <button id="sidebar-toggle" title="Toggle navigation" aria-label="Toggle navigation">☰</button>
+  <span class="brand">RTK-GPS &amp; DePIN</span>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">☀︎</button>
+    <button onclick="window.print()" title="Print / save as PDF">⎙</button>
+  </div>
+</nav>
+<aside id="sidebar"><nav id="toc"></nav></aside>
+<div id="sidebar-overlay"></div>
+
+<div id="scroll-root">
+
+<!-- PAGE 1: COVER -->
+<section class="page cover" id="p1" data-title="หน้าปก">
+  <div class="page-inner" style="align-items:center;text-align:center;gap:16px">
+    <div class="mark"></div>
+    <h1>RTK-GPS &amp; DePIN</h1>
+    <p class="tag">จาก GPS ±5 เมตร → ±2 เซนติเมตร<br>และวิธีสร้างรายได้จากโครงสร้างพื้นฐานกระจายศูนย์</p>
+    <div class="bento cols-3" style="margin-top:24px;max-width:560px">
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none">
+        <p class="label" style="color:rgba(255,255,255,.5)">ความแม่นยำ RTK</p>
+        <h3 style="color:white">±1–2 cm</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none">
+        <p class="label" style="color:rgba(255,255,255,.5)">ต้นทุน DIY</p>
+        <h3 style="color:white">&lt;$300</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none">
+        <p class="label" style="color:rgba(255,255,255,.5)">ระยะ Base→Rover</p>
+        <h3 style="color:white">≤20 km</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PAGE 1b: CHEAT SHEET -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <div class="page-inner">
+    <figure class="cheatsheet">
+      <img src="assets/rtk-gps-depin/cheatsheet.png" alt="RTK-GPS และ DePIN cheat sheet">
+      <figcaption>ภาพสรุปแบบ cheat sheet — บันทึกไว้ดูซ้ำได้</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- PAGE 2: OVERVIEW -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Overview</p>
+      <h2>RTK-GPS คืออะไร และ DePIN เปลี่ยนอะไร</h2>
+      <p class="section-lead">GPS ทั่วไปที่ใช้ในมือถือให้ความแม่นยำระดับ 1–5 เมตร ซึ่งเพียงพอสำหรับการนำทางรถยนต์ แต่ไม่เพียงพอสำหรับหุ่นยนต์ โดรน หรือการสำรวจที่ดิน RTK-GPS แก้ปัญหานี้ด้วยการวัด "phase" ของคลื่นพาหะแทนที่จะวัดแค่เวลาของสัญญาณ ทำให้ความแม่นยำกระโดดจาก ±5 เมตรสู่ ±1–2 เซนติเมตร DePIN (Decentralized Physical Infrastructure Networks) เข้ามาเปลี่ยนโมเดลธุรกิจ ทำให้ใครก็ตามสามารถสร้าง Base Station ของตัวเอง แบ่งปัน Correction Data และรับ Crypto Token เป็นรางวัล แทนที่จะต้องพึ่งบริการจากบริษัทพาณิชย์ที่มีค่าใช้จ่ายสูง</p>
+    </div>
+    <div class="bento cols-3">
+      <div class="card success">
+        <p class="label">เทคโนโลยีหลัก</p>
+        <h3>Carrier Phase RTK</h3>
+        <p>วัด phase ของคลื่น L1/L2 (wavelength ~20 cm) แทนการวัด timing เพียงอย่างเดียว ทำให้ได้ความแม่นยำระดับ sub-centimeter</p>
+      </div>
+      <div class="card warning">
+        <p class="label">โครงสร้างพื้นฐาน</p>
+        <h3>Base + Rover + Internet</h3>
+        <p>Base Station ที่รู้ตำแหน่งแน่นอนคำนวณ Error แล้วส่ง Correction ผ่าน Internet (NTRIP protocol) ให้ Rover แก้ไข Ambiguity</p>
+      </div>
+      <div class="card gold">
+        <p class="label">โมเดลธุรกิจใหม่</p>
+        <h3>DePIN Tokenomics</h3>
+        <p>ผู้ run Base Station รับ Crypto (ONO จาก Onocoy หรือ GEOD จาก GEODNET) เป็น Reward ตามคุณภาพ Signal ที่ส่งออก</p>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>💡 Core insight:</strong> RTK แก้ปัญหา "Integer Ambiguity" — ไม่รู้ว่า Rover อยู่บน wave ที่เท่าไหร่ — ด้วยการเปรียบเทียบกับ Base Station ที่รู้ตำแหน่งแน่นอน การทำ DIY ด้วย ESP32 + u-blox ZED-F9P ทำให้ต้นทุนลดจาก $700+ เหลือต่ำกว่า $300
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> RTK = GPS + Correction Signal จาก Base → ±1 cm; DePIN = Base Station ที่สร้างรายได้ crypto</div>
+  </div>
+</section>
+
+<!-- PAGE 3a: DEEP-DIVE PROTOCOL — COMPONENTS -->
+<section class="page" id="p3a"
+  data-group="protocol"
+  data-group-title="Deep-Dive Protocol"
+  data-tier="intuition"
+  data-title="ส่วนประกอบ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol · ส่วนประกอบ</p>
+      <h2>ส่วนประกอบหลักของระบบ RTK-GPS และ DePIN</h2>
+      <p class="section-lead">ก่อนลงลึกในรายละเอียด ส่วนนี้แผนที่ส่วนประกอบทั้งหมดของระบบ RTK-DePIN เพื่อให้ผู้อ่านเห็นภาพรวมก่อนว่าแต่ละชิ้นส่วนทำหน้าที่อะไร และเชื่อมต่อกันอย่างไร ความเข้าใจโครงสร้างตั้งแต่ต้นจะช่วยให้ทุก section ที่ตามมามีความหมายมากขึ้น</p>
+    </div>
+
+    <div>
+      <h3>ส่วนประกอบหลัก — ฝั่งการรับสัญญาณ</h3>
+      <div class="bento cols-3">
+        <div class="card">
+          <p class="label">Component 1 — Signal Source</p>
+          <h3>ดาวเทียม GNSS</h3>
+          <p>ส่งคลื่นพาหะ L1 (1575.42 MHz) และ L2 (1227.60 MHz) มา Earth โดยมี wavelength ~20 cm แต่ละดาวเทียมส่ง timing code + navigation message + carrier wave พร้อมกัน</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Component 2 — Standard GPS</p>
+          <h3>Pseudorange Measurement</h3>
+          <p>วัดเวลาที่สัญญาณเดินทางจากดาวเทียมถึง Receiver แล้วคูณด้วยความเร็วแสง ได้ระยะห่าง ±1–5 m ขึ้นอยู่กับ atmospheric delay, multipath, clock error</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Component 3 — RTK Layer</p>
+          <h3>Carrier Phase Measurement</h3>
+          <p>วัด phase ของ carrier wave (ตำแหน่งบนคลื่น) ซึ่งมี resolution ที่สูงกว่าการวัด timing มาก แต่มีปัญหา "Integer Ambiguity" ที่ต้องแก้ไขก่อนจึงจะใช้งานได้จริง</p>
+        </div>
+        <div class="card success">
+          <p class="label">Component 4 — Reference Point</p>
+          <h3>Base Station</h3>
+          <p>เครื่องรับ GNSS ที่ตำแหน่งทราบแน่นอน (survey-grade หรือ calibrated) คำนวณความแตกต่างระหว่างตำแหน่งที่ "ควรจะเป็น" กับที่ "วัดได้" แล้วส่ง Correction Data ต่อเนื่องทุก 1 วินาที</p>
+        </div>
+        <div class="card">
+          <p class="label">Component 5 — Mobile Receiver</p>
+          <h3>Rover</h3>
+          <p>เครื่องรับ GNSS ที่เคลื่อนที่ได้ รับ Correction Data จาก Base แล้วใช้ algorithm (LAMBDA) แก้ไข Integer Ambiguity จนได้ตำแหน่งที่แม่นยำ ±1–2 cm ภายใน 5–60 วินาที</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Component 6 — Transport Layer</p>
+          <h3>NTRIP / Internet</h3>
+          <p>Protocol สำหรับส่ง RTCM3 Correction Messages ผ่าน HTTP/TCP ทำให้ Base Station และ Rover ไม่ต้องอยู่ใกล้กัน แค่มี Internet ก็ส่ง Correction ข้ามทวีปได้</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>ส่วนประกอบหลัก — ฝั่ง DePIN</h3>
+      <div class="bento cols-2">
+        <div class="card gold">
+          <p class="label">Component 7 — Network Layer</p>
+          <h3>Correction Marketplace</h3>
+          <p>บริการอย่าง <strong>Onocoy</strong> (token: ONO) และ <strong>GEODNET</strong> (token: GEOD) รวบรวม Correction Data จาก Base Station ทั่วโลก แล้วขายให้ผู้ใช้ปลายทาง (enterprise, drones, robots)</p>
+        </div>
+        <div class="card success">
+          <p class="label">Component 8 — Incentive Layer</p>
+          <h3>Token Rewards</h3>
+          <p>Operator ที่ run Base Station รับ Crypto Token ตามคุณภาพ Signal ที่ส่งออก: จำนวน satellite bands, uptime, geographic coverage — ยิ่งคุณภาพสูงยิ่งได้ reward มาก</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architecture SVG — ASCII labels only -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <svg viewBox="0 0 900 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-p3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <rect x="10" y="70" width="130" height="60" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="75" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Satellites</text>
+        <text x="75" y="114" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">L1/L2 carrier</text>
+        <path d="M140 100 L190 80" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p3)"/>
+        <path d="M140 100 L190 120" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p3)"/>
+        <rect x="190" y="55" width="140" height="50" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="260" y="76" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Base Station</text>
+        <text x="260" y="93" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">known position</text>
+        <rect x="190" y="115" width="140" height="50" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="260" y="136" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Rover</text>
+        <text x="260" y="153" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">unknown position</text>
+        <path d="M330 80 L390 100" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-p3)"/>
+        <rect x="390" y="70" width="150" height="60" rx="10" fill="var(--soft-2)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="465" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">NTRIP / Internet</text>
+        <text x="465" y="114" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">RTCM3 correction</text>
+        <path d="M540 100 L600 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-p3)"/>
+        <rect x="600" y="70" width="140" height="60" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="670" y="97" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Onocoy/GEODNET</text>
+        <text x="670" y="114" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">marketplace + token</text>
+        <path d="M740 100 L800 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-p3)"/>
+        <rect x="800" y="70" width="88" height="60" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="844" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Rover</text>
+        <text x="844" y="114" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">+/- 2 cm</text>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">แผนผังระบบ: ดาวเทียม → Base Station คำนวณ Error → ส่งผ่าน NTRIP/Internet → Rover แก้ Ambiguity → ±2 cm</p>
+    </div>
+
+    <div class="takeaway"><b>★ ภาพรวม:</b> RTK ต้องการ 2 receiver (Base + Rover) + Internet — Base คำนวณ error แทน Rover ทำให้ Rover ได้ตำแหน่งแม่นยำโดยไม่ต้องซับซ้อนเอง</div>
+  </div>
+</section>
+
+<!-- PAGE 3b: DEEP-DIVE PROTOCOL — ASSUMPTIONS & TAKEAWAYS -->
+<section class="page" id="p3b"
+  data-group="protocol"
+  data-tier="advanced"
+  data-title="สมมติฐาน & Takeaways">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol · สมมติฐาน &amp; Takeaways</p>
+      <h2>สิ่งที่ซ่อนอยู่และ Insights สำคัญ</h2>
+    </div>
+
+    <div>
+      <h3>สมมติฐานที่ซ่อนอยู่ (Implicit Assumptions)</h3>
+      <p>สิ่งเหล่านี้คือสิ่งที่ระบบ RTK-GPS ถือว่าผู้ใช้รู้อยู่แล้ว แต่คนเริ่มต้นมักไม่ทราบและส่งผลให้เกิดความสับสนหรือผลลัพธ์ที่ไม่คาดคิด</p>
+      <ul>
+        <li><strong>สมมติฐานที่ 1 — Base ต้องอยู่ใกล้ Rover ≤ 20 km:</strong> Correction Data ที่ Base ส่งมาจะ "ถูกต้อง" สำหรับ Rover ก็ต่อเมื่อทั้งคู่อยู่ในสภาพ atmospheric error ที่คล้ายกัน ถ้าห่างเกิน 20 km ค่า ionospheric delay จะต่างกันมากจน Correction ไม่แม่นยำ</li>
+        <li><strong>สมมติฐานที่ 2 — Base Station ต้องทราบตำแหน่งของตัวเองก่อน:</strong> ถ้า Base ไม่รู้ตำแหน่งของตัวเองอย่างแม่นยำ (survey-in process อาจใช้เวลา 1–24 ชั่วโมง) ความผิดพลาดจะถูกส่งต่อไปยัง Rover ทั้งหมด ทำให้ถึงแม้ Rover จะได้ตำแหน่งที่ "เสถียร" แต่ก็อาจ offset จากตำแหน่งจริง</li>
+        <li><strong>สมมติฐานที่ 3 — Multi-band antenna ≠ ทางเลือก แต่คือความจำเป็น:</strong> การรับสัญญาณ L1 เพียง band เดียวสามารถ resolve ambiguity ได้ช้ากว่ามาก (หรือล้มเหลวในสภาพ sky ที่บังบาง) multi-band (L1+L2+L5) ให้ redundancy และความเร็วในการ fix สูงกว่ามาก</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Key Takeaways — เรียงจาก High-level → Actionable</h3>
+      <div class="bento cols-2">
+        <div class="card success">
+          <p class="label">Takeaway 1 — Big Picture</p>
+          <h3>RTK วัด Phase ไม่ใช่แค่ Timing</h3>
+          <p>GPS ทั่วไปวัดว่าสัญญาณใช้เวลานานเท่าไหร่ RTK วัดว่าสัญญาณอยู่ที่ "ตำแหน่งไหนบนคลื่น" ซึ่งมี resolution สูงกว่าเป็นร้อยเท่า นั่นคือความแตกต่างระหว่าง ±5 m กับ ±2 cm</p>
+        </div>
+        <div class="card">
+          <p class="label">Takeaway 2 — Mental Model</p>
+          <h3>Base = เพื่อนที่รู้ตัวเองว่าอยู่ที่ไหน</h3>
+          <p>เปรียบ Base Station เหมือนเพื่อนที่ยืนอยู่ตรงจุดที่รู้แน่นอน แล้วบอกว่า "GPS บอกว่าฉันอยู่ผิดไป 3 เมตร" Rover ได้ยินแล้วก็รู้ว่าตัวเองน่าจะผิดไปในทิศทางเดียวกัน จึงแก้ไขได้ถูกต้อง</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Takeaway 3 — Common Trap</p>
+          <h3>ราคา Hardware ≠ ความแม่นยำ</h3>
+          <p>Base Station ราคา $700+ จาก Leica หรือ Trimble ไม่ได้แม่นยำกว่า DIY ESP32 + ZED-F9P อย่างมีนัยสำคัญ ความแตกต่างอยู่ที่ ruggedness และ support เท่านั้น สำหรับ hobbyist/maker DIY เพียงพอ</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Takeaway 4 — Actionable</p>
+          <h3>DePIN เปลี่ยน CAPEX เป็น Revenue Stream</h3>
+          <p>แทนที่ Base Station จะเป็น "ค่าใช้จ่าย" ที่ต้องจ่ายเพื่อใช้ RTK เอง การเชื่อมต่อกับ Onocoy/GEODNET เปลี่ยนมันเป็น "แหล่งรายได้" ที่ได้ Token ขณะที่ไม่ได้ใช้งาน</p>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:8px">
+        <strong>💡 Takeaway 5–7:</strong>
+        <ul style="margin-top:8px;color:var(--accent-deep)">
+          <li><strong>T5:</strong> Fix time (TTFF) คือ 5–60 วินาทีหลัง startup — ไม่ใช่ instant ต้องรอให้ Ambiguity resolve ก่อนจึงได้ cm accuracy</li>
+          <li><strong>T6:</strong> Selling RTK correction data คือธุรกิจมูลค่า multi-million dollar แล้วตอนนี้ — DePIN democratize การเข้าถึงตลาดนี้</li>
+          <li><strong>T7:</strong> Signal quality = reward: ยิ่งมี multi-band antenna + clear sky view + stable internet ยิ่งได้ token มาก เพราะ network ให้ reward ตาม contribution quality</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="takeaway"><b>★ Mental model:</b> RTK = Base คำนวณ error แทน Rover; DePIN = Base Station ที่จ่าย crypto ให้คุณขณะที่มันช่วยคนอื่น</div>
+  </div>
+</section>
+
+<!-- PAGE 4a: RTK BASICS — INTUITION -->
+<section class="page" id="p4a"
+  data-group="rtk-basics"
+  data-group-title="RTK-GPS พื้นฐาน"
+  data-tier="intuition"
+  data-title="สัญชาตญาณ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — RTK-GPS พื้นฐาน · สัญชาตญาณ</p>
+      <h2>ทำไม GPS ทั่วไปถึงไม่แม่นยำ และ RTK แก้ปัญหานี้อย่างไร</h2>
+      <p class="section-lead">เพื่อเข้าใจว่า RTK ทำงานอย่างไร ต้องเริ่มจากเข้าใจก่อนว่า GPS ทั่วไปมีข้อจำกัดอะไร สัญญาณ GPS เดินทางจากดาวเทียมสู่โลกผ่านชั้น ionosphere และ troposphere ซึ่งทำให้สัญญาณช้าลงและเบี่ยงเบน ยิ่งไปกว่านั้น clock ของดาวเทียมและ receiver ก็ไม่เคย sync กันสมบูรณ์ 100% ความผิดพลาดเหล่านี้รวมกันทำให้ความแม่นยำอยู่ที่ ±1–5 เมตร ไม่ใช่ความผิดพลาดของอุปกรณ์ แต่เป็น fundamental limit ของวิธีการวัด</p>
+    </div>
+
+    <div>
+      <h3>GPS ทั่วไป: วัดเวลาเพื่อคำนวณระยะทาง</h3>
+      <p>GPS receiver ทำงานโดยรับสัญญาณจากดาวเทียมอย่างน้อย 4 ดวง แต่ละดาวเทียมส่ง "timestamp" บอกว่าสัญญาณออกเดินทางเมื่อไหร่ receiver วัดว่าสัญญาณมาถึงเมื่อไหร่ แล้วคูณด้วยความเร็วแสง (300,000 km/s) เพื่อได้ระยะทาง วิธีนี้เรียกว่า pseudorange measurement</p>
+      <p>ปัญหาคือ "เวลา" ที่วัดได้นั้นไม่แม่นยำสมบูรณ์ แสงเดินทางช้าลง ~240 ns เมื่อผ่านชั้น ionosphere และอีก ~7 ns เมื่อผ่าน troposphere ซึ่งแปลเป็นความผิดพลาดของระยะทางหลาย meter ไม่มีทางรู้ว่าวันนี้ ionosphere หนาแค่ไหนโดยไม่มีข้อมูลอ้างอิง นั่นคือที่มาของ ±5 m error</p>
+
+      <div style="display:flex;justify-content:center;margin:20px 0">
+        <svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+            </marker>
+          </defs>
+          <rect x="20" y="60" width="120" height="80" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="80" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Satellite</text>
+          <text x="80" y="113" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">sends timestamp</text>
+          <path d="M140 100 L220 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr4a)"/>
+          <text x="180" y="90" font-size="10" fill="var(--danger)" text-anchor="middle" font-family="system-ui">+delay</text>
+          <rect x="220" y="60" width="180" height="80" rx="10" fill="var(--warning-wash)" stroke="var(--warning)" stroke-width="1.5"/>
+          <text x="310" y="93" font-size="12" font-weight="700" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">Ionosphere</text>
+          <text x="310" y="110" font-size="10" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">slows signal</text>
+          <path d="M400 100 L480 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr4a)"/>
+          <rect x="480" y="60" width="120" height="80" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="540" y="93" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Receiver</text>
+          <text x="540" y="110" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">measures time</text>
+          <path d="M600 100 L670 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr4a)"/>
+          <rect x="670" y="60" width="115" height="80" rx="10" fill="var(--danger-wash)" stroke="var(--danger)" stroke-width="1.5"/>
+          <text x="727" y="93" font-size="12" font-weight="700" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Position</text>
+          <text x="727" y="110" font-size="10" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">+/- 1 to 5 m</text>
+          <rect x="0" y="0" width="1" height="1" fill="none"/>
+        </svg>
+      </div>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">GPS ทั่วไป: Satellite ส่ง timestamp → ผ่าน Ionosphere ที่ทำให้ช้าลง → Receiver วัดเวลา → ตำแหน่งมีความผิดพลาด ±1–5 m</p>
+    </div>
+
+    <div>
+      <h3>RTK: วัด Phase แทนการวัดแค่เวลา</h3>
+      <p>GPS receiver ที่รองรับ RTK ไม่ได้วัดแค่ว่าสัญญาณมาถึงเมื่อไหร่ แต่วัดด้วยว่าสัญญาณ "อยู่ที่ตำแหน่งไหนบนคลื่น" ณ ขณะนั้น เหมือนกับที่คุณสามารถบอกได้ไม่เพียงแค่ว่าเส้นไหนบนไม้บรรทัดที่ตรงกับขอบกล่อง แต่ยังบอกได้ว่าอยู่ที่ fraction ไหนของช่วงระหว่างขีด</p>
+      <p>Carrier wave ของ L1 มี wavelength 19.05 cm สามารถวัด phase ได้ด้วยความแม่นยำ ~1% ของ wavelength หมายความว่าความแม่นยำของการวัด phase เพียงอย่างเดียวอยู่ที่ ~2 mm ดีกว่า pseudorange มาก แต่มีปัญหาหนึ่งที่ต้องแก้ก่อน: Integer Ambiguity</p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: Integer Ambiguity คืออะไร และทำไมถึงแก้ยาก?</summary>
+        <div class="details-body">
+          <p>สมมติว่า Rover รับสัญญาณจากดาวเทียมดวงหนึ่งซึ่งอยู่ห่าง 20,000 km receiver วัดได้ว่า carrier wave อยู่ที่ phase angle 0.37 cycle แต่ระยะ 20,000 km นั้นมี carrier wave กี่รอบ? คำตอบคือประมาณ 100 ล้านรอบ แต่ receiver ไม่รู้ว่ารอบที่เท่าไหร่กันแน่ — รู้แค่ว่า fractional phase คือ 0.37</p>
+          <p>ตัวเลขจำนวนเต็มของรอบที่ไม่รู้นี้คือ "Integer Ambiguity" (N) ถ้าแก้ได้ว่า N = 100,000,000 แล้ว phase measurement จะให้ความแม่นยำ sub-centimeter แต่ถ้าเดาผิดแม้แต่ 1 cycle จะ offset ตำแหน่งไป 19 cm ทันที</p>
+          <p>RTK แก้ปัญหานี้ด้วย LAMBDA algorithm (Least-squares AMBiguity Decorrelation Adjustment) ซึ่งใช้ data จากหลายดาวเทียมพร้อมกัน และ Correction Data จาก Base Station เพื่อ narrow down ว่า N ที่เป็นไปได้มากที่สุดคือเท่าไหร่ โดยทั่วไปใช้เวลา 5–60 วินาที</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="takeaway"><b>★ Beginner takeaway:</b> RTK ไม่ได้ "แก้" GPS — มันเพิ่ม layer ใหม่ที่วัด phase ของคลื่น แล้วใช้ข้อมูลจาก Base Station ที่รู้ตำแหน่งแน่นอนเพื่อแก้ค่า error ร่วมกัน</div>
+  </div>
+</section>
+
+<!-- PAGE 4b: RTK BASICS — MECHANISM -->
+<section class="page" id="p4b"
+  data-group="rtk-basics"
+  data-tier="mechanism"
+  data-title="กลไก">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — RTK-GPS พื้นฐาน · กลไก</p>
+      <h2>กระบวนการทำงานของ RTK ทีละขั้นตอน</h2>
+      <p class="section-lead">เมื่อเข้าใจ "ทำไม" แล้ว ส่วนนี้อธิบาย "อย่างไร" — กระบวนการที่เกิดขึ้นจริงในทุก epoch (1 วินาที) ตั้งแต่ Base Station วัดสัญญาณ ส่ง Correction ผ่าน Internet จนถึง Rover คำนวณตำแหน่ง ±2 cm</p>
+    </div>
+
+    <div>
+      <h3>ขั้นตอนการทำงาน RTK ทุก Epoch</h3>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <div class="step-body">
+            <strong>Base Station วัด Error</strong>
+            <p>Base รับสัญญาณจากดาวเทียมเหมือนกัน แล้วเปรียบเทียบตำแหน่งที่ "วัดได้" กับตำแหน่งที่ "รู้แน่นอน" ความแตกต่างคือ aggregate error ของระบบ ณ ขณะนั้น (ionospheric delay, satellite clock error, orbital error) ซึ่งแม่นยำกว่าการประมาณจากโมเดล</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div class="step-body">
+            <strong>Encode เป็น RTCM3 Message แล้วส่งผ่าน NTRIP</strong>
+            <p>Base encode ค่า correction เป็น RTCM3 binary format (ขนาด ~250 bytes/message) ส่งผ่าน NTRIP Caster (เช่น RTK2GO.com หรือ Onocoy) ด้วยอัตรา 1 message/วินาที Rover ต่อ internet แล้วดึง stream ผ่าน HTTP persistent connection</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div class="step-body">
+            <strong>Rover รับ Correction + Resolve Ambiguity</strong>
+            <p>Rover รับ RTCM3 message แล้วใช้ร่วมกับ carrier phase measurement ของตัวเอง algorithm LAMBDA iterates จนหาจำนวนเต็มของ cycle ที่เป็นไปได้มากที่สุด เมื่อ "fix" สำเร็จ ความแม่นยำกระโดดจาก "float solution" (~30 cm) เป็น "fixed solution" (~2 cm) ทันที</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <div class="step-body">
+            <strong>Track Fix Status ต่อเนื่อง</strong>
+            <p>หลัง fix แล้ว Rover track การเปลี่ยนแปลงของ phase ต่อเนื่อง (cycle slip detection) ถ้าสัญญาณถูกบัง (อาคาร, ต้นไม้) และ cycle slip เกิดขึ้น Rover ต้องทำ re-initialize ซึ่งใช้เวลา 5–60 วินาทีอีกครั้ง นี่คือข้อจำกัดสำคัญในสภาพแวดล้อม urban ที่มีตึกล้อมรอบ</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div>
+      <h3>ความสำคัญของระยะห่าง Base–Rover</h3>
+      <p>Correction Data จาก Base "แม่นยำ" สำหรับ Rover ก็ต่อเมื่อทั้งคู่อยู่ในสภาพ atmospheric error ที่คล้ายกัน ถ้าอยู่ห่างกัน 20 km ค่า ionospheric delay ที่ Base วัดได้ยังคล้ายกับที่ Rover เจออยู่พอ ถ้าห่างเกิน 20 km error ของทั้งคู่เริ่มแตกต่างกัน ทำให้ Correction ไม่ถูกต้อง</p>
+      <p>นี่คือเหตุผลว่าทำไม Network RTK (หลาย Base Station ครอบคลุม grid) จึงสำคัญ — Rover สามารถเลือกใช้ Base ที่ใกล้ที่สุดได้เสมอ Onocoy และ GEODNET build network นี้โดยให้ community เป็นคนติดตั้ง Base Station แล้วจ่าย Token เป็น incentive</p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: RTCM3 Message Types — ส่งข้อมูลอะไรบ้าง?</summary>
+        <div class="details-body">
+          <p>RTCM3 มี message type หลายร้อยประเภท แต่ที่ใช้บ่อยใน RTK คือ: <strong>Type 1005/1006</strong> — ตำแหน่ง Base Station (ARP: Antenna Reference Point); <strong>Type 1074–1127</strong> — MSM (Multiple Signal Messages) สำหรับ GPS, GLONASS, Galileo, BeiDou ทั้ง pseudorange และ carrier phase; <strong>Type 4076</strong> — State Space Representation (SSR) สำหรับ network corrections</p>
+          <p>Onocoy และ GEODNET รับ RTCM3 จาก Base Station แล้วแจกจ่ายให้ Rover ทั่วโลก Rover เพียงแค่ configure endpoint URL + credentials ก็เริ่มได้รับ Correction ทันที ไม่ต้องรู้ว่า Base อยู่ที่ไหนในโลก</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="takeaway"><b>★ Intermediate takeaway:</b> Fix time 5–60s คือ cold-start delay ที่หลีกเลี่ยงไม่ได้ — วางแผน workflow ให้ Rover warm-up ก่อนเริ่มงานที่ต้องการ cm accuracy</div>
+  </div>
+</section>
+
+<!-- PAGE 5a: CORRECTION NETWORK — INTUITION -->
+<section class="page" id="p5a"
+  data-group="correction-network"
+  data-group-title="Correction Network"
+  data-tier="intuition"
+  data-title="สัญชาตญาณ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — Correction Network · สัญชาตญาณ</p>
+      <h2>NTRIP, RTK2GO และ Onocoy: Internet ส่ง Correction ได้อย่างไร</h2>
+      <p class="section-lead">หนึ่งในความก้าวหน้าที่สำคัญที่สุดของ RTK สมัยใหม่คือการส่ง Correction Data ผ่าน Internet แทนที่จะต้องใช้ Radio ระยะสั้น ก่อนหน้านี้ Base Station และ Rover ต้องอยู่ใกล้กันและมี Radio Link ตรง ทำให้ต้นทุนสูงและยืดหยุ่นน้อย NTRIP Protocol เปลี่ยนเกมทั้งหมด — ตอนนี้ Base Station ของคุณอยู่กรุงเทพฯ สามารถส่ง Correction ให้ Rover ในเชียงใหม่ได้โดยตรงผ่าน Internet</p>
+    </div>
+
+    <div>
+      <h3>NTRIP Protocol: HTTP สำหรับ GPS Correction</h3>
+      <p>NTRIP (Networked Transport of RTCM via Internet Protocol) ออกแบบมาในปี 2004 โดย Federal Agency for Cartography and Geodesy ของเยอรมนี ทำงานบน HTTP/TCP Port 2101 โดยมีสามส่วนหลัก:</p>
+      <ul>
+        <li><strong>NTRIP Source (Broadcaster):</strong> Base Station ที่ส่ง RTCM3 stream ขึ้นไปยัง Caster ต่อเนื่อง ตราบใดที่มี Internet</li>
+        <li><strong>NTRIP Caster:</strong> Server กลาง (เช่น RTK2GO.com, EUREF-IP) รับ stream จาก Source หลายตัว แล้วแจกจ่ายให้ Client ตามที่ขอ — เหมือน "radio station" บน Internet</li>
+        <li><strong>NTRIP Client (Rover):</strong> ส่ง HTTP GET request พร้อม mountpoint ของ Base ที่ต้องการ แล้วรับ RTCM3 stream ต่อเนื่อง forward เข้า GNSS receiver ผ่าน serial port</li>
+      </ul>
+
+      <div style="display:flex;justify-content:center;margin:20px 0">
+        <svg viewBox="0 0 820 180" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+            </marker>
+          </defs>
+          <rect x="10" y="60" width="155" height="60" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="87" y="87" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Base Station</text>
+          <text x="87" y="104" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">NTRIP Source</text>
+          <path d="M165 90 L240 90" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr5a)"/>
+          <text x="202" y="80" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">RTCM3</text>
+          <rect x="240" y="50" width="180" height="80" rx="10" fill="var(--soft-2)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="330" y="82" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">NTRIP Caster</text>
+          <text x="330" y="99" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">RTK2GO / Onocoy</text>
+          <text x="330" y="116" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">GEODNET</text>
+          <path d="M420 90 L490 90" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr5a)"/>
+          <text x="455" y="80" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">stream</text>
+          <rect x="490" y="50" width="155" height="80" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="567" y="82" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">NTRIP Client</text>
+          <text x="567" y="99" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">ESP32 / phone</text>
+          <path d="M645 90 L710 90" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr5a)"/>
+          <rect x="710" y="60" width="100" height="60" rx="10" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+          <text x="760" y="87" font-size="12" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Rover</text>
+          <text x="760" y="104" font-size="10" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">+/- 2 cm</text>
+          <rect x="0" y="0" width="1" height="1" fill="none"/>
+        </svg>
+      </div>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">NTRIP flow: Base → Caster (RTK2GO/Onocoy/GEODNET) → Client (ESP32/phone) → Rover → ±2 cm</p>
+    </div>
+
+    <div>
+      <h3>RTK2GO vs Onocoy vs GEODNET: เลือกอะไร?</h3>
+      <div class="tabs-nav" role="tablist">
+        <button class="active" onclick="switchTab(this,'t5a-1')" role="tab">RTK2GO (Free)</button>
+        <button onclick="switchTab(this,'t5a-2')" role="tab">Onocoy (DePIN + ONO)</button>
+        <button onclick="switchTab(this,'t5a-3')" role="tab">GEODNET (DePIN + GEOD)</button>
+      </div>
+      <div id="t5a-1" class="tabs-panel active">
+        <h3>RTK2GO — NTRIP Caster ฟรี</h3>
+        <p>RTK2GO.com เป็น NTRIP Caster สาธารณะที่ให้บริการฟรี เหมาะสำหรับการทดสอบและ hobbyist ที่ต้องการ Correction Data สำหรับใช้เองโดยไม่ได้ต้องการ earn rewards ผู้ใช้สามารถ register Base Station ได้ฟรีและ share ให้คนอื่นใช้ได้</p>
+        <p>ข้อเสีย: ไม่มี incentive ให้ Base Station operator เพราะไม่ใช่ DePIN model, coverage ขึ้นอยู่กับ volunteer, ไม่รับประกัน uptime หรือ quality</p>
+        <div class="callout warning" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> ทดสอบ setup ครั้งแรก, DIY project ที่ไม่ต้องการ production reliability</div>
+      </div>
+      <div id="t5a-2" class="tabs-panel">
+        <h3>Onocoy — DePIN GNSS Marketplace</h3>
+        <p>Onocoy เป็น DePIN network ที่ focus เฉพาะ GNSS/RTK correction data ผู้ run Base Station รับ <code>$ONO</code> token เป็น reward ตาม contribution quality Onocoy ขาย Correction Data ให้ enterprise ด้วย subscription model แล้วนำรายได้ส่วนหนึ่งกลับไปจ่าย operator</p>
+        <p>ข้อเสีย: ต้องการ compatible hardware (multi-band GNSS receiver), network ยังอยู่ระหว่าง growth phase, token price volatility</p>
+        <div class="callout success" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> ต้องการ earn crypto จาก Base Station ที่ตั้งถาวร, อยู่ในพื้นที่ที่ยังขาด coverage</div>
+      </div>
+      <div id="t5a-3" class="tabs-panel">
+        <h3>GEODNET — Blockchain-Powered GNSS</h3>
+        <p>GEODNET เป็น DePIN network ที่ใหญ่กว่า Onocoy และมีฐาน investor จาก crypto world ผู้ run station รับ <code>$GEOD</code> token โดย GEODNET ใช้ hex-based reward zone system — station แต่ละตัวครอบคลุม hex cell ถ้า cell นั้นมี station น้อย reward สูงกว่า ถ้ามี station มากแล้ว reward ลด</p>
+        <p>ข้อเสีย: hardware ที่รองรับอย่างเป็นทางการมักราคาสูงกว่า ($300+), reward system ซับซ้อน, ต้องศึกษา tokenomics ก่อน</p>
+        <div class="callout" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> ต้องการ ecosystem ที่ใหญ่กว่า, พื้นที่ที่ยังไม่มี station ใน hex cell</div>
+      </div>
+    </div>
+
+    <div class="takeaway"><b>★ Beginner takeaway:</b> NTRIP คือ "HTTP streaming สำหรับ GPS correction" — Base push, Caster relay, Rover pull ผ่าน TCP connection เดียว</div>
+  </div>
+</section>
+
+<!-- PAGE 5b: CORRECTION NETWORK — MECHANISM -->
+<section class="page" id="p5b"
+  data-group="correction-network"
+  data-tier="mechanism"
+  data-title="กลไก Network">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — Correction Network · กลไก</p>
+      <h2>การตั้งค่า NTRIP Connection และ Network Coverage</h2>
+      <p class="section-lead">ส่วนนี้อธิบายขั้นตอนการเชื่อมต่อ Rover เข้ากับ NTRIP Caster ในทางปฏิบัติ รวมถึงวิธีตรวจสอบว่ามี Base Station ครอบคลุมพื้นที่ที่ต้องการหรือไม่ และ config ที่ต้องตั้งใน GNSS receiver</p>
+    </div>
+
+    <div>
+      <h3>Config ที่ต้องมีสำหรับ NTRIP Client</h3>
+      <p>การเชื่อมต่อ Rover กับ NTRIP Caster ต้องการข้อมูลสี่อย่าง ซึ่งทั้งหมดได้มาจากการ register บนเว็บไซต์ของ Caster (RTK2GO, Onocoy, GEODNET) ก่อนใช้งาน:</p>
+      <div class="copy-wrap">
+        <pre><code># NTRIP Client config (u-blox ZED-F9P via ESP32)
+Host:        rtk2go.com      # or ntrip.onocoy.com
+Port:        2101
+Mountpoint:  MY_BASE_STATION # ชื่อ station ที่ register ไว้
+Username:    your@email.com  # สำหรับ RTK2GO
+Password:    none            # RTK2GO ไม่ต้องใช้ password
+GGA:         enable          # ส่ง position ของ Rover กลับไป Caster</code></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <p>การ enable <code>GGA</code> (NMEA sentence ที่มีตำแหน่ง Rover) สำคัญมาก เพราะ Caster ใช้ข้อมูลนี้เพื่อ route ไปยัง Base Station ที่ใกล้ที่สุดโดยอัตโนมัติ (VRS: Virtual Reference Station mode) และเพื่อ verify ว่า Rover อยู่ใน coverage zone</p>
+    </div>
+
+    <div>
+      <h3>วิธีตรวจสอบ Coverage ก่อนติดตั้ง</h3>
+      <p>ก่อนลงทุนซื้อ hardware ควรตรวจสอบก่อนว่ามี Base Station ครอบคลุมพื้นที่ที่ต้องการหรือไม่ ถ้าไม่มี — นั่นคือโอกาสสำหรับ DePIN operator ที่จะ earn rewards มากกว่า</p>
+      <div class="bento cols-2">
+        <div class="card">
+          <p class="label">Onocoy Coverage</p>
+          <h3>onocoy.com/map</h3>
+          <p>แผนที่ interactive แสดง active station ของ Onocoy network ทั่วโลก พื้นที่สีน้ำเงินหมายถึงมี coverage แล้ว พื้นที่ขาวคือโอกาสสำหรับ new operator</p>
+        </div>
+        <div class="card warning">
+          <p class="label">GEODNET Coverage</p>
+          <h3>rtk.geodnet.com/coverage</h3>
+          <p>แผนที่ hex grid ของ GEODNET แสดง reward multiplier แต่ละ cell สีเขียวเข้ม = reward สูง (มี station น้อย), สีเขียวอ่อน = reward ต่ำ (saturated area)</p>
+        </div>
+      </div>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: VRS (Virtual Reference Station) คืออะไร ต่างจาก Single Base อย่างไร?</summary>
+        <div class="details-body">
+          <p>VRS คือเทคนิคที่ใช้ข้อมูลจาก Base Station หลายตัวรอบๆ Rover เพื่อ interpolate correction ที่ "เหมือนกับว่า Base อยู่ตรงตำแหน่ง Rover เลย" ทำให้ precision สูงขึ้นโดยเฉพาะเมื่อ Rover อยู่ห่างจาก Base Station จริงมากกว่า 10 km</p>
+          <p>Network RTK อย่าง Onocoy และ GEODNET ให้ VRS correction โดยอัตโนมัติเมื่อมี Base หลายตัวในบริเวณ Rover ส่งผลให้ reliability และ accuracy ดีกว่า Single Base โดยเฉพาะพื้นที่ที่มี station density สูง</p>
+          <p>ข้อจำกัด: VRS ต้องการ Rover ส่ง GGA message กลับมาให้ Caster เพื่อรู้ว่า Rover อยู่ที่ไหน บาง firmware version ของ GNSS receiver ไม่ส่ง GGA โดย default ต้องเปิดใช้งานเอง</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="takeaway"><b>★ Intermediate takeaway:</b> Enable GGA ใน NTRIP client เสมอ — Caster ต้องรู้ตำแหน่ง Rover เพื่อ route correction ที่ถูกต้อง ถ้า disable จะได้ correction จาก Base ที่ไม่ใช่ที่ใกล้ที่สุด</div>
+  </div>
+</section>
+
+<!-- PAGE 6a: DIY HARDWARE — COMPONENTS -->
+<section class="page" id="p6a"
+  data-group="diy-hardware"
+  data-group-title="DIY Hardware"
+  data-tier="intuition"
+  data-title="ส่วนประกอบ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — DIY Hardware · ส่วนประกอบ</p>
+      <h2>สร้าง Base Station ด้วยตัวเอง: ESP32 + ZED-F9P &lt;$300</h2>
+      <p class="section-lead">Commercial RTK Base Station จากบริษัทอย่าง Leica, Trimble หรือ Septentrio มีราคา $700–$10,000 แต่ฟังก์ชันหลักที่ต้องการสำหรับ DePIN network นั้นสามารถ replicate ได้ด้วย hardware ราคาต่ำกว่า $300 ประกอบด้วย 4 components หลัก ที่แต่ละชิ้นทำหน้าที่เฉพาะและสามารถซื้อแยกได้ตามงบประมาณ</p>
+    </div>
+
+    <div>
+      <h3>4 Components หลักของ DIY RTK Base Station</h3>
+      <div class="bento cols-2">
+        <div class="card gold">
+          <p class="label">Component 1 — GNSS Receiver</p>
+          <h3>u-blox ZED-F9P</h3>
+          <p>Multi-band GNSS receiver ที่รับ L1+L2+L5 จาก GPS, GLONASS, Galileo, BeiDou พร้อมกัน ราคาประมาณ $180–$220 ถือเป็น standard สำหรับ RTK DIY community ให้ carrier phase measurement และรองรับ RTCM3 output โดยตรง</p>
+          <ul>
+            <li>Interface: UART / USB / SPI / I2C</li>
+            <li>Update rate: ถึง 20 Hz</li>
+            <li>Fix time: ~10 s (multi-band)</li>
+          </ul>
+        </div>
+        <div class="card success">
+          <p class="label">Component 2 — Antenna</p>
+          <h3>Multi-band Survey Antenna</h3>
+          <p>Antenna ที่รองรับ L1+L2+L5 พร้อมกัน (เช่น u-blox ANN-MB-00 หรือ Matek M8Q-5883) สำคัญมากกว่า receiver เพราะ antenna คุณภาพต่ำทำให้ cycle slip บ่อย ลด reward และลด accuracy ราคา $30–$80 ต้องวางในที่ที่มี clear sky view 360°</p>
+          <ul>
+            <li>Gain: &gt;40 dBHz per satellite</li>
+            <li>Housing: weatherproof (IP67+)</li>
+            <li>Phase center: stable (&lt;1 mm variation)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <p class="label">Component 3 — Microcontroller</p>
+          <h3>ESP32 (WiFi + 4G option)</h3>
+          <p>ESP32 ทำหน้าที่เป็น bridge ระหว่าง ZED-F9P กับ Internet: อ่าน RTCM3 จาก UART แล้วส่งขึ้น NTRIP Caster ผ่าน WiFi หรือ 4G modem Firmware ที่ใช้บ่อยคือ <strong>ESP32-RTK2GO</strong> (open source) ซึ่ง config ผ่าน web interface ไม่ต้องเขียนโค้ด ราคา $5–$15</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Component 4 — Connectivity</p>
+          <h3>WiFi หรือ 4G LTE Modem</h3>
+          <p>Base Station ที่ติดตั้งถาวรนอกอาคารมักใช้ 4G LTE modem (เช่น SIM7600) แทน WiFi เพราะไม่ต้องพึ่ง router และ range ไม่จำกัด ค่าใช้จ่าย SIM card ประมาณ $5–$15/เดือน ขึ้นอยู่กับ data plan (ใช้ bandwidth น้อย ~5 MB/วัน)</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>ราคาโดยประมาณและที่ซื้อ</h3>
+      <table>
+        <thead><tr><th>Component</th><th>รุ่นที่แนะนำ</th><th>ราคาโดยประมาณ</th></tr></thead>
+        <tbody>
+          <tr><td>GNSS Receiver</td><td>u-blox ZED-F9P (Ardusimple หรือ SparkFun)</td><td>$180–$230</td></tr>
+          <tr><td>Multi-band Antenna</td><td>u-blox ANN-MB-00 หรือ L1/L2/L5 survey antenna</td><td>$30–$80</td></tr>
+          <tr><td>ESP32 + Case</td><td>ESP32-WROOM-32 + weatherproof enclosure</td><td>$10–$25</td></tr>
+          <tr><td>4G Modem (optional)</td><td>SIM7600 breakout board</td><td>$20–$40</td></tr>
+          <tr><td><strong>รวม</strong></td><td></td><td><strong>$240–$375</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warning">
+      <strong>⚠ ระวัง Single-band Antenna:</strong> Antenna ที่รับแค่ L1 เพียง band เดียวจะทำให้ TTFF นานขึ้น และ Onocoy/GEODNET อาจให้ reward น้อยลง เพราะ network ให้คะแนนตาม signal quality ที่ครบทุก band
+    </div>
+
+    <div class="takeaway"><b>★ Component ที่สำคัญที่สุด:</b> Antenna ไม่ใช่ Receiver — antenna คุณภาพต่ำทำลาย performance ทั้งระบบ แม้ว่า receiver จะแพงแค่ไหนก็ตาม</div>
+  </div>
+</section>
+
+<!-- PAGE 6b: DIY HARDWARE — SETUP STEPS -->
+<section class="page" id="p6b"
+  data-group="diy-hardware"
+  data-tier="mechanism"
+  data-title="ขั้นตอน Setup">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — DIY Hardware · ขั้นตอน Setup</p>
+      <h2>ขั้นตอนการ Setup Base Station ตั้งแต่ต้น</h2>
+      <p class="section-lead">เมื่อมี component ครบแล้ว การต่อและ configure ไม่ซับซ้อนอย่างที่คิด ต้องการเพียงการต่อสาย 4 เส้น, upload firmware, กรอก config ผ่าน web interface แล้วรอ survey-in ซึ่งเป็นกระบวนการที่ Base Station "วัดตำแหน่งของตัวเอง" ก่อนเริ่มส่ง Correction</p>
+    </div>
+
+    <div>
+      <h3>ขั้นตอน Hardware Setup</h3>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <div class="step-body">
+            <strong>ต่อสาย ZED-F9P → ESP32 (4 เส้น)</strong>
+            <p>เชื่อมต่อ UART1 ของ ZED-F9P เข้ากับ ESP32: TX (F9P) → RX (ESP32 GPIO16), RX (F9P) → TX (ESP32 GPIO17), VCC (3.3V), GND Baud rate default คือ 38400 แต่ firmware จะตั้งให้อัตโนมัติ ไม่ต้องเปลี่ยน</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div class="step-body">
+            <strong>Flash ESP32 ด้วย RTK firmware</strong>
+            <p>Download firmware จาก project page แล้ว flash ด้วย <code>esptool.py</code> หรือ ESP32 Flash Tool (GUI) เมื่อ boot ครั้งแรก ESP32 สร้าง WiFi Access Point ชื่อ <code>RTK_Setup</code> เชื่อมต่อแล้วเปิด <code>192.168.4.1</code> เพื่อเข้า config UI</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div class="step-body">
+            <strong>กรอก NTRIP Credentials และ Network</strong>
+            <p>ใน web config UI กรอก: WiFi SSID + password (หรือ APN สำหรับ 4G), NTRIP Caster host/port/mountpoint/credentials ของ Onocoy หรือ GEODNET บันทึกแล้ว reboot — ESP32 จะเชื่อมต่อ internet และเริ่ม push RTCM3 ขึ้น Caster อัตโนมัติ</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <div class="step-body">
+            <strong>รอ Survey-In (1–24 ชั่วโมง)</strong>
+            <p>Survey-in คือกระบวนการที่ Base Station เฉลี่ยตำแหน่ง GPS ของตัวเองนานพอจนได้ตำแหน่งที่เสถียร (accuracy &lt;2 m หรือ ตามที่ตั้ง threshold) ZED-F9P รองรับ survey-in แบบ autonomous — ตั้ง minimum duration 300 วินาที + position accuracy 2 m ก็เพียงพอสำหรับ DePIN เพราะ absolute position ไม่สำคัญเท่า relative correction</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">5</span>
+          <div class="step-body">
+            <strong>Verify บน Dashboard ของ Caster</strong>
+            <p>Login บน Onocoy หรือ GEODNET dashboard เพื่อยืนยันว่า station ของคุณ online และส่ง RTCM3 ถูกต้อง dashboard จะแสดง: uptime, satellite count, signal quality score, และ estimated reward สำหรับวันนั้น</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div>
+      <h3>Tips เพื่อ Maximize Rewards</h3>
+      <p>Onocoy และ GEODNET คำนวณ reward จาก signal quality ซึ่งขึ้นอยู่กับหลายปัจจัย การ optimize แต่ละปัจจัยเหล่านี้จะเพิ่ม token ที่ได้รับต่อวันอย่างมีนัยสำคัญ:</p>
+      <div class="bento cols-2">
+        <div class="card success">
+          <p class="label">DO ✓</p>
+          <h3>ทำเพื่อ Reward สูง</h3>
+          <ul>
+            <li>วาง antenna ในที่ที่มี clear sky view &gt;60° elevation</li>
+            <li>ใช้ multi-band antenna (L1+L2+L5)</li>
+            <li>ใช้ stable internet (uptime &gt;99%)</li>
+            <li>ติดตั้งในพื้นที่ที่ยังไม่มี station ใน hex cell</li>
+          </ul>
+        </div>
+        <div class="card danger">
+          <p class="label">DON'T ✗</p>
+          <h3>หลีกเลี่ยงสิ่งเหล่านี้</h3>
+          <ul>
+            <li>วาง antenna ใกล้อาคารหรือต้นไม้ (multipath error)</li>
+            <li>ใช้ single-band antenna เพื่อลดต้นทุน</li>
+            <li>ใช้ WiFi ที่ไม่เสถียรหรือมี outage บ่อย</li>
+            <li>ติดตั้งในพื้นที่ที่มี station อิ่มตัวแล้ว (reward ต่ำ)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="takeaway"><b>★ Intermediate takeaway:</b> การต่อสายเพียง 4 เส้นและ upload firmware คือทั้งหมดที่ต้องทำด้าน hardware — ความซับซ้อนอยู่ที่การเลือกตำแหน่งติดตั้ง antenna และการ configure NTRIP credentials</div>
+  </div>
+</section>
+
+<!-- PAGE 7a: DePIN MODEL — INTUITION -->
+<section class="page" id="p7a"
+  data-group="depin-model"
+  data-group-title="DePIN Business Model"
+  data-tier="intuition"
+  data-title="DePIN คืออะไร">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — DePIN Business Model · สัญชาตญาณ</p>
+      <h2>DePIN: เปลี่ยน Physical Infrastructure จาก Cost Center เป็น Revenue Stream</h2>
+      <p class="section-lead">DePIN (Decentralized Physical Infrastructure Networks) คือแนวคิดที่ใช้ Blockchain Token เป็น Incentive Mechanism เพื่อให้บุคคลทั่วไปช่วยกันสร้างและดูแลรักษา Physical Infrastructure เช่น WiFi hotspot, โครงข่าย sensor, หรือ RTK Base Station แทนที่จะให้บริษัทขนาดใหญ่ลงทุนเพียงรายเดียว วิธีนี้ทำให้ infrastructure สามารถ scale ได้รวดเร็วกว่าและมีต้นทุนน้อยกว่า เพราะกระจายทั้ง risk และ reward ไปยังผู้ใช้งานจริง</p>
+    </div>
+
+    <div>
+      <h3>ทำไม DePIN ถึงใช้งานได้กับ RTK Network</h3>
+      <p>RTK Network ต้องการ Base Station จำนวนมากกระจายตัวอยู่ทั่วโลก เพื่อให้ Rover ทุกตัวมี Base Station อยู่ในรัศมี 20 km การสร้าง network แบบนี้ด้วยวิธีดั้งเดิมต้องใช้เงินลงทุนหลายสิบล้านดอลลาร์และทีม operations ขนาดใหญ่ ซึ่งทำให้บริการ RTK Correction มีราคาแพงมาก</p>
+      <p>DePIN แก้ปัญหานี้ด้วยวิธีที่ elegant: แทนที่จะบริษัทเป็นคนติดตั้ง Base Station ทุกตัว บริษัทออก Token และสร้าง marketplace สำหรับซื้อขาย Correction Data แทน ผู้ใช้งานที่มีบ้านหรือออฟฟิศในพื้นที่ที่ยังขาด coverage สามารถซื้อ hardware ราคาต่ำกว่า $300 ติดตั้ง Base Station แล้วรับ Token เป็น reward ขณะที่ network ขายข้อมูล Correction ให้ enterprise</p>
+
+      <div style="display:flex;justify-content:center;margin:20px 0">
+        <svg viewBox="0 0 820 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr7a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+            </marker>
+          </defs>
+          <rect x="10" y="70" width="140" height="60" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="80" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Operator</text>
+          <text x="80" y="114" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">runs Base Station</text>
+          <path d="M150 90 L210 90" stroke="var(--success)" stroke-width="2" marker-end="url(#arr7a)"/>
+          <text x="180" y="82" font-size="10" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">RTCM3</text>
+          <rect x="210" y="60" width="180" height="80" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="300" y="93" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">DePIN Network</text>
+          <text x="300" y="110" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Onocoy / GEODNET</text>
+          <path d="M390 80 L450 70" stroke="var(--gold)" stroke-width="2" marker-end="url(#arr7a)"/>
+          <text x="420" y="65" font-size="10" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">Token</text>
+          <path d="M390 100 L450 110" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr7a)"/>
+          <text x="425" y="125" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Correction</text>
+          <rect x="450" y="50" width="140" height="50" rx="10" fill="var(--warning-wash)" stroke="var(--warning)" stroke-width="1.5"/>
+          <text x="520" y="73" font-size="12" font-weight="700" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">Operator</text>
+          <text x="520" y="90" font-size="10" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">earns token reward</text>
+          <rect x="450" y="110" width="140" height="50" rx="10" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+          <text x="520" y="133" font-size="12" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Enterprise</text>
+          <text x="520" y="150" font-size="10" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">buys RTK subscription</text>
+          <path d="M590 135 L650 135" stroke="var(--success)" stroke-width="2" marker-end="url(#arr7a)"/>
+          <rect x="650" y="115" width="150" height="50" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="725" y="138" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Revenue →</text>
+          <text x="725" y="155" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">funds token rewards</text>
+          <rect x="0" y="0" width="1" height="1" fill="none"/>
+        </svg>
+      </div>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">DePIN flywheel: Operator ส่ง RTCM3 → Network ขาย Correction ให้ Enterprise → รายได้ fund Token Rewards → Operator ได้ Token กลับมา</p>
+    </div>
+
+    <div>
+      <h3>เปรียบเทียบ: Commercial vs DePIN RTK</h3>
+      <table>
+        <thead><tr><th>ด้าน</th><th>Commercial (Leica/Trimble)</th><th>DePIN (Onocoy/GEODNET)</th></tr></thead>
+        <tbody>
+          <tr><td>ต้นทุน User</td><td>$500–$2,000/ปี subscription</td><td>ต่ำกว่ามาก (token subsidy)</td></tr>
+          <tr><td>ต้นทุน Infrastructure</td><td>บริษัทลงทุนเอง (CAPEX สูง)</td><td>Community ลงทุน (distributed)</td></tr>
+          <tr><td>Coverage Expansion</td><td>ช้า (ต้องรอ CAPEX approval)</td><td>เร็ว (incentive ดึง operator)</td></tr>
+          <tr><td>Quality Control</td><td>High (SLA guaranteed)</td><td>Variable (depends on operators)</td></tr>
+          <tr><td>Operator Revenue</td><td>ไม่มี (cost only)</td><td class="check">✓ Crypto token rewards</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="takeaway"><b>★ DePIN intuition:</b> DePIN ทำให้ base station ไม่ใช่ "ค่าใช้จ่าย" อีกต่อไป — มันเป็น "passive income asset" ที่ yield ออกมาตราบใดที่ network มี demand</div>
+  </div>
+</section>
+
+<!-- PAGE 7b: DePIN MODEL — TOKENOMICS & REWARDS -->
+<section class="page" id="p7b"
+  data-group="depin-model"
+  data-tier="mechanism"
+  data-title="Tokenomics & Rewards">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — DePIN Business Model · Tokenomics</p>
+      <h2>วิธีคำนวณ Reward และ Tokenomics ของ Onocoy &amp; GEODNET</h2>
+      <p class="section-lead">การทำความเข้าใจ reward mechanism ของแต่ละ network สำคัญมากก่อนตัดสินใจลงทุน hardware เพราะ reward ขึ้นอยู่กับหลายปัจจัยที่ควบคุมได้และควบคุมไม่ได้ ทั้ง signal quality, geographic location, network saturation, และ token price ซึ่งแปรผันตามตลาด crypto</p>
+    </div>
+
+    <div>
+      <h3>Onocoy Reward Mechanism</h3>
+      <p>Onocoy ใช้ reward model ที่ base บน "contribution score" ซึ่งคำนวณจากสี่ปัจจัยหลัก: จำนวนและคุณภาพของ satellite ที่รับได้ (multi-band = score สูงกว่า), uptime percentage, geographic uniqueness (พื้นที่ที่ไม่มี station อื่นใกล้ = score สูงกว่า), และ data quality (cycle slip rate ต่ำ = ดีกว่า) Reward จ่ายเป็น <code>$ONO</code> token รายวัน</p>
+      <p>กลไกสำคัญที่ทำให้ Onocoy sustainable: รายได้จาก enterprise subscription (ผู้ซื้อ Correction Data) ถูกใช้เพื่อซื้อ <code>$ONO</code> token จาก open market แล้วนำมา distribute ให้ operator — ทำให้ token มี real demand backing ไม่ใช่แค่ inflation</p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก: GEODNET Hex Reward System — ทำงานอย่างไร?</summary>
+        <div class="details-body">
+          <p>GEODNET แบ่งโลกเป็น hex cells โดยใช้ H3 spatial indexing system ของ Uber แต่ละ hex cell มี "saturation level" ที่บอกว่ามี station กี่ตัวอยู่แล้ว Station ที่อยู่ใน hex cell ที่ไม่ค่อยมี station จะได้ reward multiplier สูงกว่า</p>
+          <p>ตัวอย่าง: hex cell ที่มี station 0–2 ตัว ได้ reward multiplier 1.5x; 3–5 ตัว ได้ 1.0x; มากกว่า 5 ตัว ได้ 0.5x ทำให้มี incentive สำหรับ operator ที่จะไป "frontier areas" ที่ยังขาด coverage แทนที่จะ cluster อยู่ในเมืองใหญ่</p>
+          <p>GEODNET มีทั้ง basic tier (ต้องการ hardware ผ่าน GEODNET official store ~$450) และ DIY tier (hardware ของตัวเอง แต่ต้อง verify compatibility ก่อน) reward ใน DIY tier อาจต่ำกว่าเล็กน้อยเนื่องจาก hardware quality verification</p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>ปัจจัยที่ควบคุมได้ vs ควบคุมไม่ได้</h3>
+      <div class="bento cols-2">
+        <div class="card success">
+          <p class="label">ควบคุมได้ ✓</p>
+          <h3>Factors ที่ Optimize ได้</h3>
+          <ul>
+            <li><strong>Antenna quality:</strong> upgrade เป็น multi-band survey antenna</li>
+            <li><strong>Placement:</strong> วางในที่ที่มี clear sky, ไม่มี multipath</li>
+            <li><strong>Uptime:</strong> UPS + stable internet ลด downtime</li>
+            <li><strong>Location:</strong> เลือก hex cell ที่ยัง undersaturated</li>
+          </ul>
+        </div>
+        <div class="card danger">
+          <p class="label">ควบคุมไม่ได้ ✗</p>
+          <h3>Factors ที่ต้องยอมรับ</h3>
+          <ul>
+            <li><strong>Token price:</strong> crypto market volatility</li>
+            <li><strong>Network demand:</strong> จำนวน enterprise buyer</li>
+            <li><strong>Competition:</strong> operator รายใหม่ใน hex cell</li>
+            <li><strong>Protocol changes:</strong> reward formula อาจเปลี่ยน</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>⚠ Risk ที่ต้องรู้:</strong> Token reward ใน DePIN คือ variable income ที่ขึ้นกับ token price ซึ่งอาจผันผวนมาก ROI breakeven อาจอยู่ที่ 6–18 เดือนขึ้นอยู่กับ location, token price, และ network growth ไม่ใช่ guaranteed return
+    </div>
+
+    <div class="takeaway"><b>★ Intermediate takeaway:</b> Optimize สิ่งที่ควบคุมได้ก่อน (antenna quality, placement, uptime) แล้วค่อยสนใจ token price — ปัจจัยที่ควบคุมได้มี impact มากกว่าที่คิด</div>
+  </div>
+</section>
+
+<!-- PAGE 8: USE CASES -->
+<section class="page" id="p8" data-title="Use Cases">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 6 — Use Cases</p>
+      <h2>ประยุกต์ใช้ RTK ±2 cm ในโลกจริง</h2>
+      <p class="section-lead">ความแม่นยำระดับเซนติเมตรเปิดประตูให้กับ application ที่เป็นไปไม่ได้ด้วย GPS ทั่วไป ตั้งแต่โดรนที่ต้อง land อัตโนมัติบน moving platform ไปจนถึงหุ่นยนต์เกษตรที่ต้องเดินตามแนวปลูกพืชอย่างแม่นยำ use cases เหล่านี้แสดงให้เห็นว่าทำไม RTK correction data จึงเป็น multi-million dollar market ที่ DePIN กำลัง democratize</p>
+    </div>
+
+    <div>
+      <h3>Use Cases หลัก 4 ด้าน</h3>
+      <div class="bento cols-2">
+        <div class="card gold">
+          <p class="label">Use Case 1 — Drones</p>
+          <h3>โดรนสำรวจและโดรนเกษตร</h3>
+          <p>โดรนที่ใช้ RTK สามารถ capture aerial photograph ที่มี geotag แม่นยำ ±2 cm โดยไม่ต้องใช้ GCP (Ground Control Points) ซึ่งปกติต้องวางด้วยมือก่อนบิน ประหยัดเวลาได้มาก สำหรับโดรนพ่นยา RTK ช่วยให้บินตาม waypoint ซ้ำได้อย่างแม่นยำทุกครั้งแม้ในสภาพลมแรง</p>
+          <p>Base Station ต้องวางใกล้พื้นที่บิน หรือใช้ NTRIP network ถ้ามี coverage แล้ว บาง setup ใช้ portable base station วางบนรถแล้วเชื่อมต่อกับ drone ผ่าน WiFi</p>
+        </div>
+        <div class="card success">
+          <p class="label">Use Case 2 — Robotic Mowers</p>
+          <h3>หุ่นยนต์ตัดหญ้าอัตโนมัติ</h3>
+          <p>High-end robotic mower อย่าง Husqvarna CEORA ใช้ RTK โดยติดตั้ง Base Station ที่ dock ของหุ่นยนต์ ทำให้หุ่นยนต์รู้ตำแหน่งตัวเองบนสนามได้อย่างแม่นยำ ±2 cm ไม่ต้องพึ่ง perimeter wire หรือ beacon เหมือน mower รุ่นเก่า สามารถ map สนามได้แม้มีรูปร่างซับซ้อน</p>
+        </div>
+        <div class="card">
+          <p class="label">Use Case 3 — Precision Agriculture</p>
+          <h3>เกษตรกรรมแม่นยำ</h3>
+          <p>รถไถและเครื่องหว่านเมล็ดที่ใช้ RTK สามารถเดินตาม track ซ้ำได้อย่างแม่นยำทุกฤดูกาล ช่วยลด overlap ระหว่าง pass ทำให้ประหยัดเชื้อเพลิง ปุ๋ย และยาฆ่าแมลง ฟาร์มขนาดใหญ่ในออสเตรเลียและอเมริกาใช้ RTK มาหลายปีแล้ว แต่ DePIN ทำให้ฟาร์มขนาดเล็กในประเทศกำลังพัฒนาเข้าถึงได้ด้วย</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Use Case 4 — Autonomous Vehicles</p>
+          <h3>ยานพาหนะไร้คนขับ</h3>
+          <p>ในสภาพแวดล้อม outdoor ที่ camera และ LiDAR อาจ confused ด้วยแสงหรือฝุ่น RTK GPS ให้ absolute position ที่เชื่อถือได้ตลอดเวลา ใช้เป็น fallback หรือ primary positioning สำหรับ AGV (Automated Guided Vehicle) ในเหมือง, port, และ logistics facility ที่ต้องการ precision สูง</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>เมื่อไหรที่ RTK ไม่ใช่คำตอบที่ดีที่สุด</h3>
+      <p>RTK ทำงานได้ดีใน outdoor environment ที่มี clear sky view แต่มีข้อจำกัดในบางสถานการณ์ที่ควรรู้ก่อนเลือกใช้:</p>
+      <ul>
+        <li><strong>Indoor positioning:</strong> RTK ไม่ทำงาน indoor เพราะ GNSS signal ไม่ผ่านหลังคา ต้องใช้ UWB, WiFi RTT, หรือ LiDAR-based SLAM แทน</li>
+        <li><strong>Urban canyon:</strong> ถนนที่ล้อมรอบด้วยตึกสูงทำให้ cycle slip บ่อย ทำให้ fix loss บ่อยและ accuracy ลด ในกรณีนี้ sensor fusion กับ IMU ช่วยได้</li>
+        <li><strong>Real-time requirement ต่ำกว่า 5s:</strong> ถ้าต้องการ fix ทันทีโดยไม่รอ TTFF ต้องใช้ PPP (Precise Point Positioning) ซึ่ง fix ได้โดยไม่ต้องมี Base Station แต่ accuracy อยู่ที่ ~10 cm</li>
+      </ul>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> RTK เหมาะที่สุดสำหรับ outdoor automation ที่ต้องการ ±2 cm และมีเวลา warm-up 5–60s — ทุกอย่างอื่นมี alternative ที่ดีกว่า</div>
+  </div>
+</section>
+
+<!-- PAGE 9: CAVEATS & FAQ -->
+<section class="page" id="p9" data-title="ข้อควรระวัง">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 7 — Caveats &amp; FAQ</p>
+      <h2>ข้อจำกัดและคำถามที่พบบ่อยจากการใช้งานจริง</h2>
+      <p class="section-lead">RTK และ DePIN มีข้อจำกัดและ gotcha หลายอย่างที่ documentation มักไม่พูดถึงตรงๆ ส่วนนี้รวบรวมปัญหาที่ผู้ใช้มักเจอหลังติดตั้งไปสักพัก เพื่อให้สามารถวางแผนและออกแบบระบบได้อย่างถูกต้องตั้งแต่ต้น</p>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">Fix ได้แล้วแต่หลุดบ่อย เกิดจากอะไร?</button>
+        <div class="accordion-body">
+          <p>Cycle slip คือสาเหตุหลัก เกิดขึ้นเมื่อ Rover สูญเสีย lock บน carrier wave ชั่วคราว (เช่น ขับรถผ่านใต้สะพาน, ต้นไม้บัง, หรือ signal interference จากอุปกรณ์ไฟฟ้า) เมื่อ cycle slip เกิดขึ้น Integer Ambiguity ที่ resolve ไว้แล้วจะ invalid ทันที ต้อง re-initialize ใหม่ซึ่งใช้เวลา 5–60 วินาที</p>
+          <p>วิธีแก้: ใช้ multi-band receiver (L1+L2) เพราะสามารถ detect และ repair cycle slip ได้เร็วกว่า single-band มาก; ใน mission-critical application ใช้ sensor fusion กับ IMU เพื่อ "bridge" ช่วงที่ fix หลุด; ตรวจสอบ CNR (Carrier-to-Noise Ratio) ที่ &lt;35 dBHz บ่งบอกว่า signal อ่อนเกินไป</p>
+          <p>เมื่อไหรที่ cycle slip ไม่ใช่ปัญหา: application ที่ไม่ต้องการ continuous fix เช่น survey ที่ stop-and-go หรือ machine ที่ทำงานในพื้นที่โล่ง</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">Survey-in เสร็จแล้วแต่ position ไม่ตรง ทำไม?</button>
+        <div class="accordion-body">
+          <p>Survey-in แบบ autonomous ให้ความแม่นยำของตำแหน่ง Base ประมาณ ±1–2 m ซึ่งเพียงพอสำหรับ relative positioning (Rover รู้ตำแหน่งของตัวเองเทียบกับ Base ได้ ±2 cm) แต่ไม่เพียงพอสำหรับ absolute positioning (ตำแหน่งบนแผนที่โลก)</p>
+          <p>ถ้าต้องการ absolute accuracy ±2 cm บน WGS84 coordinate system ต้อง "fix" ตำแหน่ง Base ด้วยวิธีอื่น: CORS network correction (ถ้ามีในประเทศ), PPP-AR service (เช่น Trimble CenterPoint RTX), หรือ occupying known benchmarkpoint สำหรับงานที่ต้องการ coordinate ที่แน่นอนอย่างงาน surveying มืออาชีพ</p>
+          <p>สำหรับ DePIN purposes: survey-in อัตโนมัติ ±1–2 m เพียงพอสมบูรณ์ เพราะ network ต้องการ relative correction ไม่ใช่ absolute position</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">NTRIP เชื่อมต่อได้แต่ Rover ยัง float ไม่ fix เกิดจากอะไร?</button>
+        <div class="accordion-body">
+          <p>"Float solution" หมายความว่า Rover ได้รับ Correction Data แล้วแต่ยังไม่สามารถ resolve Integer Ambiguity ได้ (accuracy อยู่ที่ ~10–30 cm แทน ±2 cm) สาเหตุที่พบบ่อยคือ: Base และ Rover ห่างกันเกิน 20 km, จำนวน common satellite น้อยเกินไป (&lt;5 ดวง), หรือ ionospheric disturbance สูง (ช่วง solar maximum)</p>
+          <p>วิธีแก้: ตรวจสอบว่า mountpoint ที่เลือกนั้น Base อยู่ใน 20 km จริงหรือไม่; เพิ่ม elevation mask ให้ต่ำลง (จาก 15° เป็น 10°) เพื่อรับ satellite มากขึ้น; รอ ionospheric condition ดีขึ้น (โดยเฉพาะช่วงหัวเช้าหรือกลางคืน)</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">DePIN reward คุ้มค่ากับการลงทุนไหม?</button>
+        <div class="accordion-body">
+          <p>ขึ้นอยู่กับ 3 ปัจจัยหลัก: (1) location — พื้นที่ที่ยังไม่มี station ใน hex cell จะได้ reward สูงกว่า; (2) token price — ณ ต้นปี 2025 token reward อาจ cover hardware cost ใน 6–12 เดือนสำหรับ location ที่ดี แต่ token price สามารถลดลง 50% ได้ใน bear market; (3) hardware longevity — hardware ที่ดีอยู่ได้ 5+ ปี ทำให้ ROI long-term ดีกว่า</p>
+          <p>คำแนะนำ: ถ้าซื้อ hardware เพราะต้องการใช้ RTK เองอยู่แล้ว (เช่น สำหรับ drone หรือ robot project) การเชื่อมต่อกับ DePIN network เป็น "bonus income" ที่ risk ต่ำ แต่ถ้าซื้อ hardware เพื่อ mine token อย่างเดียว ต้องวิเคราะห์ ROI อย่างรอบคอบก่อน</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <strong>⚠ Gotcha ที่สำคัญที่สุด:</strong> Survey-in ที่ไม่ครบเวลา (ต่ำกว่า 300 วินาที) จะทำให้ Base ส่ง Correction ที่มี systematic error ทุก Rover ที่ใช้ Correction จาก Base นั้นจะ offset ตำแหน่งไปพร้อมกัน ซึ่งตรวจจับยากมาก — รอ survey-in ให้ครบเสมอ
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> ปัญหา 80% ของ RTK setup มาจาก antenna placement (multipath), ระยะ Base-Rover (เกิน 20 km), หรือ survey-in ที่ไม่ครบ — แก้สามเรื่องนี้ก่อนอย่างอื่น</div>
+  </div>
+</section>
+
+<!-- PAGE 10: KEY TAKEAWAYS + REFERENCES -->
+<section class="page" id="p10" data-title="สรุปและอ้างอิง">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Closing — Key Takeaways</p>
+      <h2>สิ่งที่ต้องจำและขั้นตอนถัดไป</h2>
+      <p class="section-lead">หลังอ่าน explainer นี้จบ ผู้อ่านควรมีความเข้าใจครบถ้วนว่า RTK-GPS ทำงานอย่างไร จะ build DIY Base Station ได้อย่างไร และ DePIN เปลี่ยน economics ของ precision positioning อย่างไร</p>
+    </div>
+    <div class="bento cols-2">
+      <div>
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li><strong>RTK วัด Phase ไม่ใช่แค่ Timing:</strong> ความแม่นยำ ±2 cm มาจากการวัด carrier phase (wavelength 19 cm) ผ่าน Integer Ambiguity Resolution ไม่ใช่แค่การ upgrade hardware ราคาแพงขึ้น</li>
+          <li><strong>Base Station = กุญแจทั้งระบบ:</strong> Base ต้องอยู่ใกล้ Rover ≤20 km และต้องรู้ตำแหน่งตัวเองด้วย survey-in ที่ครบเวลา — ถ้า Base ผิด ทุกอย่างผิดหมด</li>
+          <li><strong>Multi-band Antenna ไม่ใช่ option:</strong> Antenna L1+L2 คือ requirement สำหรับ reliable RTK fix time ที่ยอมรับได้ single-band อาจใช้ได้แต่ slow และ unreliable ใน challenging sky</li>
+          <li><strong>DIY ทำได้ต่ำกว่า $300:</strong> ESP32 + u-blox ZED-F9P + multi-band antenna + 4G modem คือ stack ที่ทำงานได้จริงและ qualify สำหรับ DePIN rewards ไม่ต้องซื้อ commercial hardware $700+</li>
+          <li><strong>DePIN เปลี่ยน cost เป็น revenue:</strong> Onocoy (ONO) และ GEODNET (GEOD) จ่าย token ให้ Base Station operator ตาม signal quality — ROI ขึ้นกับ location, token price, และ network demand</li>
+          <li><strong>TTFF 5–60 วินาทีคือ fundamental limit:</strong> ต้องวางแผน workflow ให้ Rover warm-up ก่อนเริ่มงาน precision — ไม่มีทาง bypass กระบวนการ ambiguity resolution นี้</li>
+          <li><strong>NTRIP = HTTP streaming สำหรับ GPS correction:</strong> Base push RTCM3 → Caster relay → Rover pull ผ่าน TCP connection เดียว ต้อง enable GGA ใน client เพื่อให้ Caster route ไปยัง Base ที่ใกล้ที่สุด</li>
+        </ul>
+      </div>
+      <div>
+        <h3>References</h3>
+        <ol style="font-size:13px;color:var(--ink-dim);line-height:1.9">
+          <li>ESP32 RTK-GPS Tutorial + DePIN — <a href="https://youtu.be/Oc1LBFDj2MA" target="_blank" rel="noopener">YouTube: ESP32 precision GPS receiver</a></li>
+          <li>RTK Fundamentals — <a href="https://gssc.esa.int/navipedia/index.php/RTK_Fundamentals" target="_blank" rel="noopener">ESA Navipedia: RTK Fundamentals</a></li>
+          <li>NTRIP Protocol — <a href="https://en.wikipedia.org/wiki/Networked_Transport_of_RTCM_via_Internet_Protocol" target="_blank" rel="noopener">Wikipedia: NTRIP</a></li>
+          <li>Onocoy Documentation — <a href="https://docs.onocoy.com" target="_blank" rel="noopener">docs.onocoy.com</a></li>
+          <li>GEODNET Network — <a href="https://geodnet.com" target="_blank" rel="noopener">geodnet.com</a></li>
+          <li>LAMBDA Algorithm — <a href="https://www.tudelft.nl/citg/over-faculteit/afdelingen/geoscience-remote-sensing/research/lambda" target="_blank" rel="noopener">TU Delft: LAMBDA Method</a></li>
+          <li>RTK Corrections Explained — <a href="https://pointonenav.com/news/rtk-corrections/" target="_blank" rel="noopener">Point One Nav: RTK Corrections</a></li>
+        </ol>
+
+        <h3 style="margin-top:20px">Glossary</h3>
+        <dl style="font-size:13px;color:var(--ink-dim);line-height:1.8">
+          <dt style="font-weight:600;color:var(--ink)">Carrier Phase</dt>
+          <dd style="margin:0 0 6px 12px">การวัดตำแหน่งบน carrier wave (ไม่ใช่แค่เวลา) ให้ resolution ~2 mm</dd>
+          <dt style="font-weight:600;color:var(--ink)">Integer Ambiguity</dt>
+          <dd style="margin:0 0 6px 12px">จำนวนเต็มของรอบ carrier wave ระหว่างดาวเทียมกับ receiver ที่ต้อง resolve ก่อนได้ cm accuracy</dd>
+          <dt style="font-weight:600;color:var(--ink)">NTRIP</dt>
+          <dd style="margin:0 0 6px 12px">Networked Transport of RTCM via Internet Protocol — protocol สำหรับส่ง correction data ผ่าน HTTP</dd>
+          <dt style="font-weight:600;color:var(--ink)">RTCM3</dt>
+          <dd style="margin:0 0 6px 12px">Radio Technical Commission for Maritime — binary message format มาตรฐานสำหรับ RTK correction data</dd>
+          <dt style="font-weight:600;color:var(--ink)">DePIN</dt>
+          <dd style="margin:0 0 6px 12px">Decentralized Physical Infrastructure Networks — ใช้ token incentive ให้ community สร้างและดูแล infrastructure แทนบริษัทกลาง</dd>
+          <dt style="font-weight:600;color:var(--ink)">TTFF</dt>
+          <dd style="margin:0 0 6px 12px">Time-To-First-Fix — เวลาตั้งแต่ Rover เริ่มทำงานจนได้ RTK fix ครั้งแรก ปกติ 5–60 วินาที</dd>
+          <dt style="font-weight:600;color:var(--ink)">Cycle Slip</dt>
+          <dd style="margin:0 0 6px 12px">การสูญเสีย lock บน carrier wave ทำให้ Integer Ambiguity invalid และต้อง re-initialize ใหม่</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="takeaway">
+      <b>★ ถ้าจำได้อย่างเดียว:</b> RTK = Base วัด error ส่ง correction ผ่าน Internet → Rover แก้ ambiguity → ±2 cm; DePIN = Base Station ที่ earn crypto ขณะช่วยคนอื่น ต้นทุน DIY &lt;$300
+    </div>
+  </div>
+</section>
+
+</div><!-- /scroll-root -->
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const progressBar = document.getElementById('progress-bar');
+const tocEl = document.getElementById('toc');
+const pages = Array.from(document.querySelectorAll('.page'));
+const groups = [], groupMap = {};
+pages.forEach(page => {
+  const gSlug = page.dataset.group || page.id;
+  const gTitle = page.dataset.groupTitle;
+  const label = page.dataset.title || page.id;
+  if (!groupMap[gSlug]) { const g = {slug:gSlug, title:gTitle||label, pages:[]}; groups.push(g); groupMap[gSlug]=g; }
+  if (gTitle) groupMap[gSlug].title = gTitle;
+  groupMap[gSlug].pages.push({page, label});
+});
+groups.forEach(g => {
+  const groupDiv = document.createElement('div'); groupDiv.className='toc-group'; groupDiv.dataset.group=g.slug;
+  const groupLink = document.createElement('a'); groupLink.className='toc-group-label'; groupLink.href='#'+g.pages[0].page.id; groupLink.textContent=g.title; groupDiv.appendChild(groupLink);
+  if (g.pages.length > 1) {
+    const subList = document.createElement('ul'); subList.className='toc-subs';
+    g.pages.forEach(({page,label}) => { const li=document.createElement('li'); const a=document.createElement('a'); a.className='toc-sub'; a.href='#'+page.id; a.textContent=label; a.dataset.pageId=page.id; li.appendChild(a); subList.appendChild(li); });
+    groupDiv.appendChild(subList);
+  }
+  tocEl.appendChild(groupDiv);
+});
+function setActiveById(pageId) {
+  document.querySelectorAll('.toc-group-label').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll('.toc-sub').forEach(a=>a.classList.remove('active'));
+  const page = pages.find(p=>p.id===pageId);
+  const gSlug = page ? (page.dataset.group||page.id) : pageId;
+  const groupDiv = tocEl.querySelector('.toc-group[data-group="'+gSlug+'"]');
+  if (!groupDiv) return;
+  groupDiv.querySelector('.toc-group-label')?.classList.add('active');
+  const subLink = groupDiv.querySelector('.toc-sub[data-page-id="'+pageId+'"]');
+  if (subLink) { subLink.classList.add('active'); subLink.scrollIntoView({block:'nearest',behavior:'smooth'}); }
+  else groupDiv.querySelector('.toc-group-label')?.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+const obs = new IntersectionObserver(entries => { entries.forEach(e=>{if(e.isIntersecting)setActiveById(e.target.id);}); }, {root:null,threshold:0.25});
+pages.forEach(p=>obs.observe(p));
+sidebarToggle.addEventListener('click',()=>{sidebar.classList.toggle('open');sidebarOverlay.classList.toggle('open');});
+sidebarOverlay.addEventListener('click',()=>{sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');}});
+tocEl.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(window.innerWidth<=768){sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');}}));
+pages.forEach((page,i)=>{
+  const inner=page.querySelector('.page-inner'); if(!inner) return;
+  const foot=document.createElement('div'); foot.className='page-foot';
+  if(i>0){const prev=pages[i-1];const btn=document.createElement('a');btn.className='pf-btn pf-prev';btn.href='#'+prev.id;btn.textContent='← '+(prev.dataset.title||prev.id);foot.appendChild(btn);}
+  if(i<pages.length-1){const next=pages[i+1];const btn=document.createElement('a');btn.className='pf-btn pf-next';btn.href='#'+next.id;btn.textContent=(next.dataset.title||next.id)+' →';foot.appendChild(btn);}
+  if(foot.children.length>0) inner.appendChild(foot);
+});
+window.addEventListener('scroll',()=>{const doc=document.documentElement;const scrolled=doc.scrollTop||document.body.scrollTop;const total=doc.scrollHeight-doc.clientHeight;if(total>0)progressBar.style.transform='scaleX('+(scrolled/total)+')';},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();jumpSection(1);}if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();jumpSection(-1);}});
+function jumpSection(dir){const active=tocEl.querySelector('.toc-sub.active')||tocEl.querySelector('.toc-group-label.active');if(!active){pages[0]?.scrollIntoView({behavior:'smooth',block:'start'});return;}const targetId=active.dataset.pageId||active.getAttribute('href')?.slice(1);const idx=pages.findIndex(p=>p.id===targetId);const newIdx=Math.max(0,Math.min(pages.length-1,idx+dir));if(newIdx!==idx)pages[newIdx].scrollIntoView({behavior:'smooth',block:'start'});}
+const themeBtn=document.getElementById('theme-btn');const root=document.documentElement;const saved=localStorage.getItem('explainer-theme');if(saved){root.dataset.theme=saved;themeBtn.textContent=saved==='dark'?'☀︎':'☾';}
+themeBtn.addEventListener('click',()=>{const next=root.dataset.theme==='dark'?'light':'dark';root.dataset.theme=next;localStorage.setItem('explainer-theme',next);themeBtn.textContent=next==='dark'?'☀︎':'☾';});
+function switchTab(btn,panelId){btn.closest('.tabs-nav').querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.tabs-panel').forEach(p=>p.classList.remove('active'));const target=document.getElementById(panelId);if(target)target.classList.add('active');}
+function toggleAccordion(btn){btn.closest('.accordion-item').classList.toggle('open');}
+function copyCode(btn){const pre=btn.closest('.copy-wrap').querySelector('pre code');navigator.clipboard.writeText(pre.textContent).then(()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);});}
+</script>
+</body>
+</html>
