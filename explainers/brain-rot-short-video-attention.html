@@ -48,6 +48,10 @@
   --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
   --shadow-md: 0 4px 12px rgba(0,0,0,.4);
   --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe;
+  --danger-wash: #450a0a;  --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
 }
 
 /* ── Reset & base ── */
@@ -137,7 +141,7 @@ li { margin-bottom: 8px; line-height: 1.7; }
 .cover h1, .cover p, .cover li { color: white; }
 .cover p { color: rgba(255,255,255,.8); }
 
-/* ── Prose flow (brochure density) ── */
+/* ── Prose flow (explainer density) ── */
 .section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
 .section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
 .prose-block { display: flex; flex-direction: column; gap: 0; }
@@ -220,7 +224,6 @@ li { margin-bottom: 8px; line-height: 1.7; }
   font-size: 15px; color: var(--accent-deep);
   border: 1px solid var(--accent);
 }
-[data-theme="dark"] .callout { color: var(--accent-wash); border-color: var(--accent); }
 .callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
 .callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
 .callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
@@ -392,7 +395,7 @@ tr:hover td { background: var(--soft); }
       </div>
     </div>
     <div class="callout">
-      <strong>สิ่งที่ brochure นี้ทำแตกต่าง:</strong> เนื้อหาอิงงานวิจัย peer-reviewed และ meta-analysis ขนาดใหญ่ รวมถึงชี้จุดที่ความเชื่อทั่วไป (เช่น แว่นกรองแสง) ขัดกับหลักฐานทางวิทยาศาสตร์ปัจจุบัน
+      <strong>สิ่งที่ explainer นี้ทำแตกต่าง:</strong> เนื้อหาอิงงานวิจัย peer-reviewed และ meta-analysis ขนาดใหญ่ รวมถึงชี้จุดที่ความเชื่อทั่วไป (เช่น แว่นกรองแสง) ขัดกับหลักฐานทางวิทยาศาสตร์ปัจจุบัน
     </div>
     <div class="takeaway"><b>★ สาระสำคัญ:</b> Brain rot คือ neurochemical conditioning ไม่ใช่นิสัยแย่ — เข้าใจกลไกแล้วถึงแก้ได้ถูกจุด</div>
   </div>
@@ -410,7 +413,7 @@ tr:hover td { background: var(--soft); }
         ก่อนลงลึกในแต่ละประเด็น ส่วนนี้วางโครงกระดูกของเรื่องทั้งหมด:
         ส่วนประกอบหลักที่ต้องให้ชื่อก่อนจึงจะเข้าใจภาพรวมได้ สมมติฐานที่ซ่อนอยู่
         ซึ่งผู้เริ่มต้นมักมองข้ามและทำให้เข้าใจผิดเรื่องวิธีแก้ปัญหา
-        และ insight สำคัญที่จะเป็น backbone ของ brochure ทั้งหมด
+        และ insight สำคัญที่จะเป็น backbone ของ explainer ทั้งหมด
       </p>
     </div>
 
@@ -1164,12 +1167,12 @@ function jumpSection(dir) {
 // ── Theme toggle ──
 const themeBtn = document.getElementById('theme-btn');
 const root = document.documentElement;
-const saved = localStorage.getItem('brochure-theme');
+const saved = localStorage.getItem('explainer-theme');
 if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
 themeBtn.addEventListener('click', () => {
   const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
   root.dataset.theme = next;
-  localStorage.setItem('brochure-theme', next);
+  localStorage.setItem('explainer-theme', next);
   themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
 });
 

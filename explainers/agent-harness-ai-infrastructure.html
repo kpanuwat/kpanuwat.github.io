@@ -48,6 +48,10 @@
   --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
   --shadow-md: 0 4px 12px rgba(0,0,0,.4);
   --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe;
+  --danger-wash: #450a0a;  --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
 }
 
 /* ── Reset & base ── */
@@ -137,7 +141,7 @@ li { margin-bottom: 8px; line-height: 1.7; }
 .cover h1, .cover p, .cover li { color: white; }
 .cover p { color: rgba(255,255,255,.8); }
 
-/* ── Prose flow (brochure density) ── */
+/* ── Prose flow (explainer density) ── */
 .section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
 .section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
 .prose-block { display: flex; flex-direction: column; gap: 0; }
@@ -219,7 +223,6 @@ li { margin-bottom: 8px; line-height: 1.7; }
   font-size: 15px; color: var(--accent-deep);
   border: 1px solid var(--accent);
 }
-[data-theme="dark"] .callout { color: var(--accent-wash); border-color: var(--accent); }
 .callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
 .callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
 .callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
@@ -1077,7 +1080,7 @@ class AgentHarness:
       <p class="section-label">Closing — Key Takeaways</p>
       <h2>สิ่งที่ต้องจำและขั้นตอนถัดไป</h2>
       <p class="section-lead">
-        หลังอ่าน brochure นี้จบ คุณควรมีความเข้าใจในโครงสร้างของ Agent Harness ว่าทำไมมันถึงสำคัญกว่าที่หลายคนคิด
+        หลังอ่าน explainer นี้จบ คุณควรมีความเข้าใจในโครงสร้างของ Agent Harness ว่าทำไมมันถึงสำคัญกว่าที่หลายคนคิด
         และจะเริ่มต้นสร้างหรือปรับปรุง harness ของตัวเองได้ทันที
       </p>
     </div>
@@ -1168,12 +1171,12 @@ function jumpSection(dir) {
 // ── Theme toggle ──
 const themeBtn = document.getElementById('theme-btn');
 const root = document.documentElement;
-const saved = localStorage.getItem('brochure-theme');
+const saved = localStorage.getItem('explainer-theme');
 if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
 themeBtn.addEventListener('click', () => {
   const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
   root.dataset.theme = next;
-  localStorage.setItem('brochure-theme', next);
+  localStorage.setItem('explainer-theme', next);
   themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
 });
 

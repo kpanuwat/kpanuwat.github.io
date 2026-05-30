@@ -28,6 +28,10 @@
   --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
   --shadow-md: 0 4px 12px rgba(0,0,0,.4);
   --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe;
+  --danger-wash: #450a0a;  --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -126,7 +130,6 @@ li { margin-bottom: 6px; line-height: 1.65; }
 .steps li .step-body p { font-size: 13px; margin: 0; }
 
 .callout { background: var(--accent-wash); border-radius: var(--radius-sm); padding: 14px 18px; font-size: 15px; color: var(--accent-deep); border: 1px solid var(--accent); }
-[data-theme="dark"] .callout { color: var(--accent-wash); }
 .callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
 .callout.danger  { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
 
@@ -613,12 +616,12 @@ function scrollNext(dir) {
 
 var themeBtn = document.getElementById('theme-btn');
 var root = document.documentElement;
-var saved = localStorage.getItem('brochure-theme');
+var saved = localStorage.getItem('explainer-theme');
 if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
 themeBtn.addEventListener('click', function() {
   var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
   root.dataset.theme = next;
-  localStorage.setItem('brochure-theme', next);
+  localStorage.setItem('explainer-theme', next);
   themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
 });
 
