@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบต้นแบบไร้บัดกรี (No-Solder Prototyping) — Qwiic, Grove & STEMMA QT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1e293b; --ink-dim: #475569; --muted: #94a3b8;
+  --paper: #ffffff; --soft: #f1f5f9; --soft-2: #e2e8f0;
+  --accent: #3b82f6; --accent-deep: #1e3a8a; --accent-wash: #dbeafe;
+  --gold: #d4af37; --danger: #dc2626; --danger-wash: #fee2e2; --danger-ink: #991b1b;
+  --success: #16a34a; --success-wash: #dcfce7; --success-ink: #14532d;
+  --warning: #f59e0b; --warning-wash: #fef3c7; --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06); --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px; --radius-sm: 8px; --nav-h: 52px; --page-max: 960px; --sidebar-w: 240px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9; --ink-dim: #94a3b8; --muted: #475569;
+  --paper: #0f172a; --soft: #1e293b; --soft-2: #334155;
+  --accent-wash: #1e3a8a; --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4); --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe; --danger-wash: #450a0a; --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  background: var(--paper); color: var(--ink); line-height: 1.65; font-size: 16px; }
+code, kbd, pre, .mono { font-family: 'JetBrains Mono','Fira Code',ui-monospace,monospace; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+#progress-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 3px;
+  background: var(--accent); transform-origin: left; transform: scaleX(0);
+  transition: transform .1s linear; pointer-events: none; }
+#nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h);
+  background: var(--paper); border-bottom: 1px solid var(--soft-2);
+  display: flex; align-items: center; padding: 0 16px; box-shadow: var(--shadow-sm); }
+#sidebar-toggle { background: none; border: none; cursor: pointer; font-size: 20px;
+  color: var(--ink); padding: 4px 8px; margin-right: 8px; border-radius: var(--radius-sm);
+  line-height: 1; flex-shrink: 0; transition: background .15s; }
+#sidebar-toggle:hover { background: var(--soft); }
+#nav .brand { font-weight: 700; font-size: 15px; color: var(--ink); margin-right: auto;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button { background: none; border: 1px solid var(--soft-2);
+  border-radius: var(--radius-sm); padding: 5px 10px; font-size: 13px; cursor: pointer;
+  color: var(--ink-dim); transition: background .15s; }
+#nav .controls button:hover { background: var(--soft); }
+#sidebar { position: fixed; top: var(--nav-h); left: 0; bottom: 0; width: var(--sidebar-w);
+  background: var(--soft); border-right: 1px solid var(--soft-2);
+  overflow-y: auto; padding: 16px 0 40px; z-index: 90; transition: transform .25s ease;
+  scrollbar-width: thin; scrollbar-color: var(--soft-2) transparent; }
+#sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 89; background: rgba(15,23,42,.4); }
+.toc-group { margin-bottom: 2px; }
+.toc-group-label { display: block; padding: 8px 16px; font-size: 13px; font-weight: 600;
+  color: var(--ink-dim); cursor: pointer; transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+.toc-group-label:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-group-label.active { color: var(--accent); font-weight: 700; }
+.toc-subs { padding: 0; list-style: none; margin-bottom: 4px; }
+.toc-sub { display: block; padding: 5px 16px 5px 30px; font-size: 12px; color: var(--muted);
+  cursor: pointer; transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+.toc-sub:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-sub.active { color: var(--accent); font-weight: 600; background: var(--accent-wash);
+  border-right: 2px solid var(--accent); }
+#scroll-root { padding-top: var(--nav-h); margin-left: var(--sidebar-w); }
+.page { scroll-margin-top: calc(var(--nav-h) + 16px); padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center; }
+.page-inner { width: 100%; max-width: var(--page-max); display: flex; flex-direction: column; gap: 28px; }
+.page.cover { min-height: calc(100vh - var(--nav-h));
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  color: white; justify-content: center; align-items: center; text-align: center; }
+.page.cover .page-inner { align-items: center; }
+.page-foot { display: flex; justify-content: space-between; align-items: center;
+  padding-top: 32px; margin-top: 8px; border-top: 1px solid var(--soft-2); }
+.page-foot .pf-btn { display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm); background: var(--soft);
+  border: 1px solid var(--soft-2); font-size: 13px; color: var(--ink-dim); cursor: pointer;
+  transition: background .15s, color .15s; text-decoration: none; white-space: nowrap; }
+.page-foot .pf-btn:hover { background: var(--accent-wash); color: var(--accent); text-decoration: none; }
+.page-foot .pf-next { margin-left: auto; }
+h1 { font-size: clamp(28px,5vw,48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px,3vw,28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px; }
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+.cheatsheet { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.cheatsheet img { max-width:100%; max-height:78vh; width:auto; height:auto;
+  object-fit:contain; border-radius:var(--radius); box-shadow:var(--shadow-md); }
+.cheatsheet figcaption { font-size:13px; color:var(--muted); text-align:center; }
+.card { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow-md);
+  padding: 18px 20px; border-left: 4px solid var(--accent); box-sizing: border-box; }
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 4px; }
+.card h3 { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4,1fr); }
+@media (max-width: 640px) { .bento.cols-2,.bento.cols-3,.bento.cols-4 { grid-template-columns: 1fr; } }
+.takeaway { border-left: 4px solid var(--accent); background: var(--soft);
+  padding: 14px 18px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 15px; line-height: 1.6; }
+.takeaway b { color: var(--accent); }
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li { display: flex; gap: 14px; align-items: flex-start;
+  background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px; }
+.steps li .step-num { width: 28px; height: 28px; flex-shrink: 0; background: var(--accent);
+  color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; }
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+.callout { background: var(--accent-wash); border-radius: var(--radius-sm);
+  padding: 16px 20px; font-size: 15px; color: var(--accent-deep); border: 1px solid var(--accent); }
+.callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+code { background: var(--soft-2); color: var(--danger-ink); font-size: .875em; padding: 2px 6px; border-radius: 4px; }
+pre { background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6; }
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+kbd { background: var(--soft-2); border: 1px solid var(--soft-2); border-bottom-color: var(--muted);
+  border-radius: 4px; font-size: .8em; padding: 2px 7px; box-shadow: 0 1px 0 var(--muted); }
+.copy-wrap { position: relative; }
+.copy-btn { position: absolute; top: 8px; right: 8px; background: var(--soft-2); border: none;
+  border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink-dim); }
+.copy-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.copy-btn.copied { background: var(--success-wash); color: var(--success-ink); }
+.tabs-nav { display: flex; gap: 2px; border-bottom: 2px solid var(--soft-2); margin-bottom: 16px; }
+.tabs-nav button { background: none; border: none; padding: 8px 14px; cursor: pointer;
+  font-size: 14px; color: var(--ink-dim); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; border-radius: var(--radius-sm) var(--radius-sm) 0 0; }
+.tabs-nav button:hover { color: var(--ink); }
+.tabs-nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs-panel { display: none; }
+.tabs-panel.active { display: block; }
+details.disclosure { border-left: 3px solid var(--accent); background: var(--soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin: 12px 0; }
+details.disclosure summary { list-style: none; padding: 12px 16px; cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--ink); display: flex; align-items: center;
+  gap: 8px; user-select: none; }
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after { content: "▾"; font-size: 12px; color: var(--muted);
+  transition: transform .2s; margin-left: auto; }
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body { padding: 4px 16px 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.7; }
+details.disclosure .details-body p { font-size: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+@media print { #nav,#sidebar,#sidebar-overlay,#progress-bar,.page-foot { display: none; }
+  #scroll-root { padding-top: 0; margin-left: 0; }
+  .page { page-break-after: always; } .page:last-child { page-break-after: avoid; } }
+@media (max-width: 768px) { #sidebar { transform: translateX(-100%); box-shadow: none; }
+  #sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  #sidebar-overlay.open { display: block; } #scroll-root { margin-left: 0; } }
+@media (max-width: 480px) { .page { padding: 32px 16px; } h2 { font-size: 22px; }
+  #nav .brand { font-size: 13px; } }
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav">
+  <button id="sidebar-toggle" title="Toggle navigation" aria-label="Toggle navigation">☰</button>
+  <span class="brand">ระบบต้นแบบไร้บัดกรี — Qwiic · Grove · STEMMA QT</span>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">☀︎</button>
+    <button onclick="window.print()" title="Print / save as PDF">⎙</button>
+  </div>
+</nav>
+<aside id="sidebar"><nav id="toc"></nav></aside>
+<div id="sidebar-overlay"></div>
+<div id="scroll-root">
+
+<!-- p1: COVER -->
+<section class="page cover" id="p1" data-title="หน้าปก">
+  <div class="page-inner" style="align-items:center;text-align:center;gap:16px">
+    <div class="mark"></div>
+    <h1>ระบบต้นแบบไร้บัดกรี<br><span style="font-size:clamp(18px,3vw,28px);font-weight:500">No-Solder Prototyping</span></h1>
+    <p class="tag">Qwiic · Grove · STEMMA QT — เสียบปุ๊บ เขียนโค้ดได้เลย ไม่ต้องกลัวสายหลุดอีกต่อไป</p>
+    <div class="bento cols-3" style="margin-top:24px;max-width:580px">
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none">
+        <p class="label" style="color:rgba(255,255,255,.5)">ระบบหลัก</p>
+        <h3 style="color:white">3 ระบบ</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none">
+        <p class="label" style="color:rgba(255,255,255,.5)">บอร์ดรองรับ</p>
+        <h3 style="color:white">1,000+</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none">
+        <p class="label" style="color:rgba(255,255,255,.5)">การบัดกรี</p>
+        <h3 style="color:white">0 ครั้ง</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- p1b: CHEATSHEET -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <div class="page-inner">
+    <figure class="cheatsheet">
+      <img src="assets/no-solder-prototyping/cheatsheet.png" alt="No-Solder Prototyping cheat sheet">
+      <figcaption>ภาพสรุปแบบ cheat sheet — Qwiic vs Grove vs STEMMA QT เปรียบเทียบในภาพเดียว</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- p2: OVERVIEW -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Overview</p>
+      <h2>ทำไมต้องใช้ระบบต้นแบบไร้บัดกรี?</h2>
+      <p class="section-lead">ระบบต้นแบบอิเล็กทรอนิกส์แบบไม่ต้องบัดกรีเปลี่ยนวิธีที่นักพัฒนาสร้างวงจรต้นแบบอย่างสิ้นเชิง แทนที่จะเสียเวลากับสายไฟที่หลุดง่าย ขาสั้นบน breadboard หรือการเดินสายที่ซับซ้อน ระบบเหล่านี้ใช้หัวต่อมาตรฐานที่เสียบแล้วล็อคอยู่กับที่ ทำให้การต่อเซนเซอร์หรือโมดูลใหม่ใช้เวลาไม่ถึงสิบวินาที และไม่มีความเสี่ยงที่จะต่อผิดขั้ว ผลลัพธ์คือนักพัฒนาสามารถโฟกัสกับการเขียนโค้ดและ logic ของงาน แทนที่จะมาแก้ปัญหาฮาร์ดแวร์ที่ไม่ควรเกิด</p>
+    </div>
+    <div class="bento cols-3">
+      <div class="card success">
+        <p class="label">Qwiic — SparkFun 2017</p>
+        <h3>I2C เท่านั้น, 3.3V</h3>
+        <p>หัวต่อ JST SH 1mm 4 ขา ออกแบบเฉพาะสำหรับ I2C ระบบเปิด ไม่มีค่า royalty บอร์ดรองรับกว่า 1,000 ชนิด</p>
+      </div>
+      <div class="card warning">
+        <p class="label">Grove — Seeed Studio 2010</p>
+        <h3>I2C/UART/Analog/Digital, 3.3V+5V</h3>
+        <p>หัวต่อ 2mm 4 ขา รองรับสัญญาณหลายประเภทและแรงดันไฟทั้ง 3.3V และ 5V ecosystem ใหญ่ที่สุด</p>
+      </div>
+      <div class="card gold">
+        <p class="label">STEMMA QT — Adafruit 2014</p>
+        <h3>I2C, เข้ากันได้กับ Qwiic</h3>
+        <p>หัวต่อ JST SH 1mm 4 ขา — เหมือน Qwiic ทุกประการ สายสามารถใช้แทนกันได้ระหว่าง Adafruit และ SparkFun</p>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>💡 Key insight:</strong> STEMMA QT และ Qwiic ใช้หัวต่อเดียวกัน — สายสามารถใช้แทนกันได้ทันที แต่ Grove และ STEMMA (ไม่ใช่ QT) ใช้หัวต่อขนาดต่างกัน ต้องใช้ adapter
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> เลือก Qwiic/STEMMA QT สำหรับ I2C บน 3.3V board; เลือก Grove เมื่อต้องการ 5V หรือสัญญาณหลากหลาย</div>
+  </div>
+</section>
+
+<!-- p3a: DEEP-DIVE PROTOCOL — COMPONENTS -->
+<section class="page" id="p3a"
+  data-group="protocol"
+  data-group-title="Deep-Dive Protocol"
+  data-tier="intuition"
+  data-title="ส่วนประกอบ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol · ส่วนประกอบ</p>
+      <h2>ส่วนประกอบหลักที่ต้องเข้าใจ</h2>
+      <p class="section-lead">ก่อนเลือกว่าจะใช้ระบบใด สิ่งสำคัญคือต้องเข้าใจว่าระบบต้นแบบไร้บัดกรีประกอบด้วยอะไรบ้าง ตั้งแต่ชั้น physical ของหัวต่อไปจนถึงชั้น protocol ที่ส่งข้อมูล และ ecosystem ของบอร์ดที่รองรับ ความเข้าใจในแต่ละชั้นช่วยให้ตัดสินใจเลือกระบบได้ถูกต้องตั้งแต่ต้น</p>
+    </div>
+    <div>
+      <h3>ส่วนประกอบหลัก <span lang="en">(Components)</span></h3>
+      <div class="bento cols-3">
+        <div class="card">
+          <p class="label">Component 1</p>
+          <h3>ปัญหา Breadboard</h3>
+          <p>สายหลุด ขาสั้น ต่อผิด — เหตุผลที่ระบบ no-solder ถูกสร้างขึ้น</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Component 2</p>
+          <h3>Physical Layer — หัวต่อ JST</h3>
+          <p>ขนาด pitch (1mm vs 2mm), จำนวนขา, กลไก locking ที่ป้องกันการดึงหลุด</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Component 3</p>
+          <h3>Protocol Stack</h3>
+          <p>I2C, UART, Analog, Digital — แต่ละระบบรองรับสัญญาณต่างกัน</p>
+        </div>
+        <div class="card success">
+          <p class="label">Component 4</p>
+          <h3>Voltage Compatibility</h3>
+          <p>3.3V vs 5V — จุดอันตรายหลักที่อาจทำ board เสียได้หากเชื่อมต่อผิด</p>
+        </div>
+        <div class="card">
+          <p class="label">Component 5</p>
+          <h3>Ecosystem &amp; Lock-in</h3>
+          <p>จำนวนบอร์ดที่รองรับ, ผู้ผลิต, ราคา และความเป็น open standard</p>
+        </div>
+        <div class="card danger">
+          <p class="label">Component 6</p>
+          <h3>I2C Address Management</h3>
+          <p>การ daisy-chain ทำงานได้ถึง 127 devices ทางทฤษฎี แต่ address conflict คือปัญหาจริง</p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <svg viewBox="0 0 820 160" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="50" width="140" height="60" rx="10" fill="var(--danger-wash)" stroke="var(--danger)" stroke-width="1.5"/>
+        <text x="80" y="78" font-size="12" font-weight="700" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Breadboard</text>
+        <text x="80" y="96" font-size="11" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Problem</text>
+        <path d="M150 80 L200 80" stroke="var(--accent)" stroke-width="2" marker-end="url(#nsa1)"/>
+        <rect x="200" y="40" width="150" height="80" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="275" y="75" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">JST Connector</text>
+        <text x="275" y="93" font-size="11" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">1mm / 2mm pitch</text>
+        <path d="M350 80 L400 80" stroke="var(--accent)" stroke-width="2" marker-end="url(#nsa1)"/>
+        <rect x="400" y="40" width="160" height="80" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="480" y="75" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">I2C / Protocol</text>
+        <text x="480" y="93" font-size="11" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">SDA + SCL bus</text>
+        <path d="M560 80 L610 80" stroke="var(--accent)" stroke-width="2" marker-end="url(#nsa1)"/>
+        <rect x="610" y="50" width="200" height="60" rx="10" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+        <text x="710" y="78" font-size="12" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Qwiic / Grove</text>
+        <text x="710" y="96" font-size="11" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">STEMMA QT Ecosystem</text>
+        <defs>
+          <marker id="nsa1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">ปัญหา Breadboard → หัวต่อ JST มาตรฐาน → บัส I2C → Ecosystem ของบอร์ดและเซนเซอร์</p>
+    </div>
+    <div class="takeaway"><b>★ Mental model:</b> ระบบ no-solder คือ "หัวต่อมาตรฐาน + บัส I2C" ที่แก้ปัญหา breadboard ด้วยการ lock ขาไว้ไม่ให้หลุด</div>
+  </div>
+</section>
+
+<!-- p3b: DEEP-DIVE PROTOCOL — ASSUMPTIONS & TAKEAWAYS -->
+<section class="page" id="p3b"
+  data-group="protocol"
+  data-tier="advanced"
+  data-title="สมมติฐาน & Takeaways">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol · สมมติฐาน</p>
+      <h2>สมมติฐานที่ซ่อนอยู่และสิ่งที่ต้องรู้ก่อน</h2>
+    </div>
+    <div>
+      <h3>สมมติฐานที่ผู้เริ่มต้นมักมองข้าม</h3>
+      <p>สิ่งเหล่านี้คือสิ่งที่ระบบ no-solder ถือว่าผู้ใช้รู้อยู่แล้ว แต่มักไม่ถูกระบุอย่างชัดเจนในเอกสาร การเข้าใจก่อนจะช่วยหลีกเลี่ยงความผิดพลาดที่ทำ board เสียได้</p>
+      <ul>
+        <li><strong>สมมติฐานที่ 1 — STEMMA QT เหมือน Qwiic ทุกประการ:</strong> หัวต่อ JST SH 1mm 4 ขาของทั้งสองระบบเหมือนกัน ไม่ใช่แค่ "คล้ายกัน" — สายสามารถใช้แทนกันได้จริง แต่ชื่อ "STEMMA" (ไม่มี QT) คือระบบที่ต่างออกไปโดยสิ้นเชิงที่ใช้ JST PH 2mm</li>
+        <li><strong>สมมติฐานที่ 2 — Grove รองรับ 5V แต่เซนเซอร์ส่วนใหญ่เป็น 3.3V:</strong> การเชื่อม Grove 5V เข้ากับ microcontroller 3.3V โดยไม่มี level shifter อาจทำให้ board เสียถาวร ต้องตรวจสอบ VCC ของเซนเซอร์ก่อนเสมอ</li>
+        <li><strong>สมมติฐานที่ 3 — I2C address conflict เป็นปัญหาจริง:</strong> ถ้าซื้อเซนเซอร์ชนิดเดิมมาต่อเพิ่ม (เช่น temperature sensor สองตัว) ทั้งคู่จะมี address เดิม ต้องใช้ I2C multiplexer หรือเลือกรุ่นที่ปรับ address ได้</li>
+        <li><strong>สมมติฐานที่ 4 — No-solder คือ prototype เท่านั้น:</strong> หัวต่อแบบ snap-in ไม่ออกแบบมาสำหรับการสั่นสะเทือน แรงดึง หรือสภาพแวดล้อมที่รุนแรง งาน production ต้องบัดกรีหรือทำ PCB จริงๆ</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Key Takeaways — 7 สิ่งที่ต้องจำ</h3>
+      <div class="bento cols-2">
+        <div class="card success">
+          <p class="label">Takeaway 1 — Big Picture</p>
+          <h3>ระบบ no-solder แก้ปัญหา breadboard ด้วยหัวต่อล็อค</h3>
+          <p>ไม่ใช่แค่ "สะดวกขึ้น" แต่คือการกำจัดข้อผิดพลาดที่เกิดจากฮาร์ดแวร์ออกไปทั้งหมด ทำให้การ debug โฟกัสที่โค้ดได้เต็มที่</p>
+        </div>
+        <div class="card">
+          <p class="label">Takeaway 2 — System Selection</p>
+          <h3>เลือก Qwiic/STEMMA QT สำหรับ I2C บน 3.3V</h3>
+          <p>สำหรับ ESP32, RP2040, Arduino Nano 33 — Qwiic คือตัวเลือกที่ง่ายที่สุด มีบอร์ดให้เลือกมากและ library พร้อมใช้</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Takeaway 3 — Grove Use Case</p>
+          <h3>เลือก Grove เมื่อต้องการ 5V หรือ non-I2C</h3>
+          <p>Arduino Uno, Mega และงานที่ต้องการ analog sensor หรือ UART — Grove รองรับได้ดีกว่าและ ecosystem ใหญ่กว่า</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Takeaway 4 — Cross-System</p>
+          <h3>STEMMA QT = Qwiic — สายใช้แทนกันได้เสมอ</h3>
+          <p>ซื้อสายได้จาก SparkFun หรือ Adafruit ไม่ต้องยึดติดกับ brand เดียว ประหยัดได้มากเมื่อของหายหรือต้องการสายยาว</p>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:8px">
+        <strong>💡 Takeaways 5–7:</strong>
+        (5) I2C address conflict คือปัญหาหลักเมื่อ daisy-chain เซนเซอร์ชนิดเดียวกัน — ใช้ i2c_scanner ก่อนซื้อเซนเซอร์ชุดที่สอง
+        (6) Library ที่ใช้กับทั้ง 3 ระบบเหมือนกัน เพราะมันคือ I2C มาตรฐาน — <code>Wire.h</code> ใช้ได้ทุกระบบ
+        (7) No-solder เหมาะกับ prototype เท่านั้น — production ต้องการ custom PCB หรือการบัดกรีเพื่อความทนทาน
+      </div>
+    </div>
+    <div class="takeaway"><b>★ สมมติฐานที่อันตรายที่สุด:</b> อย่าสมมติว่าแรงดันไฟเข้ากัน — ตรวจ VCC ก่อนทุกครั้ง</div>
+  </div>
+</section>
+
+<!-- p4a: BREADBOARD PROBLEM — INTUITION -->
+<section class="page" id="p4a"
+  data-group="breadboard-problem"
+  data-group-title="ปัญหา Breadboard"
+  data-tier="intuition"
+  data-title="ทำไมต้องมีระบบนี้">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — ปัญหา Breadboard · สัญชาตญาณ</p>
+      <h2>Breadboard ทำงานอย่างไร และทำไมถึงยังไม่พอ?</h2>
+      <p class="section-lead">Breadboard คือเครื่องมือต้นแบบที่นักอิเล็กทรอนิกส์ใช้มาหลายทศวรรษ — เสียบสายแล้วถอดได้โดยไม่ต้องบัดกรี ฟังดูดี แต่ในทางปฏิบัติมีปัญหาหลายอย่างที่เพิ่มขึ้นตามขนาดและความซับซ้อนของโปรเจกต์ ทำให้การหาข้อผิดพลาดใช้เวลานานโดยไม่จำเป็น และทำให้โปรเจกต์ดูน่ากลัวสำหรับผู้เริ่มต้น</p>
+    </div>
+    <div>
+      <h3>ปัญหาหลักของ Breadboard ที่พบในชีวิตจริง</h3>
+      <p>Breadboard ทำงานได้ดีสำหรับวงจรง่ายๆ ที่มีชิ้นส่วนไม่กี่ตัว แต่เมื่อโปรเจกต์ซับซ้อนขึ้น ปัญหาเริ่มปรากฏ สาย jumper ที่ใช้เชื่อมต่อระหว่างชิ้นส่วนมีความหนาพอๆ กับขาของชิ้นส่วนที่ใส่ใน breadboard ทำให้เมื่อขยับหรือถือ board ขึ้นมา สายเหล่านั้นมักหลุดออกโดยไม่รู้ตัว</p>
+      <p>นอกจากนั้น การเดินสายใน breadboard ที่มีหลายส่วนประกอบพร้อมกันทำให้เกิด "สปาเก็ตตี้สาย" ที่มองยากว่าสายไหนต่อไปที่ไหน การตรวจสอบว่าสาย power, ground, SDA, SCL ต่อถูกต้องหรือเปล่าต้องนับขาทีละเส้น ซึ่งเป็นแหล่งของข้อผิดพลาดมากที่สุดในโปรเจกต์ฮาร์ดแวร์</p>
+      <p>ยิ่งไปกว่านั้น breadboard ออกแบบมาสำหรับ lab เท่านั้น ไม่ใช่สำหรับการใช้งานจริง การเคลื่อนย้าย board ในขณะที่โปรแกรมกำลังทำงานอยู่ทำให้ค่าเซนเซอร์กระโดดหรือโปรแกรม crash โดยไม่มีเหตุผลชัดเจน เสียเวลา debug ฝั่ง software ไปหลายชั่วโมง กว่าจะพบว่าจริงๆ แล้วสาย power หลุดออกครึ่งหนึ่ง</p>
+    </div>
+    <div style="display:flex;justify-content:center;margin:8px 0">
+      <svg viewBox="0 0 820 180" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="20" width="370" height="140" rx="12" fill="var(--danger-wash)" stroke="var(--danger)" stroke-width="1.5"/>
+        <text x="195" y="50" font-size="13" font-weight="700" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Breadboard (Messy)</text>
+        <rect x="30" y="65" width="80" height="30" rx="5" fill="var(--danger)" opacity=".3"/>
+        <text x="70" y="84" font-size="10" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Sensor A</text>
+        <rect x="130" y="75" width="80" height="30" rx="5" fill="var(--danger)" opacity=".3"/>
+        <text x="170" y="94" font-size="10" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Sensor B</text>
+        <rect x="240" y="60" width="80" height="30" rx="5" fill="var(--danger)" opacity=".3"/>
+        <text x="280" y="79" font-size="10" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">MCU</text>
+        <path d="M110 80 Q150 50 130 90" stroke="var(--danger-ink)" stroke-width="1.5" fill="none" stroke-dasharray="3"/>
+        <path d="M90 85 Q200 40 240 75" stroke="var(--danger-ink)" stroke-width="1.5" fill="none" stroke-dasharray="3"/>
+        <path d="M210 90 Q160 120 260 80" stroke="var(--danger-ink)" stroke-width="1.5" fill="none" stroke-dasharray="3"/>
+        <text x="195" y="145" font-size="11" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Tangled wires — easy to disconnect</text>
+        <text x="430" y="95" font-size="24" fill="var(--accent)" text-anchor="middle" font-family="system-ui">→</text>
+        <rect x="460" y="20" width="350" height="140" rx="12" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+        <text x="635" y="50" font-size="13" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Qwiic / Grove (Clean)</text>
+        <rect x="480" y="65" width="80" height="30" rx="5" fill="var(--success)" opacity=".3"/>
+        <text x="520" y="84" font-size="10" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Sensor A</text>
+        <rect x="590" y="65" width="80" height="30" rx="5" fill="var(--success)" opacity=".3"/>
+        <text x="630" y="84" font-size="10" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Sensor B</text>
+        <rect x="700" y="65" width="90" height="30" rx="5" fill="var(--success)" opacity=".3"/>
+        <text x="745" y="84" font-size="10" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">MCU</text>
+        <path d="M560 80 L590 80" stroke="var(--success-ink)" stroke-width="2.5" fill="none"/>
+        <path d="M670 80 L700 80" stroke="var(--success-ink)" stroke-width="2.5" fill="none"/>
+        <text x="635" y="145" font-size="11" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Locked connectors — daisy-chain clean</text>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--muted)">สายแบบ breadboard (ซ้าย) หลุดง่ายและดูยาก vs หัวต่อแบบ snap-in (ขวา) ที่ lock อยู่กับที่</p>
+    <div class="takeaway"><b>★ Beginner takeaway:</b> ถ้า bug หายเองเมื่อแตะสาย — ปัญหาคือ breadboard ไม่ใช่โค้ด</div>
+  </div>
+</section>
+
+<!-- p4b: BREADBOARD PROBLEM — MECHANISM -->
+<section class="page" id="p4b"
+  data-group="breadboard-problem"
+  data-tier="mechanism"
+  data-title="วิธีแก้ปัญหา">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — ปัญหา Breadboard · กลไก</p>
+      <h2>ระบบ No-Solder แก้ปัญหาอย่างไร?</h2>
+      <p class="section-lead">แนวคิดหลักของระบบ no-solder คือการแทนที่สาย jumper ที่หลุดง่ายด้วยหัวต่อมาตรฐานที่มีกลไก locking — เสียบแล้วดึงไม่ออกโดยไม่ตั้งใจ สายแต่ละเส้นมีหัวต่อที่ถูกกำหนด pinout ไว้แล้ว ทำให้ต่อผิดขั้วไม่ได้ เพราะหัวต่อมีทิศทางเดียวที่ใส่ได้</p>
+    </div>
+    <div>
+      <h3>กลไก Keyed Connector — ต่อผิดไม่ได้</h3>
+      <p>หัวต่อ JST ที่ใช้ในระบบ Qwiic และ STEMMA QT มีรูปร่างที่ไม่สมมาตร ทำให้ใส่ได้ทิศทางเดียวเท่านั้น ไม่มีทางใส่กลับหัวได้ ซึ่งหมายความว่า VCC (3.3V) ไม่มีทางต่อเข้ากับ GND โดยบังเอิญ และ SDA ไม่มีทางเข้าช่อง SCL การต่อผิดที่พบบ่อยใน breadboard จึงถูกกำจัดออกไปโดยสิ้นเชิง</p>
+      <p>นอกจากนั้น หัวต่อ JST ยังมีกลไก friction fit ที่ทำให้สายยึดอยู่กับที่โดยไม่หลุดแม้จะเขย่า board การถอดสายต้องดึงด้วยแรงพอสมควร ไม่ใช่แค่สัมผัสเบาๆ เหมือน jumper wire ที่หลุดได้เอง</p>
+      <details class="disclosure">
+        <summary>เจาะลึก: ทำไม 4 ขาถึงพอสำหรับ I2C?</summary>
+        <div class="details-body">
+          <p>I2C ใช้เพียงสองสายสัญญาณคือ SDA (Serial Data) และ SCL (Serial Clock) ทำให้รวมกับ VCC และ GND แล้วได้ 4 ขาพอดี นี่คือเหตุผลที่ทุกระบบ no-solder ที่เน้น I2C ใช้ connector 4 ขา บัสสองเส้นนี้รองรับ device ได้ถึง 127 ตัวบน bus เดียวกัน (ทางทฤษฎี) โดย MCU เป็น master และ sensor แต่ละตัวมี address 7-bit ที่ไม่ซ้ำกัน</p>
+        </div>
+      </details>
+    </div>
+    <div>
+      <h3>Pipeline: จาก Prototype สู่งานถาวร</h3>
+      <p>ระบบ no-solder ออกแบบมาสำหรับ phase แรกของการพัฒนา ไม่ใช่ผลิตภัณฑ์สุดท้าย workflow ที่ดีคือ: เริ่มด้วย no-solder เพื่อ test concept → ยืนยันว่า logic และ sensor ทำงานได้ → ย้ายไป custom PCB หรือบัดกรีสำหรับ production</p>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <div class="step-body">
+            <strong>Prototype ด้วย No-Solder</strong>
+            <p>ต่อ sensor กับ MCU ผ่าน Qwiic/Grove เขียนโค้ดทดสอบ ปรับ algorithm — ไม่มี hardware failure เข้ามารบกวน</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div class="step-body">
+            <strong>Verify ว่า Concept ใช้งานได้</strong>
+            <p>ทดสอบใน use case จริง ตรวจ latency, accuracy, power consumption ก่อนลงทุนใน PCB</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div class="step-body">
+            <strong>ย้ายไป Custom PCB หรือบัดกรี</strong>
+            <p>เมื่อ design ยืนยันแล้ว ใช้ schematic เดิมออกแบบ PCB สำหรับ production ที่ทนทานกว่า</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> No-solder = prototype phase; custom PCB = production phase — อย่าสับสนระหว่างสองขั้นตอนนี้</div>
+  </div>
+</section>
+
+<!-- p5a: QWIIC — INTUITION -->
+<section class="page" id="p5a"
+  data-group="qwiic"
+  data-group-title="ระบบ Qwiic"
+  data-tier="intuition"
+  data-title="Qwiic คืออะไร">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — ระบบ Qwiic · สัญชาตญาณ</p>
+      <h2>Qwiic — ระบบ I2C แบบ snap-in จาก SparkFun</h2>
+      <p class="section-lead">Qwiic เป็นระบบ no-solder ที่ SparkFun พัฒนาขึ้นในปี 2017 โดยมีเป้าหมายเดียวคือทำให้การเชื่อมต่อ I2C sensor ง่ายที่สุดเท่าที่จะเป็นไปได้ ระบบนี้ใช้หัวต่อ JST SH ขนาด 1mm ที่มีเพียง 4 ขา รองรับเฉพาะ I2C ที่แรงดัน 3.3V เท่านั้น ความเรียบง่ายนี้คือจุดแข็งที่ทำให้ ecosystem เติบโตได้เร็วมากจนมีบอร์ดรองรับกว่า 1,000 ชนิดในปัจจุบัน</p>
+    </div>
+    <div>
+      <h3>Pinout และข้อกำหนดทางเทคนิค</h3>
+      <p>หัวต่อ Qwiic มี 4 ขาเรียงตามลำดับ: ขาที่ 1 คือ GND (สายดำ), ขาที่ 2 คือ VCC 3.3V (สายแดง), ขาที่ 3 คือ SDA หรือ I2C Data (สายน้ำเงินหรือเขียว) และขาที่ 4 คือ SCL หรือ I2C Clock (สายเหลืองหรือขาว) pinout นี้เป็นมาตรฐานเดียวกันในทุกบอร์ดที่มีโลโก้ Qwiic ไม่ว่าจะเป็นของ SparkFun หรือผู้ผลิตอื่นที่ร่วมใช้มาตรฐานนี้</p>
+      <p>SparkFun ออกแบบ Qwiic ให้เป็น open standard — ไม่มีค่า royalty ผู้ผลิตอื่นสามารถใช้โลโก้และมาตรฐาน Qwiic ได้ฟรี นโยบายนี้ทำให้ ecosystem เติบโตเร็วและราคาบอร์ดถูกลงเพราะมีการแข่งขัน</p>
+      <div class="bento cols-2" style="margin-top:16px">
+        <div class="card">
+          <p class="label">Qwiic Specs</p>
+          <h3>ข้อกำหนดทางเทคนิค</h3>
+          <ul>
+            <li>Connector: JST SH 1.0mm pitch, 4-pin</li>
+            <li>Protocol: I2C เท่านั้น</li>
+            <li>Voltage: 3.3V (ห้ามใช้กับ 5V logic โดยตรง)</li>
+            <li>Speed: I2C standard (100 kHz) หรือ fast (400 kHz)</li>
+            <li>Max devices: 127 (ทางทฤษฎี)</li>
+          </ul>
+        </div>
+        <div class="card success">
+          <p class="label">Qwiic Ecosystem</p>
+          <h3>บอร์ดและ Sensor</h3>
+          <ul>
+            <li>Sensors: BME280, APDS9960, VL53L1X, GPS, IMU</li>
+            <li>Displays: OLED, LCD character, e-ink</li>
+            <li>MCU boards: ESP32, RP2040, Arduino Nano 33</li>
+            <li>ผู้ผลิตร่วม: Adafruit (STEMMA QT), DFRobot, หลายราย</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>Daisy-Chain — ต่อ sensor หลายตัวบน bus เดียว</h3>
+      <p>จุดเด่นของ I2C คือสามารถต่อ sensor หลายตัวบน bus เดียวกันโดยแต่ละตัวมี address ต่างกัน บอร์ด Qwiic ส่วนใหญ่มีหัวต่อ 2 อัน (ขาเข้าและขาออก) เพื่อให้ daisy-chain ได้โดยตรงโดยไม่ต้องใช้ hub เพิ่มเติม ลักษณะนี้ทำให้การเพิ่ม sensor ใหม่ง่ายมาก เพียงแค่เสียบสายต่อท้ายตัวสุดท้ายในสาย</p>
+      <p>อย่างไรก็ตาม หาก sensor สองตัวมี I2C address เดียวกัน (เช่น BME280 สองตัวที่มี address 0x76 หรือ 0x77 เหมือนกัน) จะทำงานด้วยกันบน bus เดียวไม่ได้ ต้องใช้ I2C multiplexer (เช่น TCA9548A) เพื่อแยก bus หรือซื้อรุ่นที่สามารถ set address ต่างกันได้</p>
+    </div>
+    <div class="takeaway"><b>★ Beginner takeaway:</b> Qwiic คือตัวเลือกที่ดีที่สุดสำหรับมือใหม่ที่ใช้ ESP32 หรือ Arduino 3.3V — เสียบแล้วทำงานได้ทันที</div>
+  </div>
+</section>
+
+<!-- p5b: QWIIC — MECHANISM -->
+<section class="page" id="p5b"
+  data-group="qwiic"
+  data-tier="mechanism"
+  data-title="การใช้งาน Qwiic">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — ระบบ Qwiic · กลไก</p>
+      <h2>การใช้งาน Qwiic ในทางปฏิบัติ</h2>
+      <p class="section-lead">การเริ่มต้นใช้ Qwiic ไม่ซับซ้อน — เสียบสาย เปิด library manager ใน Arduino IDE หรือ PlatformIO แล้วติดตั้ง library ของ sensor นั้นๆ ส่วนใหญ่ library จะ handle I2C communication ให้หมดโดยอัตโนมัติ ผู้พัฒนาเพียงแค่เรียก function ของ library เพื่ออ่านค่า sensor</p>
+    </div>
+    <div>
+      <h3>ตัวอย่าง: ตรวจสอบ I2C Address ด้วย i2c_scanner</h3>
+      <p>ก่อนเริ่มเขียน code สำหรับ sensor จริง ควรรันโปรแกรม i2c_scanner เพื่อตรวจสอบว่า MCU มองเห็น sensor ที่ต่ออยู่บน bus หรือไม่ และ address ที่ sensor ใช้จริงคืออะไร โปรแกรมนี้ scan address ตั้งแต่ 0x01 ถึง 0x7F และรายงานว่ามี device ตอบสนองที่ address ใดบ้าง</p>
+      <div class="copy-wrap">
+        <pre><code>// i2c_scanner — วาง sketch นี้ใน Arduino IDE แล้ว upload
+#include &lt;Wire.h&gt;
+
+void setup() {
+  Wire.begin();
+  Serial.begin(115200);
+  Serial.println("Scanning I2C bus...");
+}
+
+void loop() {
+  byte nDevices = 0;
+  for (byte addr = 1; addr &lt; 127; addr++) {
+    Wire.beginTransmission(addr);
+    byte error = Wire.endTransmission();
+    if (error == 0) {
+      Serial.print("Found device at 0x");
+      if (addr &lt; 16) Serial.print("0");
+      Serial.println(addr, HEX);
+      nDevices++;
+    }
+  }
+  if (nDevices == 0) Serial.println("No I2C devices found");
+  delay(3000);
+}</code></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <p>โปรแกรมด้านบนใช้ <code>Wire.beginTransmission(addr)</code> เพื่อส่ง start signal ไปยัง address นั้น และ <code>Wire.endTransmission()</code> จะคืนค่า 0 หากมี device ตอบสนอง ถ้าเห็น <code>0x76</code> หรือ <code>0x77</code> แสดงว่า BME280 ต่อถูกต้อง; ถ้าไม่เห็นอะไร ให้ตรวจสอบว่าแรงดันไฟ 3.3V จ่ายให้ board แล้วหรือยัง</p>
+    </div>
+    <div>
+      <h3>การอ่านค่า Sensor จริง — BME280 ตัวอย่าง</h3>
+      <p>หลังจาก verify ด้วย i2c_scanner แล้ว สามารถติดตั้ง library ของ sensor นั้นๆ ผ่าน Arduino Library Manager (ค้นหา "BME280" แล้วเลือก library จาก Adafruit หรือ SparkFun) แล้วเรียกใช้ function ที่ library จัดเตรียมไว้</p>
+      <div class="copy-wrap">
+        <pre><code>#include &lt;Wire.h&gt;
+#include &lt;Adafruit_BME280.h&gt;
+
+Adafruit_BME280 bme;
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();  // SDA, SCL ถูก map อัตโนมัติตาม board
+  bme.begin(0x76);  // หรือ 0x77 แล้วแต่ address ที่ i2c_scanner เห็น
+}
+
+void loop() {
+  float temp = bme.readTemperature();
+  float humidity = bme.readHumidity();
+  float pressure = bme.readPressure() / 100.0F;
+  Serial.printf("Temp: %.1f C | Humidity: %.1f%% | Pressure: %.0f hPa\n",
+                temp, humidity, pressure);
+  delay(2000);
+}</code></pre>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      </div>
+      <p><code>Wire.begin()</code> ไม่ต้องระบุ pin เพราะ library จะ map SDA/SCL ตาม board definition ที่ติดตั้งใน Boards Manager โดยอัตโนมัติ สำหรับ ESP32 โดยทั่วไปคือ GPIO21 (SDA) และ GPIO22 (SCL) แต่ตรวจสอบ pinout ของ board ที่ใช้ก่อนเสมอ</p>
+      <details class="disclosure">
+        <summary>เจาะลึก: กำหนด SDA/SCL ใน Wire.begin() เองเมื่อใด?</summary>
+        <div class="details-body">
+          <p>ใน ESP32 สามารถกำหนด pin ที่ต้องการใช้ได้ด้วย <code>Wire.begin(SDA_PIN, SCL_PIN)</code> เช่น <code>Wire.begin(21, 22)</code> ซึ่งมีประโยชน์เมื่อ board นั้นๆ ไม่ได้มี Qwiic connector ในตัว และต้องใช้ adapter cable ไปยัง pin อื่น หรือเมื่อต้องการสร้าง second I2C bus สำหรับ device ที่มี address ชนกัน: <code>Wire1.begin(16, 17)</code></p>
+        </div>
+      </details>
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> รัน i2c_scanner ก่อนเสมอ — ตรวจสอบ address และยืนยัน sensor ต่อถูกก่อนเขียนโค้ดจริง</div>
+  </div>
+</section>
+
+<!-- p6a: GROVE — INTUITION -->
+<section class="page" id="p6a"
+  data-group="grove"
+  data-group-title="ระบบ Grove"
+  data-tier="intuition"
+  data-title="Grove คืออะไร">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — ระบบ Grove · สัญชาตญาณ</p>
+      <h2>Grove — ระบบต้นแบบที่เก่าแก่ที่สุดและ ecosystem ใหญ่ที่สุด</h2>
+      <p class="section-lead">Grove คือระบบ no-solder ที่ Seeed Studio พัฒนาขึ้นในปี 2010 ซึ่งเก่ากว่า Qwiic ถึง 7 ปี ด้วยระยะเวลาที่ยาวนานนี้ Grove จึงมี ecosystem ที่ใหญ่ที่สุดในบรรดาทั้งสามระบบ และมีจุดเด่นสำคัญที่ Qwiic ทำไม่ได้คือรองรับสัญญาณได้หลายประเภท ทั้ง I2C, UART, Analog และ Digital รวมถึงรองรับแรงดันไฟทั้ง 3.3V และ 5V</p>
+    </div>
+    <div>
+      <h3>4 ประเภทของ Grove Connector</h3>
+      <p>Grove ใช้หัวต่อ 4 ขาขนาด 2.0mm pitch เหมือนกันทุกรุ่น แต่สิ่งที่แตกต่างคือ protocol ที่วิ่งผ่านสายแต่ละเส้น ซึ่งแบ่งเป็น 4 ประเภทหลัก ผู้ใช้ต้องดูที่ตัว sensor หรือ module ว่าเป็นประเภทใดก่อนซื้อ เพราะถ้าต่อ Grove-Analog เข้ากับ port I2C บน MCU อาจไม่ทำงาน</p>
+      <div class="bento cols-2">
+        <div class="card">
+          <p class="label">Type 1</p>
+          <h3>Grove-I2C</h3>
+          <p>ขา: SCL (เหลือง), SDA (ขาว), VCC (แดง), GND (ดำ) — ใช้กับ sensor ที่สื่อสารผ่าน I2C เช่น temperature, distance, IMU</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Type 2</p>
+          <h3>Grove-UART</h3>
+          <p>ขา: TX (เหลือง), RX (ขาว), VCC (แดง), GND (ดำ) — ใช้กับ GPS module, fingerprint sensor, CO2 sensor บางรุ่น</p>
+        </div>
+        <div class="card success">
+          <p class="label">Type 3</p>
+          <h3>Grove-Analog</h3>
+          <p>ขา: A0 (เหลือง), A1 (ขาว), VCC (แดง), GND (ดำ) — ใช้กับ potentiometer, light sensor, soil moisture แบบ analog</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Type 4</p>
+          <h3>Grove-Digital</h3>
+          <p>ขา: D0 (เหลือง), D1 (ขาว), VCC (แดง), GND (ดำ) — ใช้กับ button, relay, LED module, ultrasonic range finder</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>จุดเด่นของ Grove เหนือ Qwiic</h3>
+      <p>Grove รองรับ 5V ซึ่งหมายความว่าใช้งานร่วมกับ Arduino Uno, Mega, Leonardo ได้โดยตรงโดยไม่ต้องกังวลเรื่องแรงดัน นอกจากนั้น ecosystem ที่ใหญ่กว่า Qwiic มาก (Seeed Studio มีผลิตภัณฑ์ Grove มากกว่า 300 รายการ) ทำให้หา sensor ชนิดที่ต้องการได้ง่ายกว่า โดยเฉพาะ sensor ที่ผิดแผกจากมาตรฐาน เช่น gas sensor, soil moisture, weight sensor</p>
+    </div>
+    <div class="takeaway"><b>★ Beginner takeaway:</b> ถ้าใช้ Arduino Uno 5V หรือต้องการ sensor ที่ไม่ใช่แค่ I2C — Grove คือตัวเลือกที่ดีกว่า</div>
+  </div>
+</section>
+
+<!-- p6b: GROVE — MECHANISM -->
+<section class="page" id="p6b"
+  data-group="grove"
+  data-tier="mechanism"
+  data-title="การใช้งาน Grove">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — ระบบ Grove · กลไก</p>
+      <h2>การใช้งาน Grove ในทางปฏิบัติ: แรงดันและ Protocol</h2>
+      <p class="section-lead">การใช้งาน Grove อย่างถูกต้องต้องเข้าใจ 2 เรื่องหลัก: ประเภทของ port ที่ MCU มีให้ (I2C / Analog / Digital / UART) และแรงดันไฟ (3.3V หรือ 5V) ของทั้ง MCU และ sensor ที่ต้องการเชื่อมต่อ การมองข้ามขั้นตอนนี้คือสาเหตุที่ทำให้ board เสียได้มากที่สุดในระบบ Grove</p>
+    </div>
+    <div>
+      <h3>การตรวจสอบแรงดันไฟก่อนเชื่อมต่อ — Critical Step</h3>
+      <p>ก่อนต่อ Grove sensor เข้ากับ MCU ต้องตรวจสอบ 2 จุดเสมอ: แรงดัน VCC ของ MCU board ที่ output ออกมา (3.3V หรือ 5V) และแรงดัน logic ของ sensor นั้นๆ ที่ระบุใน datasheet ถ้า MCU ให้ VCC เป็น 3.3V แต่ sensor ต้องการ 5V sensor อาจทำงานได้ไม่ถูกต้อง ในทางกลับกัน ถ้า sensor ให้สัญญาณ 5V กลับมาที่ MCU ที่รองรับแค่ 3.3V logic — MCU pin อาจเสียทันที</p>
+      <p>วิธีที่ปลอดภัยที่สุดเมื่อต้องผสม 3.3V และ 5V คือใช้ logic level converter ที่มี Grove connector สำเร็จรูปอยู่แล้ว เพียงต่อสายระหว่าง MCU กับ converter แล้วต่อ converter กับ sensor โดยไม่ต้องดัดแปลงอะไรเพิ่มเติม</p>
+      <details class="disclosure">
+        <summary>เจาะลึก: ทำไม Arduino Uno 5V ถึงทำ ESP32 3.3V เสียได้?</summary>
+        <div class="details-body">
+          <p>Arduino Uno ใช้ Atmega328P ที่ทำงานที่ 5V logic ดังนั้น digital output จาก Uno คือสัญญาณ 5V ESP32 ทนแรงดันที่ GPIO pin ได้สูงสุดเพียง 3.6V การส่งสัญญาณ 5V เข้า GPIO ของ ESP32 จะทำให้ ESD protection diode ภายในชิปทำงานเกินพิกัดและเสียถาวรภายในไม่กี่วินาที ต้องใช้ level shifter เสมอเมื่อเชื่อม Grove จาก Uno เข้ากับ ESP32</p>
+        </div>
+      </details>
+    </div>
+    <div>
+      <h3>Grove Base Shield — วิธีง่ายที่สุดสำหรับ Arduino</h3>
+      <p>Seeed Studio ผลิต Grove Base Shield ซึ่งเป็น expansion board ที่เสียบเข้ากับ Arduino Uno หรือ Mega โดยตรง แล้วให้ Grove connector ในรูปแบบต่างๆ มาถึง 16 port (I2C, Analog, Digital, UART) ทำให้ไม่ต้องใช้สายแปลง Breadboard และจัดการ power rail ให้อัตโนมัติ</p>
+      <table style="margin-top:16px">
+        <thead>
+          <tr><th>MCU Board</th><th>VCC</th><th>Grove Shield</th><th>Level Shifter?</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Arduino Uno / Mega</td><td>5V</td><td>Grove Shield for Arduino</td><td class="check">✓ ไม่ต้อง (5V native)</td></tr>
+          <tr><td>Arduino Nano 33 IoT</td><td>3.3V</td><td>Grove Shield for Nano</td><td class="check">✓ ไม่ต้อง (3.3V native)</td></tr>
+          <tr><td>ESP32 (any)</td><td>3.3V</td><td>ต้องใช้ adapter หรือสายแปลง</td><td class="cross">✗ ต้องใช้ level shifter กับ 5V sensor</td></tr>
+          <tr><td>Raspberry Pi Pico</td><td>3.3V</td><td>Grove Shield for Pico</td><td class="check">✓ ไม่ต้อง (3.3V sensor)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> ตรวจสอบ VCC ของทั้ง MCU และ sensor ก่อนต่อสาย Grove ทุกครั้ง — 5V เข้า 3.3V GPIO ทำให้ board เสียทันที</div>
+  </div>
+</section>
+
+<!-- p7a: STEMMA — INTUITION -->
+<section class="page" id="p7a"
+  data-group="stemma"
+  data-group-title="STEMMA & STEMMA QT"
+  data-tier="intuition"
+  data-title="STEMMA QT คืออะไร">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — STEMMA & STEMMA QT · สัญชาตญาณ</p>
+      <h2>STEMMA QT — ระบบจาก Adafruit ที่เข้ากันได้กับ Qwiic</h2>
+      <p class="section-lead">Adafruit พัฒนาระบบ STEMMA ขึ้นในปี 2014 โดยมี 2 variant ที่ต้องแยกแยะให้ถูกต้อง คือ STEMMA (ใหญ่, 2mm) และ STEMMA QT (เล็ก, 1mm, เหมือน Qwiic) ความสับสนจาก naming นี้เป็นสาเหตุหลักที่ทำให้ผู้เริ่มต้นซื้อสายผิด ความเข้าใจที่ถูกต้องคือ STEMMA QT คือ Qwiic ในชื่อของ Adafruit — ใช้สายเดียวกันได้ทันที</p>
+    </div>
+    <div>
+      <h3>สองระบบในชื่อเดียวกัน: STEMMA vs STEMMA QT</h3>
+      <p>STEMMA ดั้งเดิม (ไม่มี QT) ใช้หัวต่อ JST PH ขนาด 2.0mm ซึ่งใหญ่กว่าและเสียบง่ายกว่าสำหรับผู้ที่มีมือใหญ่หรือทำงานกับชิ้นส่วนขนาดใหญ่ ระบบนี้ยังรองรับทั้ง I2C และสัญญาณ analog ด้วย connector 3 ขา (GND, VCC, Signal) ทำให้ใช้กับ servo, potentiometer และ sensor analog ทั่วไปได้</p>
+      <p>STEMMA QT (ชื่อเล่น "Cutie") คือระบบที่ Adafruit เพิ่มเข้ามาเพื่อรองรับ I2C โดยเฉพาะ โดยใช้หัวต่อ JST SH ขนาด 1.0mm 4 ขา — ขนาดเดียวกับ Qwiic ทุกประการ Adafruit ประกาศอย่างชัดเจนว่า STEMMA QT และ Qwiic ใช้สายแทนกันได้ 100% ทำให้ผู้ใช้ไม่ต้องซื้อสายแยกกันสำหรับสองระบบนี้</p>
+      <div class="bento cols-2" style="margin-top:16px">
+        <div class="card warning">
+          <p class="label">STEMMA (ไม่มี QT)</p>
+          <h3>JST PH 2.0mm</h3>
+          <ul>
+            <li>4-pin: I2C (SCL/SDA/VCC/GND)</li>
+            <li>3-pin: Analog/Digital (GND/VCC/Signal)</li>
+            <li>รองรับ 3.3V และ 5V</li>
+            <li>ไม่เข้ากับ Qwiic</li>
+          </ul>
+        </div>
+        <div class="card success">
+          <p class="label">STEMMA QT</p>
+          <h3>JST SH 1.0mm — เหมือน Qwiic</h3>
+          <ul>
+            <li>4-pin: GND/VCC/SDA/SCL (ลำดับเดียวกับ Qwiic)</li>
+            <li>รองรับ 3.3V (และ 5V tolerant บางบอร์ด)</li>
+            <li>สายใช้แทนกับ Qwiic ได้ทันที</li>
+            <li>Adafruit ยืนยันว่า fully compatible</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>ทำไม Adafruit ถึงสร้าง STEMMA QT ซ้อนกับ Qwiic?</h3>
+      <p>ความแตกต่างที่แท้จริงไม่ได้อยู่ที่หัวต่อ แต่อยู่ที่ ecosystem และ library — Adafruit มี library ชื่อดัง อย่าง Adafruit Unified Sensor, CircuitPython และ Arduino library ที่รองรับ sensor ของตัวเองได้ดีกว่า SparkFun ในหลายรุ่น การมี STEMMA QT ทำให้ Adafruit สามารถเพิ่มหัวต่อนี้ในบอร์ดของตัวเองเพื่อขายร่วมกับ sensor ในระบบ Adafruit โดยยังคง interoperability กับ SparkFun Qwiic ไว้ด้วย</p>
+    </div>
+    <div class="takeaway"><b>★ Beginner takeaway:</b> STEMMA QT = Qwiic สายสามารถใช้แทนกัน; STEMMA (ไม่มี QT) = ระบบต่างหาก ต้องใช้ adapter</div>
+  </div>
+</section>
+
+<!-- p7b: STEMMA — MECHANISM (CROSS-COMPAT) -->
+<section class="page" id="p7b"
+  data-group="stemma"
+  data-tier="mechanism"
+  data-title="ความเข้ากันได้ข้ามระบบ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — STEMMA & STEMMA QT · ความเข้ากันได้</p>
+      <h2>Cross-System Compatibility — ผสมระหว่าง Qwiic, Grove และ STEMMA</h2>
+      <p class="section-lead">ในโปรเจกต์จริง มักพบว่า sensor บางตัวมีแค่ Grove connector ขณะที่ MCU มี Qwiic หรือ STEMMA QT ข่าวดีคือมี adapter cable และ breakout board ที่ช่วยเชื่อมระหว่างระบบเหล่านี้ได้ ข่าวสำคัญคือต้องระวังเรื่องแรงดันไฟเมื่อผสมระบบ เพราะ Qwiic/STEMMA QT เป็น 3.3V เท่านั้น ขณะที่ Grove บางรุ่นเป็น 5V</p>
+    </div>
+    <div>
+      <h3>ตาราง Cross-Compatibility</h3>
+      <table>
+        <thead>
+          <tr><th>จาก</th><th>ไป</th><th>ใช้งานร่วมกันได้?</th><th>วิธี</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Qwiic</td><td>STEMMA QT</td><td class="check">✓ ใช้แทนกันได้ทันที</td><td>ใช้สาย Qwiic หรือ STEMMA QT — เหมือนกัน</td></tr>
+          <tr><td>STEMMA QT</td><td>Qwiic</td><td class="check">✓ ใช้แทนกันได้ทันที</td><td>ใช้สายเดิมจากฝั่งใดก็ได้</td></tr>
+          <tr><td>Qwiic</td><td>Grove-I2C (3.3V)</td><td>△ ต้องใช้ adapter</td><td>SparkFun Qwiic-to-Grove adapter cable</td></tr>
+          <tr><td>STEMMA QT</td><td>Grove-I2C (5V)</td><td class="cross">✗ อันตราย</td><td>ต้องใช้ level shifter ก่อน</td></tr>
+          <tr><td>STEMMA (2mm)</td><td>Qwiic/STEMMA QT</td><td class="cross">✗ ไม่เข้ากัน</td><td>ต้องใช้ adapter หรือสาย breakout</td></tr>
+          <tr><td>Grove</td><td>Breadboard pin</td><td class="check">✓ ใช้ breakout cable</td><td>Grove-to-DuPont cable — มีขายทั่วไป</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Adapter Options ที่หาซื้อได้</h3>
+      <p>SparkFun ผลิต adapter ที่แปลง Qwiic ไปเป็น Grove (4-pin I2C) และในทิศทางกลับ Adafruit ก็มี STEMMA QT to Grove adapter เช่นกัน นอกจากนั้นยังมี breakout cable ที่แปลงหัวต่อ Qwiic หรือ Grove เป็น DuPont pin header ธรรมดา ทำให้นำไปเสียบกับ breadboard หรือ custom PCB ได้</p>
+      <p>สำหรับการผสมระหว่าง 3.3V และ 5V โดยเฉพาะ ควรซื้อ Adafruit 4-Channel I2C Level Shifter ที่มีหัวต่อ STEMMA QT ในตัว ซึ่งแปลงสัญญาณ 5V จาก Arduino Uno ลงมาเป็น 3.3V สำหรับ sensor ที่ต้องการแรงดันต่ำกว่า</p>
+      <details class="disclosure">
+        <summary>เจาะลึก: ทำไม STEMMA QT ถึงบอกว่า "5V tolerant" บางบอร์ด?</summary>
+        <div class="details-body">
+          <p>บอร์ด Adafruit บางรุ่น (เช่น breakout sensor ที่ออกแบบสำหรับ Arduino Uno) มีวงจร level shifter หรือ voltage regulator ติดตั้งมาในตัวบอร์ด ทำให้รับ VCC 5V จาก Arduino ได้และแปลงลงเป็น 3.3V สำหรับ IC ภายใน สัญญาณ I2C ก็ถูก pull-up ไปที่ 3.3V โดยอัตโนมัติผ่าน resistor บนบอร์ด แต่สิ่งนี้ต้องอ่านจาก datasheet ของบอร์ดนั้นๆ ไม่ใช่สมมติเอาเอง</p>
+        </div>
+      </details>
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Qwiic ↔ STEMMA QT ใช้สายแทนกันได้เลย; Qwiic ↔ Grove I2C ต้องใช้ adapter; อย่าผสม 5V Grove กับ 3.3V Qwiic โดยไม่มี level shifter</div>
+  </div>
+</section>
+
+<!-- p8: CHOOSING SYSTEM -->
+<section class="page" id="p8" data-title="การเลือกระบบ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 6 — การเลือกระบบ</p>
+      <h2>เลือกระบบไหน? — Framework การตัดสินใจ</h2>
+      <p class="section-lead">การเลือกระบบ no-solder ที่เหมาะสมขึ้นอยู่กับ 3 ปัจจัยหลัก: แรงดันไฟของ MCU ที่ใช้, ประเภทของสัญญาณที่ sensor ต้องการ และขนาดของ ecosystem ที่ต้องการ Framework ด้านล่างช่วยให้ตัดสินใจได้ตรงจุดโดยไม่ต้องอ่าน datasheet ของทุกระบบก่อน</p>
+    </div>
+    <div>
+      <div class="tabs-nav" role="tablist">
+        <button class="active" onclick="switchTab(this,'ns-t1')" role="tab">MCU 3.3V + I2C</button>
+        <button onclick="switchTab(this,'ns-t2')" role="tab">Arduino 5V + ต่างๆ</button>
+        <button onclick="switchTab(this,'ns-t3')" role="tab">ผสมหลาย MCU</button>
+      </div>
+      <div id="ns-t1" class="tabs-panel active">
+        <h3>แนะนำ: Qwiic หรือ STEMMA QT</h3>
+        <p>ถ้าใช้ ESP32, RP2040, Arduino Nano 33, Feather หรือ board ใดก็ตามที่ทำงานที่ 3.3V และต้องการต่อ sensor ผ่าน I2C — Qwiic หรือ STEMMA QT คือตัวเลือกที่ดีที่สุด เหตุผลคือระบบทั้งสองออกแบบมาสำหรับ use case นี้โดยเฉพาะ ไม่ต้องกังวลเรื่องแรงดัน ไม่ต้องใช้ adapter และมี library พร้อมใช้สำหรับ sensor ยอดนิยมทุกรุ่น</p>
+        <p>เลือก Qwiic ถ้าต้องการซื้อของจาก SparkFun หรือ ecosystem ที่กว้างกว่า เลือก STEMMA QT ถ้าต้องการ sensor จาก Adafruit หรือต้องการ library จาก CircuitPython ทั้งสองใช้สายแทนกันได้ ดังนั้นเริ่มจากระบบใดก็ได้และผสมได้ตามต้องการ</p>
+        <div class="callout success" style="margin-top:12px"><strong>เหมาะที่สุด:</strong> ESP32, RP2040, Arduino Nano 33 IoT/BLE, Adafruit Feather, Sparkfun Thing Plus, BBC micro:bit (ด้วย adapter)</div>
+      </div>
+      <div id="ns-t2" class="tabs-panel">
+        <h3>แนะนำ: Grove พร้อม Base Shield</h3>
+        <p>ถ้าใช้ Arduino Uno, Mega, Leonardo หรือ board 5V อื่นๆ หรือต้องการ sensor ที่ไม่ใช่ I2C (เช่น potentiometer, button, relay, ultrasonic, UART GPS) — Grove คือตัวเลือกที่ตรงที่สุด Grove Base Shield เสียบเข้ากับ Arduino ได้ทันทีโดยไม่ต้องซื้ออะไรเพิ่ม และมี port ครบทั้ง I2C, Analog, Digital และ UART</p>
+        <p>ข้อเสียของ Grove สำหรับผู้ใช้มือใหม่คือต้องระวังประเภทของ port (อย่าเสียบ Grove-Analog เข้า port I2C) และต้องตรวจสอบแรงดันของ sensor ก่อนใช้กับ board 3.3V</p>
+        <div class="callout warning" style="margin-top:12px"><strong>เหมาะที่สุด:</strong> Arduino Uno, Mega, งานที่ต้องการ non-I2C sensor, โรงเรียนและ education kit ที่ใช้ Grove ecosystem อยู่แล้ว</div>
+      </div>
+      <div id="ns-t3" class="tabs-panel">
+        <h3>แนะนำ: เลือก Qwiic เป็นหลัก + adapter สำหรับ Grove</h3>
+        <p>ถ้าโปรเจกต์มี MCU หลายตัวที่แรงดันต่างกัน หรือต้องการเชื่อม sensor จากหลาย ecosystem — วิธีที่ดีที่สุดคือเลือก Qwiic หรือ STEMMA QT เป็น primary system สำหรับ I2C sensor ทั้งหมด แล้วใช้ Grove-to-Qwiic adapter เมื่อจำเป็นต้องต่อ Grove sensor</p>
+        <p>วิธีนี้ประหยัด adapter ได้มากกว่าการผสมทั้งสองระบบเท่าๆ กัน เพราะ adapter ราคาถูกและมีขายจาก SparkFun และ Adafruit โดยตรง การมี Qwiic/STEMMA QT เป็น standard ของทีมยังทำให้การแชร์ sensor ระหว่างโปรเจกต์ง่ายขึ้นด้วย</p>
+        <div class="callout" style="margin-top:12px"><strong>เหมาะที่สุด:</strong> ทีมที่มีหลายโปรเจกต์, maker space, lab ที่มี sensor หลากหลายระบบ</div>
+      </div>
+    </div>
+    <table style="margin-top:16px">
+      <thead>
+        <tr><th>เกณฑ์</th><th>Qwiic</th><th>Grove</th><th>STEMMA QT</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>แรงดันไฟ</td><td>3.3V เท่านั้น</td><td>3.3V + 5V</td><td>3.3V (บางบอร์ด 5V tolerant)</td></tr>
+        <tr><td>Protocol รองรับ</td><td>I2C เท่านั้น</td><td>I2C, UART, Analog, Digital</td><td>I2C เท่านั้น</td></tr>
+        <tr><td>Connector size</td><td>JST SH 1mm</td><td>2.0mm (ใหญ่กว่า)</td><td>JST SH 1mm</td></tr>
+        <tr><td>Ecosystem</td><td>1,000+ boards</td><td>300+ Seeed products</td><td>Adafruit boards</td></tr>
+        <tr><td>Cross-compat</td><td class="check">✓ ใช้สาย STEMMA QT ได้</td><td>△ ต้องใช้ adapter</td><td class="check">✓ ใช้สาย Qwiic ได้</td></tr>
+        <tr><td>ราคาสาย</td><td>ถูก (~$1-2)</td><td>ถูก (~$1-2)</td><td>ถูก (~$1-2)</td></tr>
+      </tbody>
+    </table>
+    <div class="takeaway"><b>★ สรุปการเลือก:</b> 3.3V + I2C → Qwiic/STEMMA QT; 5V หรือ non-I2C → Grove; ผสมระบบ → Qwiic หลัก + adapter</div>
+  </div>
+</section>
+
+<!-- p9: TAKEAWAYS + REFERENCES + GLOSSARY -->
+<section class="page" id="p9" data-title="สรุปและอ้างอิง">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Closing — Key Takeaways</p>
+      <h2>สิ่งที่ต้องจำและขั้นตอนถัดไป</h2>
+      <p class="section-lead">หลังอ่านบทเจาะลึกนี้จบ ผู้อ่านควรสามารถเลือกระบบ no-solder ที่เหมาะกับโปรเจกต์ เชื่อมต่อ sensor ได้ถูกต้อง และหลีกเลี่ยงข้อผิดพลาดที่พบบ่อยที่สุดในการใช้งาน Qwiic, Grove และ STEMMA QT</p>
+    </div>
+    <div class="bento cols-2">
+      <div>
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li><strong>ระบบ no-solder กำจัดข้อผิดพลาดจากฮาร์ดแวร์:</strong> หัวต่อแบบ keyed ป้องกันการต่อผิดขั้ว และกลไก locking ป้องกันสายหลุด ทำให้ debug โฟกัสที่โค้ดได้เต็มที่</li>
+          <li><strong>STEMMA QT = Qwiic ทุกประการ:</strong> สายสามารถใช้แทนกันระหว่าง Adafruit และ SparkFun ไม่ต้องซื้อสายสองชุดสำหรับสองระบบนี้</li>
+          <li><strong>Qwiic/STEMMA QT สำหรับ I2C 3.3V; Grove สำหรับที่เหลือ:</strong> ถ้าใช้ ESP32 หรือ RP2040 และต้องการแค่ I2C — Qwiic ง่ายที่สุด; ถ้าต้องการ 5V หรือ non-I2C — Grove รองรับได้</li>
+          <li><strong>ตรวจ VCC ก่อนต่อสายเสมอ:</strong> 5V เข้า GPIO 3.3V ทำให้ board เสียทันที ใช้ level shifter เมื่อผสมแรงดัน</li>
+          <li><strong>รัน i2c_scanner ก่อน write code จริง:</strong> ยืนยันว่า MCU มองเห็น sensor และ address ถูกต้องก่อนลงทุนเวลาเขียน library</li>
+          <li><strong>Address conflict แก้ด้วย I2C multiplexer:</strong> ถ้าต้องการ sensor ชนิดเดิมสองตัว ใช้ TCA9548A หรือเลือก sensor ที่ปรับ address ได้</li>
+          <li><strong>No-solder คือ prototype phase:</strong> เมื่อ design ยืนยันแล้ว ย้ายไป custom PCB หรือบัดกรีเพื่อความทนทานใน production</li>
+        </ul>
+      </div>
+      <div>
+        <h3>References</h3>
+        <ol style="font-size:13px;color:var(--ink-dim);line-height:1.9">
+          <li>DroneBot Workshop — <a href="https://youtu.be/682-BDpVseE" target="_blank" rel="noopener">No-Solder Prototyping: Qwiic, Grove &amp; STEMMA QT (YouTube)</a></li>
+          <li>SparkFun — <a href="https://www.sparkfun.com/qwiic" target="_blank" rel="noopener">Qwiic Connect System Documentation</a></li>
+          <li>Seeed Studio — <a href="https://wiki.seeedstudio.com/Grove_System/" target="_blank" rel="noopener">Grove System Overview</a></li>
+          <li>Adafruit — <a href="https://learn.adafruit.com/introducing-adafruit-stemma-qt" target="_blank" rel="noopener">Introducing STEMMA QT</a></li>
+          <li>Espressif — ESP32 GPIO &amp; I2C Technical Reference</li>
+          <li>Arduino Wire Library — official I2C documentation</li>
+        </ol>
+        <h3 style="margin-top:20px">Glossary</h3>
+        <dl style="font-size:13px;color:var(--ink-dim);line-height:1.8">
+          <dt style="font-weight:600;color:var(--ink)">JST</dt>
+          <dd style="margin:0 0 8px 12px">Japan Solderless Terminal — ผู้ผลิตหัวต่อขนาดเล็กที่ใช้ใน Qwiic/STEMMA QT (SH 1mm) และ Grove (2mm)</dd>
+          <dt style="font-weight:600;color:var(--ink)">I2C</dt>
+          <dd style="margin:0 0 8px 12px">Inter-Integrated Circuit — บัสสื่อสารแบบ 2 สาย (SDA + SCL) ที่ช่วยให้ MCU ต่อ sensor ได้หลายตัวพร้อมกัน</dd>
+          <dt style="font-weight:600;color:var(--ink)">SDA / SCL</dt>
+          <dd style="margin:0 0 8px 12px">Serial Data / Serial Clock — สองสายของ I2C bus ที่ทุกระบบ no-solder แบบ I2C ใช้ร่วมกัน</dd>
+          <dt style="font-weight:600;color:var(--ink)">Daisy-chain</dt>
+          <dd style="margin:0 0 8px 12px">การต่อ device หลายตัวเป็นสายโซ่บน bus เดียวกัน — ทำได้เพราะ I2C ใช้ address แยกแต่ละ device</dd>
+          <dt style="font-weight:600;color:var(--ink)">Address conflict</dt>
+          <dd style="margin:0 0 8px 12px">ปัญหาที่เกิดเมื่อ sensor สองตัวมี I2C address เดียวกัน — MCU ไม่สามารถแยกแยะได้ว่าข้อมูลมาจากตัวไหน</dd>
+          <dt style="font-weight:600;color:var(--ink)">Level shifter</dt>
+          <dd style="margin:0 0 8px 12px">วงจรที่แปลงแรงดันสัญญาณระหว่าง 5V และ 3.3V — จำเป็นเมื่อผสม board ต่างแรงดันบน I2C bus เดียวกัน</dd>
+          <dt style="font-weight:600;color:var(--ink)">Keyed connector</dt>
+          <dd style="margin:0 0 8px 12px">หัวต่อที่มีรูปร่างไม่สมมาตร ทำให้ใส่ได้ทิศทางเดียว ป้องกันการต่อผิดขั้ว</dd>
+          <dt style="font-weight:600;color:var(--ink)">I2C Multiplexer</dt>
+          <dd style="margin:0 0 8px 12px">IC (เช่น TCA9548A) ที่แยก I2C bus ออกเป็นหลาย channel ทำให้ต่อ sensor address เดียวกันได้หลายตัว</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="takeaway">
+      <b>★ ถ้าจำได้อย่างเดียว:</b> เลือกระบบตาม MCU voltage ก่อน → Qwiic/STEMMA QT สำหรับ 3.3V I2C; Grove สำหรับ 5V หรือ non-I2C — แล้วตรวจ address ก่อน deploy
+    </div>
+  </div>
+</section>
+</div><!-- /scroll-root -->
+<script>
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const progressBar = document.getElementById('progress-bar');
+const tocEl = document.getElementById('toc');
+const pages = Array.from(document.querySelectorAll('.page'));
+const groups = [], groupMap = {};
+pages.forEach(page => {
+  const gSlug = page.dataset.group || page.id;
+  const gTitle = page.dataset.groupTitle;
+  const label = page.dataset.title || page.id;
+  if (!groupMap[gSlug]) { const g = {slug:gSlug,title:gTitle||label,pages:[]}; groups.push(g); groupMap[gSlug]=g; }
+  if (gTitle) groupMap[gSlug].title = gTitle;
+  groupMap[gSlug].pages.push({page,label});
+});
+groups.forEach(g => {
+  const groupDiv = document.createElement('div'); groupDiv.className='toc-group'; groupDiv.dataset.group=g.slug;
+  const groupLink = document.createElement('a'); groupLink.className='toc-group-label';
+  groupLink.href='#'+g.pages[0].page.id; groupLink.textContent=g.title; groupDiv.appendChild(groupLink);
+  if (g.pages.length>1) {
+    const subList=document.createElement('ul'); subList.className='toc-subs';
+    g.pages.forEach(({page,label})=>{
+      const li=document.createElement('li'); const a=document.createElement('a');
+      a.className='toc-sub'; a.href='#'+page.id; a.textContent=label; a.dataset.pageId=page.id;
+      li.appendChild(a); subList.appendChild(li);
+    }); groupDiv.appendChild(subList);
+  }
+  tocEl.appendChild(groupDiv);
+});
+function setActiveById(pageId) {
+  document.querySelectorAll('.toc-group-label').forEach(a=>a.classList.remove('active'));
+  document.querySelectorAll('.toc-sub').forEach(a=>a.classList.remove('active'));
+  const page=pages.find(p=>p.id===pageId);
+  const gSlug=page?(page.dataset.group||page.id):pageId;
+  const groupDiv=tocEl.querySelector('.toc-group[data-group="'+gSlug+'"]');
+  if(!groupDiv)return;
+  groupDiv.querySelector('.toc-group-label')?.classList.add('active');
+  const subLink=groupDiv.querySelector('.toc-sub[data-page-id="'+pageId+'"]');
+  if(subLink){subLink.classList.add('active');subLink.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  else groupDiv.querySelector('.toc-group-label')?.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)setActiveById(e.target.id);});},{root:null,threshold:0.25});
+pages.forEach(p=>obs.observe(p));
+sidebarToggle.addEventListener('click',()=>{sidebar.classList.toggle('open');sidebarOverlay.classList.toggle('open');});
+sidebarOverlay.addEventListener('click',()=>{sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');}
+  if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();jumpSection(1);}
+  if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();jumpSection(-1);}
+});
+tocEl.querySelectorAll('a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=768){sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');}});});
+pages.forEach((page,i)=>{
+  const inner=page.querySelector('.page-inner'); if(!inner)return;
+  const foot=document.createElement('div'); foot.className='page-foot';
+  if(i>0){const prev=pages[i-1];const btn=document.createElement('a');btn.className='pf-btn pf-prev';btn.href='#'+prev.id;btn.textContent='← '+(prev.dataset.title||prev.id);foot.appendChild(btn);}
+  if(i<pages.length-1){const next=pages[i+1];const btn=document.createElement('a');btn.className='pf-btn pf-next';btn.href='#'+next.id;btn.textContent=(next.dataset.title||next.id)+' →';foot.appendChild(btn);}
+  if(foot.children.length>0)inner.appendChild(foot);
+});
+window.addEventListener('scroll',()=>{
+  const doc=document.documentElement; const scrolled=doc.scrollTop||document.body.scrollTop;
+  const total=doc.scrollHeight-doc.clientHeight;
+  if(total>0)progressBar.style.transform='scaleX('+(scrolled/total)+')';
+},{passive:true});
+function jumpSection(dir){
+  const active=tocEl.querySelector('.toc-sub.active')||tocEl.querySelector('.toc-group-label.active');
+  if(!active){pages[0]?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  const targetId=active.dataset.pageId||active.getAttribute('href')?.slice(1);
+  const idx=pages.findIndex(p=>p.id===targetId);
+  const newIdx=Math.max(0,Math.min(pages.length-1,idx+dir));
+  if(newIdx!==idx)pages[newIdx].scrollIntoView({behavior:'smooth',block:'start'});
+}
+const themeBtn=document.getElementById('theme-btn'); const root=document.documentElement;
+const saved=localStorage.getItem('explainer-theme');
+if(saved){root.dataset.theme=saved;themeBtn.textContent=saved==='dark'?'☀︎':'☾';}
+themeBtn.addEventListener('click',()=>{
+  const next=root.dataset.theme==='dark'?'light':'dark';
+  root.dataset.theme=next; localStorage.setItem('explainer-theme',next);
+  themeBtn.textContent=next==='dark'?'☀︎':'☾';
+});
+function switchTab(btn,panelId){
+  btn.closest('.tabs-nav').querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tabs-panel').forEach(p=>p.classList.remove('active'));
+  const target=document.getElementById(panelId); if(target)target.classList.add('active');
+}
+function copyCode(btn){
+  const pre=btn.closest('.copy-wrap').querySelector('pre code');
+  navigator.clipboard.writeText(pre.textContent).then(()=>{
+    btn.textContent='Copied!'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
+  });
+}
+</script>
+</body>
+</html>
