@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESP32 คู่มือฉบับสมบูรณ์ — วิวัฒนาการ ซีรีส์ การเลือก และการโปรแกรม</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1e293b;
+  --ink-dim: #475569;
+  --muted: #94a3b8;
+  --paper: #ffffff;
+  --soft: #f1f5f9;
+  --soft-2: #e2e8f0;
+  --accent: #3b82f6;
+  --accent-deep: #1e3a8a;
+  --accent-wash: #dbeafe;
+  --gold: #d4af37;
+  --danger: #dc2626;
+  --danger-wash: #fee2e2;
+  --danger-ink: #991b1b;
+  --success: #16a34a;
+  --success-wash: #dcfce7;
+  --success-ink: #14532d;
+  --warning: #f59e0b;
+  --warning-wash: #fef3c7;
+  --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 52px;
+  --page-max: 960px;
+  --sidebar-w: 240px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9;
+  --ink-dim: #94a3b8;
+  --muted: #475569;
+  --paper: #0f172a;
+  --soft: #1e293b;
+  --soft-2: #334155;
+  --accent-wash: #1e3a8a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe;
+  --danger-wash: #450a0a;  --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+}
+code, kbd, pre, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+#progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 3px; background: var(--accent);
+  transform-origin: left; transform: scaleX(0);
+  transition: transform .1s linear;
+  pointer-events: none;
+}
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--soft-2);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  box-shadow: var(--shadow-sm);
+}
+#sidebar-toggle {
+  background: none; border: none; cursor: pointer;
+  font-size: 20px; color: var(--ink); padding: 4px 8px;
+  margin-right: 8px; border-radius: var(--radius-sm);
+  line-height: 1; flex-shrink: 0;
+  transition: background .15s;
+}
+#sidebar-toggle:hover { background: var(--soft); }
+#nav .brand {
+  font-weight: 700; font-size: 15px; color: var(--ink);
+  margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button {
+  background: none; border: 1px solid var(--soft-2);
+  border-radius: var(--radius-sm); padding: 5px 10px;
+  font-size: 13px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+#nav .controls button:hover { background: var(--soft); }
+#sidebar {
+  position: fixed; top: var(--nav-h); left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--soft);
+  border-right: 1px solid var(--soft-2);
+  overflow-y: auto; overflow-x: hidden;
+  padding: 16px 0 40px;
+  z-index: 90;
+  transition: transform .25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--soft-2) transparent;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--soft-2); border-radius: 2px; }
+#sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 89;
+  background: rgba(15,23,42,.4);
+}
+.toc-group { margin-bottom: 2px; }
+.toc-group-label {
+  display: block;
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 600; color: var(--ink-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none;
+}
+.toc-group-label:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-group-label.active { color: var(--accent); font-weight: 700; }
+.toc-subs { padding: 0; list-style: none; margin-bottom: 4px; }
+.toc-sub {
+  display: block;
+  padding: 5px 16px 5px 30px;
+  font-size: 12px; color: var(--muted);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none;
+}
+.toc-sub:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-sub.active {
+  color: var(--accent); font-weight: 600;
+  background: var(--accent-wash);
+  border-right: 2px solid var(--accent);
+}
+#scroll-root {
+  padding-top: var(--nav-h);
+  margin-left: var(--sidebar-w);
+}
+.page {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+  padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.page-inner {
+  width: 100%; max-width: var(--page-max);
+  display: flex; flex-direction: column; gap: 28px;
+}
+.page.cover {
+  min-height: calc(100vh - var(--nav-h));
+  background: linear-gradient(135deg, #0f172a 0%, var(--accent-deep) 100%);
+  color: white; justify-content: center; align-items: center; text-align: center;
+}
+.page.cover .page-inner { align-items: center; }
+.page-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 32px; margin-top: 8px;
+  border-top: 1px solid var(--soft-2);
+}
+.page-foot .pf-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  background: var(--soft); border: 1px solid var(--soft-2);
+  font-size: 13px; color: var(--ink-dim); cursor: pointer;
+  transition: background .15s, color .15s;
+  text-decoration: none; white-space: nowrap;
+}
+.page-foot .pf-btn:hover { background: var(--accent-wash); color: var(--accent); text-decoration: none; }
+.page-foot .pf-next { margin-left: auto; }
+h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
+.prose-block { display: flex; flex-direction: column; gap: 0; }
+.prose-block + .prose-block { margin-top: 4px; }
+.section-label {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.page-number {
+  font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 24px;
+  align-self: flex-end;
+}
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+.cheatsheet { display:flex; flex-direction:column; align-items:center; gap:10px; min-height:0; }
+.cheatsheet img { max-width:100%; max-height:78vh; width:auto; height:auto;
+  object-fit:contain; border-radius:var(--radius); box-shadow:var(--shadow-md); background:var(--paper); }
+.cheatsheet svg { width:100%; height:auto; }
+.cheatsheet figcaption { font-size:13px; color:var(--muted); text-align:center; }
+.card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+  border-left: 4px solid var(--accent);
+  box-sizing: border-box;
+}
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card h3      { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p       { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul      { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 640px) {
+  .bento.cols-2, .bento.cols-3, .bento.cols-4 { grid-template-columns: 1fr; }
+}
+.takeaway {
+  border-left: 4px solid var(--accent);
+  background: var(--soft);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 15px; line-height: 1.6;
+}
+.takeaway b { color: var(--accent); }
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.steps li .step-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--accent); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+.callout {
+  background: var(--accent-wash);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 15px; color: var(--accent-deep);
+  border: 1px solid var(--accent);
+}
+.callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+code {
+  background: var(--soft-2); color: var(--danger-ink); font-size: .875em;
+  padding: 2px 6px; border-radius: 4px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6;
+}
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+kbd {
+  background: var(--soft-2); border: 1px solid var(--soft-2);
+  border-bottom-color: var(--muted); border-radius: 4px;
+  font-size: .8em; padding: 2px 7px; box-shadow: 0 1px 0 var(--muted);
+}
+.copy-wrap { position: relative; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--soft-2); border: none; border-radius: 4px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+.copy-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.copy-btn.copied { background: var(--success-wash); color: var(--success-ink); }
+.tabs-nav {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--soft-2); margin-bottom: 16px;
+}
+.tabs-nav button {
+  background: none; border: none; padding: 8px 14px; cursor: pointer;
+  font-size: 14px; color: var(--ink-dim); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color .15s, border-color .15s;
+}
+.tabs-nav button:hover { color: var(--ink); }
+.tabs-nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs-panel { display: none; }
+.tabs-panel.active { display: block; }
+.accordion { border: 1px solid var(--soft-2); border-radius: var(--radius-sm); overflow: hidden; }
+.accordion-item { border-top: 1px solid var(--soft-2); }
+.accordion-item:first-child { border-top: none; }
+.accordion-btn {
+  width: 100%; background: none; border: none; padding: 14px 16px;
+  text-align: left; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; font-size: 15px; color: var(--ink);
+  transition: background .15s;
+}
+.accordion-btn:hover { background: var(--soft); }
+.accordion-btn::after { content: "▾"; font-size: 12px; color: var(--muted); transition: transform .2s; }
+.accordion-item.open .accordion-btn::after { transform: rotate(-180deg); }
+.accordion-body { display: none; padding: 0 16px 16px; color: var(--ink-dim); font-size: 14px; line-height: 1.7; }
+.accordion-item.open .accordion-body { display: block; }
+details.disclosure {
+  border-left: 3px solid var(--accent);
+  background: var(--soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 12px 0;
+}
+details.disclosure summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  user-select: none;
+}
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after {
+  content: "▾";
+  font-size: 12px; color: var(--muted);
+  transition: transform .2s;
+  margin-left: auto;
+}
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body {
+  padding: 4px 16px 16px;
+  font-size: 14px; color: var(--ink-dim); line-height: 1.7;
+}
+details.disclosure .details-body p { font-size: 14px; }
+details.disclosure .details-body pre { margin: 8px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+@media print {
+  #nav, #sidebar, #sidebar-overlay, #progress-bar, .page-foot { display: none; }
+  #scroll-root { padding-top: 0; margin-left: 0; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+}
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); box-shadow: none; }
+  #sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  #sidebar-overlay.open { display: block; }
+  #scroll-root { margin-left: 0; }
+}
+@media (max-width: 480px) {
+  .page { padding: 32px 16px; }
+  h2 { font-size: 22px; }
+  #nav .brand { font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav id="nav">
+  <button id="sidebar-toggle" title="Toggle navigation" aria-label="Toggle navigation">&#9776;</button>
+  <span class="brand">ESP32 คู่มือฉบับสมบูรณ์</span>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">&#9788;&#65038;</button>
+    <button onclick="window.print()" title="Print / save as PDF">&#9113;</button>
+  </div>
+</nav>
+
+<aside id="sidebar">
+  <nav id="toc"></nav>
+</aside>
+<div id="sidebar-overlay"></div>
+
+<div id="scroll-root">
+
+<!-- p1: COVER -->
+<section class="page cover" id="p1" data-title="หน้าปก">
+  <div class="page-inner" style="align-items:center;text-align:center;gap:16px">
+    <div class="mark"></div>
+    <h1>ESP32 คู่มือฉบับสมบูรณ์</h1>
+    <p class="tag" style="font-size:18px;color:rgba(255,255,255,.8);max-width:560px">เลือกและใช้งาน ESP32 ให้ถูกซีรีส์ — เร็วกว่า แม่นกว่า ไม่เสียเวลา debug</p>
+    <div class="bento cols-3" style="margin-top:24px;max-width:560px">
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">วิวัฒนาการ</p>
+        <h3 style="color:white">8+ ปี</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">ซีรีส์ชิป</p>
+        <h3 style="color:white">6 ซีรีส์</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">สภาพแวดล้อม</p>
+        <h3 style="color:white">3 แบบ</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- p1b: CHEAT SHEET -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <div class="page-inner">
+    <figure class="cheatsheet">
+      <img src="assets/esp32-guide/cheatsheet.png" alt="ESP32 chip guide cheat sheet">
+      <figcaption>ภาพสรุปแบบ cheat sheet — บันทึกไว้ดูซ้ำได้เมื่อต้องการเลือกชิป</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- p2: OVERVIEW -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Overview</p>
+      <h2>ภาพรวม: ESP32 คือระบบนิเวศ ไม่ใช่ชิปเดียว</h2>
+      <p class="section-lead">เมื่อพูดถึง "ESP32" คนส่วนใหญ่นึกถึงชิปตัวเดียว แต่ในความเป็นจริง ESP32 คือชื่อของระบบนิเวศชิปที่ประกอบด้วยอย่างน้อย 6 ซีรีส์หลัก แต่ละซีรีส์มีสถาปัตยกรรม CPU ความสามารถในการเชื่อมต่อ และ use case ที่ต่างกันโดยสิ้นเชิง คู่มือนี้จะพาคุณเดินทางจากจุดเริ่มต้นของ Espressif ในปี 2008 ผ่านการเปลี่ยนผ่านสถาปัตยกรรมครั้งใหญ่จาก Xtensa สู่ RISC-V และช่วยให้คุณเลือกชิปได้ถูกต้องตั้งแต่ครั้งแรก</p>
+    </div>
+    <div class="bento cols-3">
+      <div class="card success">
+        <p class="label">ประเด็นหลักที่ 1</p>
+        <h3>เลือกโปรโตคอลก่อน</h3>
+        <p>ชิปแต่ละซีรีส์รองรับโปรโตคอลต่างกัน S2 ไม่มี Bluetooth เลย H2 ไม่มี WiFi เลย ต้องรู้ requirement ก่อนซื้อบอร์ด</p>
+      </div>
+      <div class="card warning">
+        <p class="label">ประเด็นหลักที่ 2</p>
+        <h3>Xtensa vs RISC-V</h3>
+        <p>ESP32 รุ่นเก่าใช้ Xtensa (proprietary) รุ่นใหม่ C/H/P ใช้ RISC-V (open-source) โค้ดไม่ 100% compatible ข้ามสถาปัตยกรรม</p>
+      </div>
+      <div class="card gold">
+        <p class="label">ประเด็นหลักที่ 3</p>
+        <h3>เลือก IDE ให้ตรง Level</h3>
+        <p>Arduino IDE เหมาะกับผู้เริ่มต้น PlatformIO สำหรับโปรเจกต์กลาง ESP-IDF สำหรับ production — แต่ละระดับมี trade-off ชัดเจน</p>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>Key insight:</strong> ESP32 H2 และ C6 รองรับ Matter/Thread ทำให้เป็น future-proof choice สำหรับ Smart Home — เลือกตอนนี้ไม่ต้องเปลี่ยนชิปใหม่เมื่อ ecosystem Matter เติบโต
+    </div>
+    <div class="bento cols-2">
+      <div class="card">
+        <p class="label">ประเด็นหลักที่ 4</p>
+        <h3>Documentation สำคัญกว่าราคา</h3>
+        <p>บอร์ดราคาถูกที่ไม่มีเอกสารทำให้เสียเวลา debug มากกว่าที่ประหยัดไป โดยเฉพาะสำหรับผู้เริ่มต้น</p>
+      </div>
+      <div class="card success">
+        <p class="label">ประเด็นหลักที่ 5</p>
+        <h3>ESP Tool ช่วย Identify ชิป</h3>
+        <p>ใช้ esptool.py หรือเว็บแอปเพื่อระบุชิปที่ไม่มีเอกสาร อ่านค่า crystal speed และ flash ใหม่ได้โดยไม่ต้องเดา</p>
+      </div>
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> เลือกซีรีส์ ESP32 จากโปรโตคอลที่ต้องการก่อน แล้วค่อย optimize ขนาด ราคา และ IDE</div>
+  </div>
+</section>
+
+<!-- p3a: DEEP-DIVE PROTOCOL — Components -->
+<section class="page" id="p3a"
+  data-group="protocol"
+  data-group-title="Deep-Dive Protocol"
+  data-tier="intuition"
+  data-title="ส่วนประกอบ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol · ส่วนประกอบ</p>
+      <h2>ส่วนประกอบหลักของระบบนิเวศ ESP32</h2>
+      <p class="section-lead">ก่อนลงลึกในรายละเอียดแต่ละหัวข้อ ส่วนนี้วางโครงกระดูกของระบบนิเวศ ESP32 ทั้งหมด ตั้งแต่ชิปและสถาปัตยกรรม ไปจนถึงโปรโตคอล IDE และเครื่องมือสนับสนุน เพื่อให้ผู้อ่านมี mental map ที่ครบก่อนเดินทางลงในรายละเอียดแต่ละชั้น</p>
+    </div>
+    <div>
+      <h3>ส่วนประกอบหลัก 5 ด้าน</h3>
+      <div class="bento cols-3">
+        <div class="card">
+          <p class="label">Component 1</p>
+          <h3>SoC Lineup</h3>
+          <p>กลุ่มชิป ESP32 ทั้ง 6 ซีรีส์ (Original, S2, S3, C3, H2, P4) แต่ละตัวมี CPU core จำนวนต่างกัน speed ต่างกัน และ target use case ต่างกัน</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Component 2</p>
+          <h3>Connectivity Stack</h3>
+          <p>โปรโตคอลการเชื่อมต่อที่ชิปรองรับ: WiFi (802.11), Bluetooth Classic, BLE 5, Zigbee, Thread (802.15.4), และ Matter — แต่ละซีรีส์รองรับต่างกัน</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Component 3</p>
+          <h3>Development Environments</h3>
+          <p>สามสภาพแวดล้อมหลัก: Arduino IDE (beginner), PlatformIO (intermediate), และ ESP-IDF (production) — แต่ละระดับมี access ระดับต่างกันต่อ hardware</p>
+        </div>
+        <div class="card success">
+          <p class="label">Component 4</p>
+          <h3>Board Selection Framework</h3>
+          <p>กรอบการตัดสินใจ 4 ปัจจัย: connectivity requirement, form factor, peripheral needs, และคุณภาพ documentation — ต้องพิจารณาตามลำดับนี้</p>
+        </div>
+        <div class="card">
+          <p class="label">Component 5</p>
+          <h3>ESP Tool</h3>
+          <p>เครื่องมือสำหรับระบุชิป, อ่าน crystal speed, ล้าง flash, และ flash firmware ใหม่ มีทั้งแบบเว็บแอปและ esptool.py CLI ใช้งาน cross-platform</p>
+        </div>
+        <div class="card" style="background:var(--soft);box-shadow:none">
+          <p class="label">Architecture Shift</p>
+          <h3>Xtensa → RISC-V</h3>
+          <p>การเปลี่ยนสถาปัตยกรรมที่ส่งผลต่อต้นทุนและ ecosystem ทั้งหมด เป็น thread ที่เชื่อมทุก component เข้าด้วยกัน</p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <svg viewBox="0 0 820 180" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-p3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <rect x="10" y="60" width="130" height="60" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="75" y="87" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">SoC Lineup</text>
+        <text x="75" y="105" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">6 series chips</text>
+        <path d="M140 90 L175 90" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p3)"/>
+        <rect x="175" y="55" width="145" height="70" rx="8" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="247" y="85" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Connectivity</text>
+        <text x="247" y="103" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">WiFi/BT/Zigbee/Thread</text>
+        <path d="M320 90 L355 90" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p3)"/>
+        <rect x="355" y="55" width="150" height="70" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="430" y="85" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Board Selection</text>
+        <text x="430" y="103" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">4-factor framework</text>
+        <path d="M505 90 L540 90" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p3)"/>
+        <rect x="540" y="55" width="140" height="70" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="610" y="85" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Dev Environment</text>
+        <text x="610" y="103" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Arduino/PIO/IDF</text>
+        <path d="M680 90 L715 90" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p3)"/>
+        <rect x="715" y="60" width="95" height="60" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="762" y="87" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">ESP Tool</text>
+        <text x="762" y="105" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">flash + identify</text>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">ความสัมพันธ์ระหว่าง 5 ส่วนประกอบหลัก — จากชิปสู่การเชื่อมต่อ การเลือกบอร์ด IDE และเครื่องมือ</p>
+    </div>
+    <div class="takeaway"><b>★ Mental map:</b> เลือกชิปจาก connectivity → เลือกบอร์ดจาก form factor → เลือก IDE จาก experience level</div>
+  </div>
+</section>
+
+<!-- p3b: DEEP-DIVE PROTOCOL — Assumptions & Takeaways -->
+<section class="page" id="p3b"
+  data-group="protocol"
+  data-tier="advanced"
+  data-title="สมมติฐาน & Takeaways">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol · สมมติฐาน & Takeaways</p>
+      <h2>สมมติฐานซ่อนอยู่และ Key Insights</h2>
+      <p class="section-lead">ส่วนนี้เปิดเผยสิ่งที่เอกสารทางการมักไม่พูดตรงๆ สมมติฐานที่ผู้เริ่มต้นมักมองข้าม และ insight ที่จะช่วยให้คุณตัดสินใจได้ถูกต้องตั้งแต่ต้น โดยไม่ต้องเรียนรู้จากความผิดพลาดที่แพงเกินไป</p>
+    </div>
+    <div>
+      <h3>สมมติฐานที่ซ่อนอยู่ — สิ่งที่ผู้เริ่มต้นมักไม่ทราบ</h3>
+      <p>เอกสารและวิดีโอสอน ESP32 ส่วนใหญ่ถือว่าผู้อ่านรู้บางสิ่งแล้ว ทั้งที่ในความจริงผู้เริ่มต้นมักไม่รู้ สิ่งเหล่านี้คือ blind spot ที่นำไปสู่การซื้อผิดบอร์ด debug ผิดทาง และเสียเวลาโดยไม่จำเป็น</p>
+      <ul>
+        <li><strong>สมมติฐานที่ 1 — "ESP32" เป็น family ไม่ใช่ชิปเดียว:</strong> เมื่อคนพูดว่า "ใช้ ESP32" พวกเขาอาจหมายถึงซีรีส์ Original, S2, S3, หรือ C3 ก็ได้ S2 ไม่มี Bluetooth เลย P4 ไม่มีวิทยุเลย การสั่งซื้อ "ESP32 board" โดยไม่ระบุซีรีส์คือการพนัน</li>
+        <li><strong>สมมติฐานที่ 2 — Arduino compatibility ไม่เท่ากับ feature parity:</strong> แม้ว่าชิปจะใช้ Arduino IDE ได้ แต่ hardware-specific features เช่น USB OTG ของ S2 หรือ Vector instructions ของ S3 อาจต้องใช้ ESP-IDF library โดยตรง ไม่ใช่ Arduino wrapper</li>
+        <li><strong>สมมติฐานที่ 3 — RISC-V และ Xtensa ไม่ใช่แค่ชื่อต่างกัน:</strong> โค้ดที่ compile สำหรับ Xtensa (Original/S series) ไม่สามารถใช้ binary เดิมกับ RISC-V (C/H/P series) ได้โดยตรง ต้อง recompile และ library บางตัวอาจยังไม่ support RISC-V ครบ</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Key Takeaways — 7 ข้อที่ต้องจำ</h3>
+      <div class="bento cols-2">
+        <div class="card success">
+          <p class="label">Takeaway 1 — Big Picture</p>
+          <h3>ESP32 = Ecosystem ไม่ใช่ชิปเดียว</h3>
+          <p>เลือกซีรีส์ตามโปรโตคอลที่ต้องการก่อนเสมอ อย่าเริ่มจากราคาหรือขนาด</p>
+        </div>
+        <div class="card">
+          <p class="label">Takeaway 2 — Architecture</p>
+          <h3>Xtensa→RISC-V ลดต้นทุน licensing</h3>
+          <p>การเปลี่ยนไป open-source ISA ทำให้ C/H/P series ราคาถูกกว่าและ toolchain เปิดกว้างกว่า</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Takeaway 3 — Selection</p>
+          <h3>Connectivity first, size second</h3>
+          <p>เลือกชิปจาก protocol ที่ต้องการก่อน แล้วค่อยหาบอร์ดที่เล็กที่สุดที่รองรับชิปนั้น</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Takeaway 4 — IDE</p>
+          <h3>Arduino=เริ่มต้น, PIO=กลาง, IDF=Production</h3>
+          <p>อย่ากระโดดไป ESP-IDF ตั้งแต่ต้น แต่อย่าหยุดแค่ Arduino ถ้าโปรเจกต์ซับซ้อน</p>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:8px">
+        <strong>Takeaways 5–7:</strong>
+        H2/C6 รองรับ Matter/Thread เหมาะกับ Smart Home ระยะยาว (5) |
+        ESP Tool ช่วยระบุชิปไม่มีเอกสาร ประหยัดเวลา debug (6) |
+        บอร์ดที่มี documentation ดีสำคัญกว่าราคาถูกเสมอ (7)
+      </div>
+    </div>
+    <div class="takeaway"><b>★ ถ้าจำได้อย่างเดียว:</b> ESP32 คือ family — เลือกซีรีส์จากโปรโตคอล ไม่ใช่จากชื่อ "ESP32"</div>
+  </div>
+</section>
+
+<!-- p4a: Evolution — Intuition -->
+<section class="page" id="p4a"
+  data-group="evolution"
+  data-group-title="วิวัฒนาการ"
+  data-tier="intuition"
+  data-title="จาก ESP8266 สู่ Ecosystem">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — วิวัฒนาการ · สัญชาตญาณ</p>
+      <h2>จาก ESP8266 สู่ระบบนิเวศ: เรื่องราว 8 ปีของ Espressif</h2>
+      <p class="section-lead">Espressif Systems ก่อตั้งในปี 2008 ที่เซี่ยงไฮ้ ประเทศจีน และในปี 2014 ได้สร้างแรงสั่นสะเทือนให้วงการ IoT ด้วย ESP8266 — ชิป WiFi ราคาถูกที่เปลี่ยนเกม ทำให้ maker และนักพัฒนาทั่วโลกสามารถเชื่อมต่อ Arduino กับอินเทอร์เน็ตได้ในราคาไม่กี่ดอลลาร์ นั่นคือจุดเริ่มต้นของการเดินทางที่นำมาสู่ ecosystem ชิปที่หลากหลายที่สุดในวงการ embedded ปัจจุบัน</p>
+    </div>
+    <div>
+      <h3>จุดเริ่มต้น: ESP8266 และการปฏิวัติ Maker</h3>
+      <p>ก่อนที่ ESP8266 จะปรากฏตัว การเพิ่ม WiFi ให้กับ Arduino ต้องใช้ shield ราคาแพงหรือ module ที่ซับซ้อน ราคามักอยู่ที่ 20–40 ดอลลาร์ Espressif ทำลายราคานั้นลงเหลือ 1–2 ดอลลาร์ด้วย ESP8266 ซึ่งมี WiFi built-in และสามารถใช้ Arduino sketch ได้ผ่าน community firmware ที่พัฒนาขึ้นอย่างรวดเร็ว</p>
+      <p>ESP8266 ใช้ CPU Tensilica L106 (Xtensa LX3) ทำงานที่ 80–160 MHz มี 80KB SRAM และ flash สูงสุด 16MB ผ่าน SPI flash ภายนอก มัน single-core และไม่มี Bluetooth แต่ความสามารถ WiFi ที่ราคาถูกทำให้มันปฏิวัติตลาด IoT ในช่วง 2014–2016 จนกระทั่ง ESP32 original มาแทนที่ด้วยสเปกที่แรงกว่าในทุกมิติ</p>
+      <p>NodeMCU board ที่ใช้ ESP8266 กลายเป็น board ที่ maker ทั่วโลกรู้จักมากที่สุดในยุคนั้น และยังคงขายอยู่ถึงปัจจุบัน แสดงให้เห็นว่าความเรียบง่ายและราคาถูกสร้าง community ที่ยั่งยืนได้อย่างไร</p>
+    </div>
+    <div>
+      <h3>ESP32 Original (2016): Dual-Core เปลี่ยนเกม</h3>
+      <p>ในปี 2016 Espressif เปิดตัว ESP32 original ซึ่งอัปเกรดทุกอย่างจาก ESP8266 อย่างมีนัยสำคัญ: dual-core Xtensa LX6 ที่ 240 MHz, WiFi + Bluetooth Classic + BLE พร้อมกันในตัวเดียว, 520KB SRAM built-in (เทียบกับ 80KB ของ ESP8266), และ peripheral ที่หลากหลายกว่ามากทั้ง SPI, I2C, UART, I2S, ADC, DAC, และ touch sensor</p>
+      <p>การมี dual-core ทำให้ developer สามารถแยก task ออกได้ เช่น core 0 สำหรับ WiFi/BT stack และ core 1 สำหรับ application logic ทำให้ system เสถียรกว่า ESP8266 อย่างชัดเจนในงาน production IoT ราคายังคงต่ำ ทำให้ ESP32 กลายเป็น "go-to" chip สำหรับโปรเจกต์ IoT ตั้งแต่ปี 2016 จนถึงปัจจุบัน</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <svg viewBox="0 0 820 160" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-p4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <circle cx="80" cy="80" r="50" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="2"/>
+        <text x="80" y="72" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Espressif</text>
+        <text x="80" y="88" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">Founded 2008</text>
+        <path d="M130 80 L185 80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-p4a)"/>
+        <circle cx="235" cy="80" r="50" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="2"/>
+        <text x="235" y="72" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">ESP8266</text>
+        <text x="235" y="88" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">2014, WiFi-only</text>
+        <path d="M285 80 L345 80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-p4a)"/>
+        <circle cx="400" cy="80" r="55" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="400" y="72" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">ESP32</text>
+        <text x="400" y="88" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">2016, Xtensa Dual</text>
+        <path d="M455 80 L515 80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-p4a)"/>
+        <circle cx="570" cy="80" r="55" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="2"/>
+        <text x="570" y="72" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">S2/S3/C3</text>
+        <text x="570" y="88" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">2020-2022</text>
+        <path d="M625 80 L685 80" stroke="var(--accent)" stroke-width="2" marker-end="url(#arr-p4a)"/>
+        <circle cx="740" cy="80" r="55" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="2"/>
+        <text x="740" y="72" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">H2/C6/P4</text>
+        <text x="740" y="88" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">RISC-V era</text>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">เส้นทางวิวัฒนาการ ESP32: จากการก่อตั้งบริษัทปี 2008 ผ่าน ESP8266 สู่ยุค RISC-V ในปัจจุบัน</p>
+    </div>
+    <div class="takeaway"><b>★ Beginner takeaway:</b> ESP8266 → ESP32 original → RISC-V series คือการเดินทาง 8 ปีที่ทำให้ IoT ถูกลงและทรงพลังขึ้นในทุกรุ่น</div>
+  </div>
+</section>
+
+<!-- p4b: Evolution — Xtensa to RISC-V -->
+<section class="page" id="p4b"
+  data-group="evolution"
+  data-tier="mechanism"
+  data-title="Xtensa vs RISC-V Shift">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — วิวัฒนาการ · กลไก</p>
+      <h2>Xtensa → RISC-V: การเปลี่ยนสถาปัตยกรรมครั้งประวัติศาสตร์</h2>
+      <p class="section-lead">การตัดสินใจเปลี่ยนจาก Xtensa (proprietary ISA ของ Cadence) ไปสู่ RISC-V (open-source ISA) ในซีรีส์ C/H/P ไม่ใช่แค่การเปลี่ยน CPU architecture แต่เป็นการเปลี่ยน business model ทั้งหมดที่ส่งผลต่อราคา, ecosystem, และอนาคตของ platform</p>
+    </div>
+    <div>
+      <h3>ทำไม Espressif ถึงเลือก RISC-V</h3>
+      <p>Xtensa เป็น ISA ที่ต้องจ่าย licensing fee ให้กับ Cadence (เดิมชื่อ Tensilica) ทุกครั้งที่ผลิตชิป ค่าใช้จ่ายนี้รวมอยู่ในราคาต้นทุนของ ESP32 original และ S series RISC-V เป็น open-source ISA ที่ไม่มี licensing fee ทำให้ Espressif สามารถผลิต C3, H2, และ P4 ได้ในราคาที่ถูกกว่าอย่างมีนัยสำคัญ โดยไม่ต้องแบกค่า royalty</p>
+      <p>นอกจากเรื่องราคา RISC-V ยังมี toolchain ที่เปิดกว้างกว่า ทั้ง GCC, LLVM/Clang, และ ecosystem ที่เติบโตเร็วมากในช่วง 2019–2024 ทำให้ developer community ที่ support RISC-V ใหญ่กว่า Xtensa อย่างชัดเจน และ library ใหม่ๆ มักจะ support RISC-V ก่อน</p>
+      <p>ผลกระทบในทางปฏิบัติ: ESP32-C3 ที่ใช้ RISC-V มีราคา BOM (Bill of Materials) ต่ำกว่า ESP32 original ที่ใช้ Xtensa ประมาณ 20–30% แม้จะมีสเปกหลายด้านใกล้เคียงกัน ทำให้ C3 กลายเป็น "drop-in replacement" ที่ถูกกว่าสำหรับงาน WiFi + BLE ที่ไม่ต้องการ dual-core</p>
+    </div>
+    <div>
+      <h3>ผลกระทบต่อ Developer: Code Compatibility</h3>
+      <p>สิ่งสำคัญที่ developer ต้องเข้าใจคือ binary ที่ compile สำหรับ Xtensa ไม่สามารถรันบน RISC-V ได้ และในทางกลับกัน เนื่องจาก instruction set ต่างกันโดยสิ้นเชิง แต่ถ้า source code เขียนด้วย C/C++ ผ่าน Arduino หรือ ESP-IDF สามารถ recompile ได้โดยปกติโดยไม่ต้องแก้ code หลัก ยกเว้น assembly code หรือ inline ASM ที่ architecture-specific</p>
+      <details class="disclosure">
+        <summary>เจาะลึก: ความแตกต่างทางเทคนิคระหว่าง Xtensa LX7 และ RISC-V RV32</summary>
+        <div class="details-body">
+          <p>Xtensa LX7 (ใช้ใน ESP32-S3) เป็น 32-bit VLIW-capable RISC-like processor ที่มี custom instruction extensions ของ Tensilica รองรับ double-precision floating point และ vector operations สำหรับ DSP/ML workload RISC-V RV32IMC (ใช้ใน ESP32-C3, H2) เป็น 32-bit RISC ที่ clean, minimalist ไม่มี custom extensions แต่ standard ที่สุด</p>
+          <p>ESP32-P4 ใช้ dual HP-core RISC-V ที่ 400MHz และ single LP-core ที่ 40MHz เป็น high-performance variant ที่ออกแบบสำหรับ multimedia และ graphics processing โดยเฉพาะ ไม่มีวิทยุ built-in จึงต้องจับคู่กับ C6 หรือชิป WiFi/BT แยกต่างหาก</p>
+        </div>
+      </details>
+    </div>
+    <div class="takeaway"><b>★ Key insight:</b> RISC-V ไม่ใช่แค่ CPU ใหม่ — มันคือการลด licensing cost ที่ทำให้ Espressif ขายชิปได้ถูกลงโดยไม่ลด margin</div>
+  </div>
+</section>
+
+<!-- p5a: Chip Series — Overview -->
+<section class="page" id="p5a"
+  data-group="chip-series"
+  data-group-title="ซีรีส์ชิป"
+  data-tier="intuition"
+  data-title="ภาพรวม 6 ซีรีส์">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — ซีรีส์ชิป · ภาพรวม</p>
+      <h2>6 ซีรีส์: แต่ละตัวทำอะไรได้ดีที่สุด</h2>
+      <p class="section-lead">แทนที่จะท่องจำสเปกทั้งหมด ให้จำว่าแต่ละซีรีส์ถูกออกแบบมาสำหรับงานใดโดยเฉพาะ เมื่อรู้ use case ของโปรเจกต์ก็จะเลือกซีรีส์ได้ทันที โดยไม่ต้องเปรียบเทียบ spec ทุกบรรทัด</p>
+    </div>
+    <div class="bento cols-3">
+      <div class="card">
+        <p class="label">Original · Xtensa Dual 240MHz</p>
+        <h3>ESP32</h3>
+        <p>WiFi + BT Classic + BLE — ใช้งานทั่วไป maker projects, home automation, sensor hubs ที่ต้องการ Bluetooth Classic สำหรับเชื่อมกับ speaker หรือ legacy device</p>
+      </div>
+      <div class="card warning">
+        <p class="label">S2 · Xtensa Single 240MHz</p>
+        <h3>ESP32-S2</h3>
+        <p>WiFi เท่านั้น (ไม่มี Bluetooth) + USB OTG ราคาถูก เหมาะสำหรับ USB HID device, IoT node ที่ไม่ต้องการ BT, security-focused applications</p>
+      </div>
+      <div class="card success">
+        <p class="label">S3 · Xtensa Dual 240MHz</p>
+        <h3>ESP32-S3</h3>
+        <p>WiFi + BLE5 + Vector instructions สำหรับ Edge AI/ML, รองรับ display และ camera HMI, เหมาะกับ face recognition, wake word detection, และ TensorFlow Lite</p>
+      </div>
+      <div class="card">
+        <p class="label">C3 · RISC-V Single 160MHz</p>
+        <h3>ESP32-C3</h3>
+        <p>WiFi + BLE5 + ราคาถูกที่สุด — ESP8266 replacement ที่ดีที่สุด เหมาะสำหรับ low-cost IoT node, sensor ที่ต้องการ WiFi + BLE แต่ไม่ต้องการ power</p>
+      </div>
+      <div class="card gold">
+        <p class="label">H2 · RISC-V Single 96MHz</p>
+        <h3>ESP32-H2</h3>
+        <p>Zigbee + Thread (802.15.4) + BLE — ไม่มี WiFi เหมาะสำหรับ Smart Home mesh network, Matter end-device, low-power sensor ที่ต้องการ battery life ยาว</p>
+      </div>
+      <div class="card danger">
+        <p class="label">P4 · RISC-V Dual HP 400MHz</p>
+        <h3>ESP32-P4</h3>
+        <p>ไม่มีวิทยุ — High-performance HMI/multimedia processor รองรับ graphics, video processing ต้องจับคู่กับ ESP32-C6 หรือชิป WiFi แยก สำหรับ industrial HMI</p>
+      </div>
+    </div>
+    <div class="takeaway"><b>★ Quick selection:</b> Maker ทั่วไป=Original, Edge AI=S3, Zigbee/Matter=H2, ราคาถูก=C3, HMI=P4, USB device=S2</div>
+  </div>
+</section>
+
+<!-- p5b: Chip Series — Full Comparison -->
+<section class="page" id="p5b"
+  data-group="chip-series"
+  data-tier="mechanism"
+  data-title="ตารางสเปก">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — ซีรีส์ชิป · ตารางสเปก</p>
+      <h2>เปรียบเทียบสเปกทุกซีรีส์</h2>
+      <p class="section-lead">ตารางด้านล่างเปรียบเทียบ specification หลักของทุกซีรีส์แบบ side-by-side เพื่อให้การตัดสินใจง่ายขึ้น เน้นจุดที่ต่างกันชัดที่สุดในแต่ละแถว</p>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>ซีรีส์</th>
+            <th>CPU</th>
+            <th>Core</th>
+            <th>Speed</th>
+            <th>WiFi</th>
+            <th>BT</th>
+            <th>Zigbee/Thread</th>
+            <th>USB OTG</th>
+            <th>AI/ML</th>
+            <th>ราคา tier</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Original</strong></td>
+            <td>Xtensa LX6</td>
+            <td>Dual/Single</td>
+            <td>240 MHz</td>
+            <td class="check">&#10003;</td>
+            <td class="check">Classic+BLE</td>
+            <td class="cross">&#10007;</td>
+            <td class="cross">&#10007;</td>
+            <td class="cross">&#10007;</td>
+            <td>$$</td>
+          </tr>
+          <tr>
+            <td><strong>S2</strong></td>
+            <td>Xtensa LX7</td>
+            <td>Single</td>
+            <td>240 MHz</td>
+            <td class="check">&#10003;</td>
+            <td class="cross">&#10007; ไม่มี</td>
+            <td class="cross">&#10007;</td>
+            <td class="check">&#10003;</td>
+            <td class="cross">&#10007;</td>
+            <td>$</td>
+          </tr>
+          <tr>
+            <td><strong>S3</strong></td>
+            <td>Xtensa LX7</td>
+            <td>Dual</td>
+            <td>240 MHz</td>
+            <td class="check">&#10003;</td>
+            <td class="check">BLE5</td>
+            <td class="cross">&#10007;</td>
+            <td class="check">&#10003;</td>
+            <td class="check">Vector</td>
+            <td>$$$</td>
+          </tr>
+          <tr>
+            <td><strong>C3</strong></td>
+            <td>RISC-V RV32</td>
+            <td>Single</td>
+            <td>160 MHz</td>
+            <td class="check">&#10003;</td>
+            <td class="check">BLE5</td>
+            <td class="cross">&#10007;</td>
+            <td class="cross">&#10007;</td>
+            <td class="cross">&#10007;</td>
+            <td>$</td>
+          </tr>
+          <tr>
+            <td><strong>H2</strong></td>
+            <td>RISC-V RV32</td>
+            <td>Single</td>
+            <td>96 MHz</td>
+            <td class="cross">&#10007; ไม่มี</td>
+            <td class="check">BLE5</td>
+            <td class="check">&#10003; 802.15.4</td>
+            <td class="cross">&#10007;</td>
+            <td class="cross">&#10007;</td>
+            <td>$$</td>
+          </tr>
+          <tr>
+            <td><strong>P4</strong></td>
+            <td>RISC-V RV32</td>
+            <td>Dual HP + LP</td>
+            <td>400 MHz</td>
+            <td class="cross">&#10007; ไม่มี</td>
+            <td class="cross">&#10007; ไม่มี</td>
+            <td class="cross">&#10007;</td>
+            <td class="check">&#10003;</td>
+            <td>&#9651; graphics</td>
+            <td>$$$$</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>จุดที่ต้องระวังในแต่ละซีรีส์</h3>
+      <p>ESP32-S2 ที่ไม่มี Bluetooth ถูกมองข้ามบ่อยมากเพราะชื่อดูคล้าย S3 แต่ใช้แทนกันไม่ได้เลยในงานที่ต้องการ BLE เช่น beacon หรือ Bluetooth audio ESP32-H2 ที่ไม่มี WiFi อาจดูเหมือน "ด้อยกว่า" แต่นั่นคือการออกแบบโดยเจตนาเพื่อลดการใช้พลังงาน ชิปที่มี WiFi กินไฟสูงกว่า 802.15.4 มากในโหมด standby</p>
+      <p>ESP32-P4 เป็นชิปที่ทรงพลังที่สุดในกลุ่ม แต่การไม่มีวิทยุหมายความว่าต้องซื้อชิป companion เพิ่ม ทำให้ราคา BOM สูงขึ้นอย่างมีนัยสำคัญ เหมาะสำหรับ industrial HMI ที่ต้องการ compute สูงแต่ไม่ใช่สำหรับ simple IoT node</p>
+      <details class="disclosure">
+        <summary>เจาะลึก: ESP32-C6 ที่ไม่อยู่ในตาราง</summary>
+        <div class="details-body">
+          <p>ESP32-C6 เป็นซีรีส์ที่ไม่ได้กล่าวถึงในตารางหลักเนื่องจากยังใหม่มาก แต่สำคัญมากสำหรับ Smart Home: มี WiFi 6 (802.11ax) + BLE5 + Zigbee + Thread (802.15.4) ในชิปตัวเดียว เป็น RISC-V single-core 160MHz รองรับ Matter ได้สมบูรณ์แบบที่สุดในกลุ่ม และรองรับ Thread Border Router role ซึ่ง H2 ไม่สามารถทำได้เพียงชิปเดียว</p>
+        </div>
+      </details>
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> S2=ไม่มี BT, H2=ไม่มี WiFi, P4=ไม่มีวิทยุเลย — สามจุดที่คนเลือกผิดบ่อยที่สุด</div>
+  </div>
+</section>
+
+
+<!-- p6a: Connectivity — WiFi & BT -->
+<section class="page" id="p6a"
+  data-group="connectivity"
+  data-group-title="การเชื่อมต่อ"
+  data-tier="intuition"
+  data-title="WiFi & Bluetooth">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — การเชื่อมต่อ · WiFi & Bluetooth</p>
+      <h2>WiFi และ Bluetooth: โปรโตคอลพื้นฐานที่ต้องเข้าใจ</h2>
+      <p class="section-lead">WiFi และ Bluetooth เป็นโปรโตคอลที่ ESP32 original, S3, และ C3 รองรับ แต่แม้แต่ภายใน "Bluetooth" เองก็ยังแยกเป็น Classic (สำหรับ audio, legacy device) และ BLE (สำหรับ IoT sensor, beacon) ซึ่งใช้แทนกันไม่ได้ การเข้าใจความแตกต่างนี้จะป้องกันการซื้อชิปผิดสำหรับงานที่ต้องการโปรโตคอลเฉพาะ</p>
+    </div>
+    <div>
+      <h3>WiFi: STA, AP และ Both Modes</h3>
+      <p>ESP32 สามารถทำงานเป็น WiFi Station (STA) เชื่อมต่อกับ router เหมือนโทรศัพท์มือถือ, หรือเป็น Access Point (AP) สร้าง WiFi network ของตัวเอง หรือทำงานทั้งสองโหมดพร้อมกัน (AP+STA) ซึ่งมีประโยชน์มากในงาน provisioning — ให้ผู้ใช้เชื่อมต่อกับ ESP32 โดยตรงผ่าน AP mode เพื่อกำหนดค่า WiFi credentials แล้ว ESP32 จะ switch ไป STA mode เชื่อมต่อกับ home network</p>
+      <p>WiFi ที่ ESP32 รองรับคือ 802.11 b/g/n บน 2.4 GHz band (ไม่รองรับ 5 GHz) ซึ่งเพียงพอสำหรับงาน IoT ส่วนใหญ่ ESP32-C6 เป็นตัวเดียวในกลุ่มที่รองรับ WiFi 6 (802.11ax) แต่ยังคงอยู่บน 2.4 GHz</p>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:16px">
+        <svg viewBox="0 0 700 160" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arr-p6a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+            </marker>
+          </defs>
+          <rect x="10" y="55" width="120" height="50" rx="8" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+          <text x="70" y="78" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">ESP32</text>
+          <text x="70" y="95" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">STA Mode</text>
+          <path d="M130 80 L185 80" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p6a)"/>
+          <rect x="185" y="55" width="110" height="50" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="240" y="78" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Router</text>
+          <text x="240" y="95" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">WiFi AP</text>
+          <path d="M295 80 L355 80" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p6a)"/>
+          <rect x="355" y="55" width="110" height="50" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="410" y="78" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Internet</text>
+          <text x="410" y="95" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">ISP / WAN</text>
+          <path d="M465 80 L525 80" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p6a)"/>
+          <rect x="525" y="55" width="130" height="50" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+          <text x="590" y="78" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Cloud/MQTT</text>
+          <text x="590" y="95" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">AWS IoT/HiveMQ</text>
+          <rect x="0" y="0" width="1" height="1" fill="none"/>
+        </svg>
+        <p style="text-align:center;font-size:13px;color:var(--muted)">การเชื่อมต่อ WiFi STA Mode: ESP32 เชื่อมกับ Router แล้วส่งข้อมูลขึ้น Cloud ผ่าน MQTT หรือ HTTP</p>
+      </div>
+    </div>
+    <div>
+      <h3>Bluetooth Classic vs BLE: เลือกให้ถูก</h3>
+      <p>ESP32 original เป็นซีรีส์เดียวที่มีทั้ง Bluetooth Classic (BR/EDR) และ BLE พร้อมกัน Bluetooth Classic ใช้สำหรับงานที่ต้องการ bandwidth สูง เช่น audio streaming ไปยัง speaker หรือ headphone, หรือการเชื่อมต่อกับ legacy device เช่น PS4 controller BLE ใช้พลังงานต่ำกว่ามาก เหมาะสำหรับ sensor data, beacon, proximity detection และ IoT use case ส่วนใหญ่</p>
+      <p>S3 และ C3 มีเฉพาะ BLE5 ซึ่งดีกว่า BLE4 ในด้าน range, data rate, และ mesh support แต่ไม่มี Bluetooth Classic เลย ดังนั้นถ้าโปรเจกต์ต้องการ Bluetooth audio หรือเชื่อมกับ keyboard/mouse Bluetooth Classic ต้องใช้ ESP32 original เท่านั้น</p>
+    </div>
+    <div class="takeaway"><b>★ BT rule:</b> BLE = IoT/sensor/low-power; BT Classic = audio/legacy device; ต้องการทั้งสอง = ใช้ ESP32 Original เท่านั้น</div>
+  </div>
+</section>
+
+<!-- p6b: Connectivity — Zigbee/Thread/Matter -->
+<section class="page" id="p6b"
+  data-group="connectivity"
+  data-tier="mechanism"
+  data-title="Zigbee, Thread & Matter">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — การเชื่อมต่อ · Zigbee, Thread & Matter</p>
+      <h2>IEEE 802.15.4, Zigbee, Thread และ Matter</h2>
+      <p class="section-lead">Zigbee และ Thread เป็นโปรโตคอลที่สร้างบน IEEE 802.15.4 physical/MAC layer เดียวกัน แต่มี network stack และ application layer ต่างกัน Matter คือ application layer ที่สร้างบน Thread (และ WiFi/Ethernet) เพื่อให้ device ต่าง vendor คุยกันได้ เข้าใจ 3 ชั้นนี้แล้วจะเลือก H2 หรือ C6 ได้ถูกต้อง</p>
+    </div>
+    <div>
+      <h3>IEEE 802.15.4: ฐานรากที่ใช้ร่วมกัน</h3>
+      <p>IEEE 802.15.4 เป็น standard สำหรับ physical layer และ MAC layer ของ wireless personal area network ที่กินพลังงานต่ำ ทำงานบน 2.4 GHz band (channel เดียวกับ WiFi แต่ใช้ DSSS modulation ต่างกัน) มี data rate 250 kbps ซึ่งต่ำกว่า WiFi มาก แต่ใช้พลังงานต่ำกว่าหลายเท่า เหมาะสำหรับ battery-powered sensor ที่ต้องการ battery อยู่ได้หลายปี</p>
+      <p>ESP32-H2 (และ C6) ใช้ 802.15.4 เป็น radio layer ซึ่งทำให้รองรับได้ทั้ง Zigbee และ Thread แต่ไม่สามารถทำงานทั้งสองพร้อมกันในเวลาเดียวกัน ต้องเลือก stack ที่ต้องการตอน compile</p>
+    </div>
+    <div>
+      <h3>Zigbee vs Thread: สองโปรโตคอล หนึ่ง Physical Layer</h3>
+      <table style="margin:12px 0">
+        <thead>
+          <tr><th>เกณฑ์</th><th>Zigbee</th><th>Thread</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Network layer</td><td>Zigbee proprietary stack</td><td>IPv6 (6LoWPAN)</td></tr>
+          <tr><td>Mesh routing</td><td class="check">&#10003; built-in</td><td class="check">&#10003; built-in</td></tr>
+          <tr><td>Internet connectivity</td><td>ต้องการ Coordinator+Gateway</td><td>Thread Border Router (IPv6)</td></tr>
+          <tr><td>Matter support</td><td class="cross">&#10007; ไม่รองรับ</td><td class="check">&#10003; รองรับ</td></tr>
+          <tr><td>Ecosystem</td><td>Philips Hue, Samsung SmartThings legacy</td><td>Apple Home, Google Home, Amazon</td></tr>
+          <tr><td>Interoperability</td><td>vendor-specific profile</td><td>open IPv6 standard</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Matter: Application Layer ที่รวมทุกอย่าง</h3>
+      <p>Matter (เดิมชื่อ Project CHIP) คือ application-layer standard ที่พัฒนาโดย CSA (Connectivity Standards Alliance) ซึ่งมี Apple, Google, Amazon, Samsung เป็น founding members เป้าหมายคือให้ smart home device จาก vendor ต่างๆ ทำงานร่วมกันได้โดยไม่ต้องอิง cloud ของ vendor ใด</p>
+      <p>Matter ทำงานบน transport layer สองแบบ: Thread (สำหรับ battery-powered device) และ WiFi/Ethernet (สำหรับ plugged-in device) ESP32-H2 สามารถเป็น Thread end-device ในระบบ Matter ได้ แต่ต้องการ Thread Border Router (เช่น HomePod mini หรือ Apple TV) เพื่อเชื่อมต่อเข้าสู่ network หลัก ESP32-C6 สามารถทำหน้าที่เป็น Thread Border Router เองได้เพราะมีทั้ง WiFi และ 802.15.4</p>
+      <details class="disclosure">
+        <summary>เจาะลึก: Thread Border Router ทำงานอย่างไร</summary>
+        <div class="details-body">
+          <p>Thread Border Router คือ device ที่มีทั้ง Thread interface (802.15.4) และ IP network interface (WiFi หรือ Ethernet) พร้อมกัน มันทำหน้าที่ route IPv6 traffic ระหว่าง Thread mesh network และ IP network หลัก ทำให้ Matter controller (เช่น iPhone) สามารถส่ง command ถึง Thread end-device (เช่น ESP32-H2 sensor) ได้โดยตรงผ่าน IPv6</p>
+          <p>ESP32-C6 เป็น chip ที่ถูกที่สุดที่สามารถทำ Thread Border Router ได้เพราะมีทั้ง WiFi 6 + 802.15.4 ในชิปเดียว ทำให้การสร้าง DIY Matter gateway ราคาถูกมากขึ้น</p>
+        </div>
+      </details>
+    </div>
+    <div class="takeaway"><b>★ Future-proof choice:</b> H2 = Thread end-device (battery sensor), C6 = Thread Border Router + WiFi hub — ทั้งสองรองรับ Matter เต็มรูปแบบ</div>
+  </div>
+</section>
+
+<!-- p7a: Board Selection — Framework -->
+<section class="page" id="p7a"
+  data-group="board-selection"
+  data-group-title="การเลือกบอร์ด"
+  data-tier="intuition"
+  data-title="ปัจจัยการตัดสินใจ">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — การเลือกบอร์ด · กรอบการตัดสินใจ</p>
+      <h2>4 ปัจจัยในการเลือกบอร์ด ESP32</h2>
+      <p class="section-lead">มีบอร์ด ESP32 ให้เลือกหลายร้อยรุ่นจาก manufacturer หลายสิบราย แต่การตัดสินใจที่ถูกต้องไม่ได้เริ่มจากการดูรายการสินค้า — ต้องเริ่มจากการตอบ 4 คำถามตามลำดับ เมื่อตอบได้ครบจะเหลือตัวเลือกไม่กี่รุ่นที่เหมาะสมจริงๆ</p>
+    </div>
+    <div class="bento cols-2">
+      <div class="card success">
+        <p class="label">ปัจจัยที่ 1 — ถามก่อนเสมอ</p>
+        <h3>Connectivity ที่ต้องการคืออะไร?</h3>
+        <p>ต้องการ WiFi, BT Classic, BLE, Zigbee, Thread, หรือ USB OTG? คำตอบนี้กรองซีรีส์ชิปได้ทันที ข้ามขั้นตอนนี้คือการพนัน</p>
+      </div>
+      <div class="card">
+        <p class="label">ปัจจัยที่ 2</p>
+        <h3>Form Factor และขนาดที่รับได้</h3>
+        <p>breadboard-friendly, SMD สำหรับ PCB, หรือ ultra-tiny (เช่น C3 Super Mini)? ขนาด antenna มีผลต่อ range โดยตรง</p>
+      </div>
+      <div class="card warning">
+        <p class="label">ปัจจัยที่ 3</p>
+        <h3>Peripheral และ Pin ที่ต้องการ</h3>
+        <p>ต้องการ pin จำนวนเท่าไหร่? ADC, DAC, I2S, camera interface, display interface? บอร์ดบางรุ่น expose pin น้อยกว่าชิปจริง</p>
+      </div>
+      <div class="card gold">
+        <p class="label">ปัจจัยที่ 4 — อย่ามองข้าม</p>
+        <h3>Documentation และ Community Support</h3>
+        <p>มี schematic, pinout ที่ชัดเจน, และ community ที่ active ไหม? บอร์ดราคาถูกไม่มีเอกสารทำให้เสียเวลา debug มากกว่าที่ประหยัดได้</p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <svg viewBox="0 0 700 230" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-p7a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <rect x="250" y="10" width="200" height="50" rx="8" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="350" y="32" font-size="12" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Connectivity Needed?</text>
+        <text x="350" y="50" font-size="10" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">WiFi/BT/Zigbee/Thread?</text>
+        <path d="M350 60 L350 90" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p7a)"/>
+        <rect x="250" y="90" width="200" height="50" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="350" y="112" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Form Factor?</text>
+        <text x="350" y="130" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">breadboard / SMD / tiny</text>
+        <path d="M350 140 L350 170" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr-p7a)"/>
+        <rect x="250" y="170" width="200" height="50" rx="8" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="350" y="192" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Peripherals + Docs?</text>
+        <text x="350" y="210" font-size="10" fill="var(--ink-dim)" text-anchor="middle" font-family="system-ui">pins / community / schematic</text>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">กระบวนการตัดสินใจ 4 ขั้น: เลือก connectivity ก่อน แล้วค่อยกรองด้วยขนาด peripheral และ documentation</p>
+    </div>
+    <div class="takeaway"><b>★ Decision rule:</b> connectivity ก่อน form factor ก่อน peripherals ก่อน documentation — ตามลำดับนี้เสมอ</div>
+  </div>
+</section>
+
+<!-- p7b: Board Selection — Recommended Boards -->
+<section class="page" id="p7b"
+  data-group="board-selection"
+  data-tier="mechanism"
+  data-title="บอร์ดแนะนำตามงาน">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — การเลือกบอร์ด · บอร์ดแนะนำ</p>
+      <h2>บอร์ดแนะนำสำหรับแต่ละ Use Case</h2>
+      <p class="section-lead">หลังจากผ่านกรอบ 4 ปัจจัยแล้ว ส่วนนี้แนะนำบอร์ดที่เฉพาะเจาะจงสำหรับ use case ที่พบบ่อยที่สุด โดยเน้น board ที่มี documentation ดี community ใหญ่ และ pinout ที่เป็น standard</p>
+    </div>
+    <div>
+      <h3>บอร์ดยอดนิยมตาม Use Case</h3>
+      <div class="bento cols-2">
+        <div class="card compact">
+          <p class="label">ผู้เริ่มต้น / General Purpose</p>
+          <h3>ESP32 DevKit v1 / NodeMCU-32S</h3>
+          <p>breadboard-compatible, USB-Serial built-in, ราคา 100–150 บาท, pinout document ครบ, community ใหญ่ที่สุด เหมาะสำหรับเรียนรู้และ prototype</p>
+        </div>
+        <div class="card compact">
+          <p class="label">WiFi + BLE ราคาถูก</p>
+          <h3>ESP32-C3 Super Mini</h3>
+          <p>ขนาดเล็กมาก USB-C built-in, RISC-V single core, WiFi + BLE5, ราคา 60–80 บาท เหมาะสำหรับโปรเจกต์ที่ต้องการขนาดเล็กและราคาต่ำ</p>
+        </div>
+        <div class="card compact">
+          <p class="label">Edge AI / Display / Camera</p>
+          <h3>ESP32-S3 Box / XIAO ESP32S3</h3>
+          <p>Vector instructions + PSRAM + camera interface เหมาะสำหรับ face recognition, wake word, TF Lite inference XIAO รูปแบบเล็กมากสำหรับ wearable</p>
+        </div>
+        <div class="card compact gold">
+          <p class="label">Zigbee / Thread / Matter</p>
+          <h3>ESP32-H2 DevKit</h3>
+          <p>802.15.4 radio + BLE5 official Espressif DevKit มี schematic ครบ เหมาะสำหรับ Smart Home device ที่ต้องการ Zigbee หรือ Matter Thread end-device</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>สัญญาณว่าบอร์ดมี Documentation ดี</h3>
+      <p>บอร์ดที่ควรเลือกจะมีสิ่งเหล่านี้: schematic ที่ดาวน์โหลดได้ฟรี, pinout diagram ที่ระบุ GPIO ทุกขา, ระบุชิปที่ใช้อย่างชัดเจน (ไม่ใช่แค่ "ESP32"), และมีผู้ใช้รีวิวบน GitHub หรือ forum เช่น ESP32.com หรือ r/esp32 อย่างน้อยหลายสิบราย</p>
+      <p>บอร์ดที่ควรระวัง: ไม่มีชื่อ manufacturer ชัดเจน, ราคาต่ำกว่า market rate มากผิดปกติ, pin label ใน listing ไม่ตรงกับ schematic, หรือขาย "clone" โดยไม่ระบุเวอร์ชันชิป บอร์ดเหล่านี้อาจใช้ชิปที่มี crystal speed ต่างจากมาตรฐาน (26 MHz vs 40 MHz) ซึ่งทำให้ firmware มาตรฐาน flash ไม่ได้</p>
+      <details class="disclosure">
+        <summary>เจาะลึก: ปัญหา Crystal Speed 26 MHz vs 40 MHz</summary>
+        <div class="details-body">
+          <p>ESP32 original ส่วนใหญ่ใช้ crystal 40 MHz แต่บอร์ดบางรุ่นโดยเฉพาะ clone ราคาถูกใช้ 26 MHz firmware bootloader ที่ compile สำหรับ 40 MHz จะทำงานผิดปกติหรือ crash ทันทีบนบอร์ดที่มี crystal 26 MHz วิธีตรวจสอบคือใช้ ESP Tool อ่านค่า crystal speed ก่อน flash firmware</p>
+        </div>
+      </details>
+    </div>
+    <div class="takeaway"><b>★ Safety tip:</b> ซื้อบอร์ดจาก brand ที่รู้จัก (Espressif official, Adafruit, Seeed Studio, LILYGO) เสียเงินเพิ่ม 50–100 บาท คุ้มกว่าเสียเวลา debug หลายชั่วโมง</div>
+  </div>
+</section>
+
+<!-- p8a: Programming — Arduino IDE -->
+<section class="page" id="p8a"
+  data-group="programming"
+  data-group-title="การโปรแกรม"
+  data-tier="intuition"
+  data-title="Arduino IDE & Boards Manager">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 6 — การโปรแกรม · Arduino IDE</p>
+      <h2>Arduino IDE: จุดเริ่มต้นที่ดีที่สุดสำหรับ ESP32</h2>
+      <p class="section-lead">Arduino IDE เป็น development environment ที่ง่ายที่สุดในการเริ่มต้นกับ ESP32 ด้วย library ecosystem ที่ใหญ่ที่สุด tutorial ที่มากที่สุด และ community ที่ตอบคำถามเร็วที่สุด Espressif ออก ESP32 Boards Manager 3.0 สำหรับ support ชิปรุ่นใหม่ ต้องใช้เวอร์ชันนี้ถ้าต้องการ S3, C3, H2, หรือ C6</p>
+    </div>
+    <div>
+      <h3>ขั้นตอนการติดตั้ง ESP32 Boards Manager</h3>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <div class="step-body">
+            <strong>ติดตั้ง Arduino IDE 2.x</strong>
+            <p>ดาวน์โหลดจาก arduino.cc/en/software เลือก version 2.x (ไม่ใช่ 1.x) Arduino IDE 2 มี Language Server, Auto-complete และ Debugger built-in ที่ดีกว่ามาก</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div class="step-body">
+            <strong>เพิ่ม ESP32 Boards URL</strong>
+            <p>ไปที่ File &rarr; Preferences แล้วเพิ่ม URL นี้ใน "Additional Boards Manager URLs": <code>https://espressif.github.io/arduino-esp32/package_esp32_index.json</code> (Boards Manager 3.0 สำหรับชิปรุ่นใหม่ทั้งหมด)</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div class="step-body">
+            <strong>ติดตั้ง esp32 package จาก Boards Manager</strong>
+            <p>ไปที่ Tools &rarr; Board &rarr; Boards Manager ค้นหา "esp32" เลือก package ของ Espressif Systems ติดตั้ง version 3.x เพื่อ support ชิปใหม่ทั้งหมด ใช้เวลาดาวน์โหลด 5–10 นาที</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <div class="step-body">
+            <strong>เลือก Board และ Port แล้วอัปโหลด sketch แรก</strong>
+            <p>Tools &rarr; Board &rarr; ESP32 Arduino &rarr; เลือก board ที่ตรงกับ hardware ที่มี เสียบ USB แล้วเลือก Port ที่ถูกต้อง อัปโหลด Blink sketch จาก File &rarr; Examples เพื่อทดสอบ</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+    <div>
+      <h3>ทำไม Arduino IDE ถึงเหมาะกับผู้เริ่มต้น</h3>
+      <p>Arduino IDE ซ่อน complexity ทั้งหมดไว้หลัง abstraction layer ทำให้ developer ไม่ต้องเข้าใจ CMake, linker script, partition table หรือ bootloader ก่อนเริ่มเขียนโค้ด library ecosystem ที่มีมากกว่า 5,000 library ครอบคลุม sensor, display, protocol และ service ส่วนใหญ่ที่ต้องการ</p>
+      <p>ข้อเสียคือ abstraction ที่ดีก็เป็นข้อจำกัดด้วย งานที่ต้องการ fine-grained hardware control เช่น custom interrupt handler, DMA configuration, หรือ multi-core task pinning จะต้องใช้ ESP-IDF functions โดยตรงใน Arduino sketch หรือย้ายไป PlatformIO/ESP-IDF แทน</p>
+    </div>
+    <div class="takeaway"><b>★ Beginner rule:</b> เริ่มด้วย Arduino IDE + Boards Manager 3.0 เสมอ ย้ายไป PlatformIO เมื่อโปรเจกต์ซับซ้อนขึ้น อย่ากระโดดไป ESP-IDF ตั้งแต่ต้น</div>
+  </div>
+</section>
+
+<!-- p8b: Programming — PlatformIO, ESP-IDF, ESP Tool -->
+<section class="page" id="p8b"
+  data-group="programming"
+  data-tier="mechanism"
+  data-title="PlatformIO, ESP-IDF & ESP Tool">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 6 — การโปรแกรม · PlatformIO, ESP-IDF & ESP Tool</p>
+      <h2>3 ระดับ: PlatformIO, ESP-IDF และ ESP Tool</h2>
+      <p class="section-lead">เมื่อโปรเจกต์เติบโตเกิน Arduino IDE ขั้นต่อไปคือ PlatformIO สำหรับ library management ที่ดีขึ้น หรือ ESP-IDF สำหรับ production-grade control ESP Tool เป็นเครื่องมือที่แยกต่างหากสำหรับ chip identification และ firmware flashing ใช้ร่วมกับทุก environment</p>
+    </div>
+    <div>
+      <div class="tabs-nav" role="tablist">
+        <button class="active" onclick="switchTab(this,'tab-pio')" role="tab">PlatformIO</button>
+        <button onclick="switchTab(this,'tab-idf')" role="tab">ESP-IDF</button>
+        <button onclick="switchTab(this,'tab-esptool')" role="tab">ESP Tool</button>
+      </div>
+      <div id="tab-pio" class="tabs-panel active">
+        <h3>PlatformIO: VSCode Extension สำหรับโปรเจกต์กลาง</h3>
+        <p>PlatformIO เป็น extension ของ VSCode ที่เพิ่ม project management, library dependency, และ multi-board support เข้าไปใน IDE ที่คุ้นเคย ทุกโปรเจกต์มีไฟล์ <code>platformio.ini</code> ที่ระบุ board, framework, library dependency อย่างชัดเจน ทำให้ share และ reproduce ได้ง่ายกว่า Arduino IDE มาก</p>
+        <p>PlatformIO รองรับทั้ง Arduino framework และ ESP-IDF framework ทำให้สามารถใช้ Arduino library ในโปรเจกต์ PlatformIO ได้ และค่อยๆ เพิ่ม ESP-IDF calls เมื่อต้องการ feature ที่ Arduino wrapper ไม่ครอบคลุม การทดสอบก็ง่ายกว่าด้วย PlatformIO มี built-in unit testing framework</p>
+        <div class="callout success" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> โปรเจกต์ที่มีหลาย file, ต้องการ version control library, ทำงานเป็น team, หรือต้องการ CI/CD</div>
+      </div>
+      <div id="tab-idf" class="tabs-panel">
+        <h3>ESP-IDF: Native Framework สำหรับ Production</h3>
+        <p>ESP-IDF (Espressif IoT Development Framework) คือ native framework ของ Espressif ที่ให้ access เต็มที่ถึง hardware ทุกส่วน ใช้ CMake เป็น build system, FreeRTOS เป็น RTOS, และ component system สำหรับ modular development ESP-IDF เป็น framework เดียวที่ Espressif officially support สำหรับ production firmware</p>
+        <p>ESP-IDF ซับซ้อนกว่า Arduino มากในช่วงแรก แต่ให้ประสิทธิภาพและ control ที่ดีกว่าสำหรับงาน production คุณสามารถกำหนด partition table, bootloader behavior, flash encryption, secure boot, และ OTA update strategy ได้อย่างละเอียด สิ่งเหล่านี้ทำได้ยากหรือทำไม่ได้ใน Arduino IDE</p>
+        <div class="callout warning" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> firmware สำหรับ production device, ต้องการ security features (secure boot, flash encryption), หรือต้องการ fine-grained hardware control</div>
+      </div>
+      <div id="tab-esptool" class="tabs-panel">
+        <h3>ESP Tool: ระบุชิปและ Flash Firmware</h3>
+        <p>ESP Tool มีสองรูปแบบ: เว็บแอป (espressif.github.io/esptool-js/) ที่ใช้ Web Serial API รองรับ Chrome/Edge โดยไม่ต้องติดตั้งอะไร และ Python CLI (<code>esptool.py</code>) ที่ติดตั้งด้วย <code>pip install esptool</code> เวอร์ชัน CLI ทรงพลังกว่าและใช้ใน CI/CD scripts ได้</p>
+        <p>คำสั่งที่ใช้บ่อยที่สุดคือการระบุชิป: ต่อบอร์ดแล้วรัน <code>esptool.py chip_id</code> จะได้ข้อมูล chip model, crystal frequency (26 vs 40 MHz), flash size, MAC address ทั้งหมดในไม่กี่วินาที คำสั่งนี้ช่วยมากเมื่อได้บอร์ดที่ไม่มีเอกสารหรือ clone ที่ไม่แน่ใจว่าเป็นชิปอะไร</p>
+        <div class="copy-wrap" style="margin-top:12px">
+          <pre><code># ระบุชิปและ crystal speed
+esptool.py --port /dev/ttyUSB0 chip_id
+
+# ล้าง flash ทั้งหมด (ก่อน flash firmware ใหม่)
+esptool.py --port /dev/ttyUSB0 erase_flash
+
+# Flash firmware (bootloader + partition + app)
+esptool.py --port /dev/ttyUSB0 write_flash \
+  0x1000 bootloader.bin \
+  0x8000 partitions.bin \
+  0x10000 firmware.bin</code></pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <p style="margin-top:8px;font-size:14px;color:var(--ink-dim)">address 0x1000 คือ bootloader location สำหรับ Xtensa-based ESP32 สำหรับ RISC-V series (C3/H2) bootloader อยู่ที่ 0x0000 แทน ต้องตรวจสอบ datasheet ก่อนเสมอ</p>
+        <div class="callout" style="margin-top:12px"><strong>เหมาะสำหรับ:</strong> ระบุชิปที่ไม่รู้จัก, recovery จาก firmware เสีย, production flashing หลายบอร์ดพร้อมกัน</div>
+      </div>
+    </div>
+    <div>
+      <h3>เปรียบเทียบ: เลือก Environment ไหนดี</h3>
+      <table>
+        <thead><tr><th>เกณฑ์</th><th>Arduino IDE</th><th>PlatformIO</th><th>ESP-IDF</th></tr></thead>
+        <tbody>
+          <tr><td>ความยาก</td><td class="check">ง่าย</td><td>ปานกลาง</td><td class="cross">ยาก</td></tr>
+          <tr><td>Library ecosystem</td><td class="check">ใหญ่ที่สุด</td><td class="check">ใหญ่</td><td>เฉพาะ ESP-IDF</td></tr>
+          <tr><td>Project management</td><td class="cross">จำกัด</td><td class="check">ดีมาก</td><td class="check">ดีมาก</td></tr>
+          <tr><td>Hardware access</td><td>จำกัด</td><td>ปานกลาง</td><td class="check">สมบูรณ์</td></tr>
+          <tr><td>Production use</td><td class="cross">ไม่แนะนำ</td><td>ได้</td><td class="check">แนะนำ</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Arduino → เริ่มต้น, PlatformIO → โปรเจกต์กลาง, ESP-IDF → production — ใช้ ESP Tool ระบุชิปก่อน debug ทุกครั้ง</div>
+  </div>
+</section>
+
+<!-- p9: TAKEAWAYS & REFERENCES -->
+<section class="page" id="p9" data-title="สรุปและอ้างอิง">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Closing — Key Takeaways</p>
+      <h2>7 สิ่งที่ต้องจำและขั้นตอนถัดไป</h2>
+      <p class="section-lead">หลังอ่านคู่มือนี้จบ คุณควรมีความเข้าใจพอที่จะเลือก ESP32 ซีรีส์ที่ถูกต้อง ตั้งค่า development environment ได้ และระบุปัญหาเบื้องต้นได้โดยไม่ต้องเดา</p>
+    </div>
+    <div class="bento cols-2">
+      <div>
+        <h3>Key Takeaways</h3>
+        <ul>
+          <li><strong>ESP32 = Family ไม่ใช่ชิปเดียว:</strong> มี 6+ ซีรีส์ที่แตกต่างกันโดยสิ้นเชิง การซื้อ "ESP32" โดยไม่ระบุซีรีส์คือการพนัน เลือก series จาก connectivity requirement ก่อนเสมอ</li>
+          <li><strong>Xtensa → RISC-V ลด cost เปิด ecosystem:</strong> C/H/P series ใช้ RISC-V เพราะ licensing-free ทำให้ราคาถูกกว่าและ toolchain เปิดกว่า โค้ดต้อง recompile ข้ามสถาปัตยกรรม</li>
+          <li><strong>Protocol mapping:</strong> WiFi+BT=Original/S3/C3, WiFi only=S2, Zigbee+Thread=H2/C6, No radio=P4 — map นี้คือทุกอย่างที่ต้องรู้ในการเลือกชิป</li>
+          <li><strong>Arduino → PlatformIO → ESP-IDF ตามความซับซ้อน:</strong> อย่า over-engineer ตั้งแต่ต้น แต่อย่าติดอยู่กับ Arduino ถ้าโปรเจกต์ต้องการ production-grade features</li>
+          <li><strong>H2/C6 = Future-proof Matter/Thread:</strong> Smart Home ที่ต้องการ longevity ควรเลือก H2 หรือ C6 เพราะ Matter กำลังเป็น standard ที่ Big Tech ทุกรายสนับสนุน</li>
+          <li><strong>ESP Tool ช่วย identify ชิปที่ไม่มีเอกสาร:</strong> รัน esptool.py chip_id ก่อน debug ทุกครั้งเมื่อได้บอร์ดใหม่ ประหยัดเวลาได้หลายชั่วโมง</li>
+          <li><strong>Documentation &gt; ราคา:</strong> บอร์ดที่มี schematic ชัดเจนและ community active คือการลงทุนที่คุ้มค่ากว่าบอร์ดราคาถูกที่ไม่มีเอกสารเสมอ</li>
+        </ul>
+      </div>
+      <div>
+        <h3>References</h3>
+        <ol style="font-size:13px;color:var(--ink-dim);line-height:1.9">
+          <li>YouTube — <a href="https://www.youtube.com/watch?v=TrFypASzTQs" target="_blank" rel="noopener">ESP32 Guide 2024: Choosing and Using an ESP32 Board</a></li>
+          <li>Espressif — <a href="https://docs.espressif.com/projects/esp-idf/en/latest/" target="_blank" rel="noopener">ESP-IDF Programming Guide (official)</a></li>
+          <li>Espressif — <a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/" target="_blank" rel="noopener">Arduino ESP32 Boards Manager 3.0 Docs</a></li>
+          <li>Espressif — <a href="https://docs.espressif.com/projects/esptool/en/latest/" target="_blank" rel="noopener">esptool.py Documentation</a></li>
+          <li>CSA — <a href="https://buildwithmatter.com/" target="_blank" rel="noopener">Matter Protocol official (CSA)</a></li>
+          <li>PlatformIO — <a href="https://docs.platformio.org/en/latest/platforms/espressif32.html" target="_blank" rel="noopener">PlatformIO ESP32 Platform Docs</a></li>
+        </ol>
+        <h3 style="margin-top:20px">Glossary</h3>
+        <dl style="font-size:13px;color:var(--ink-dim);line-height:1.8">
+          <dt style="font-weight:600;color:var(--ink)">Xtensa</dt>
+          <dd style="margin:0 0 8px 12px">สถาปัตยกรรม CPU proprietary ของ Cadence (เดิม Tensilica) ใช้ใน ESP32 Original, S2, S3 มี licensing fee</dd>
+          <dt style="font-weight:600;color:var(--ink)">RISC-V</dt>
+          <dd style="margin:0 0 8px 12px">สถาปัตยกรรม CPU open-source ไม่มี licensing fee ใช้ใน ESP32 C3, H2, C6, P4 toolchain มาตรฐาน</dd>
+          <dt style="font-weight:600;color:var(--ink)">BLE</dt>
+          <dd style="margin:0 0 8px 12px">Bluetooth Low Energy โปรโตคอล Bluetooth ที่กินพลังงานต่ำ เหมาะสำหรับ IoT sensor และ beacon</dd>
+          <dt style="font-weight:600;color:var(--ink)">IEEE 802.15.4</dt>
+          <dd style="margin:0 0 8px 12px">Standard สำหรับ physical/MAC layer ของ low-power WPAN ใช้โดย Zigbee และ Thread บน 2.4 GHz</dd>
+          <dt style="font-weight:600;color:var(--ink)">Matter</dt>
+          <dd style="margin:0 0 8px 12px">Application-layer standard สำหรับ Smart Home device ให้ device ต่าง vendor คุยกันได้บน Thread หรือ WiFi</dd>
+          <dt style="font-weight:600;color:var(--ink)">Thread</dt>
+          <dd style="margin:0 0 8px 12px">IPv6-based mesh network protocol สำหรับ IoT สร้างบน 802.15.4 ใช้โดย Matter สำหรับ battery device</dd>
+          <dt style="font-weight:600;color:var(--ink)">Zigbee</dt>
+          <dd style="margin:0 0 8px 12px">Mesh network protocol สร้างบน 802.15.4 ใช้กันแพร่หลายใน smart home legacy (Philips Hue, IKEA)</dd>
+          <dt style="font-weight:600;color:var(--ink)">ESP-IDF</dt>
+          <dd style="margin:0 0 8px 12px">Espressif IoT Development Framework native framework อย่างเป็นทางการ ให้ access เต็มที่ถึง hardware</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="takeaway">
+      <b>★ ถ้าจำได้อย่างเดียว:</b> เลือก ESP32 series จาก connectivity ก่อนเสมอ — S2 ไม่มี BT, H2 ไม่มี WiFi, P4 ไม่มีวิทยุ
+    </div>
+  </div>
+</section>
+
+</div><!-- /scroll-root -->
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const progressBar = document.getElementById('progress-bar');
+const tocEl = document.getElementById('toc');
+const pages = Array.from(document.querySelectorAll('.page'));
+
+const groups = [];
+const groupMap = {};
+
+pages.forEach(page => {
+  const gSlug = page.dataset.group || page.id;
+  const gTitle = page.dataset.groupTitle;
+  const label  = page.dataset.title || page.id;
+
+  if (!groupMap[gSlug]) {
+    const g = { slug: gSlug, title: gTitle || label, pages: [] };
+    groups.push(g);
+    groupMap[gSlug] = g;
+  }
+  if (gTitle) groupMap[gSlug].title = gTitle;
+  groupMap[gSlug].pages.push({ page, label });
+});
+
+groups.forEach(g => {
+  const groupDiv = document.createElement('div');
+  groupDiv.className = 'toc-group';
+  groupDiv.dataset.group = g.slug;
+
+  const groupLink = document.createElement('a');
+  groupLink.className = 'toc-group-label';
+  groupLink.href = '#' + g.pages[0].page.id;
+  groupLink.textContent = g.title;
+  groupDiv.appendChild(groupLink);
+
+  if (g.pages.length > 1) {
+    const subList = document.createElement('ul');
+    subList.className = 'toc-subs';
+    g.pages.forEach(({ page, label }) => {
+      const li = document.createElement('li');
+      const a  = document.createElement('a');
+      a.className = 'toc-sub';
+      a.href = '#' + page.id;
+      a.textContent = label;
+      a.dataset.pageId = page.id;
+      li.appendChild(a);
+      subList.appendChild(li);
+    });
+    groupDiv.appendChild(subList);
+  }
+
+  tocEl.appendChild(groupDiv);
+});
+
+function setActiveById(pageId) {
+  document.querySelectorAll('.toc-group-label').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.toc-sub').forEach(a => a.classList.remove('active'));
+
+  const page  = pages.find(p => p.id === pageId);
+  const gSlug = page ? (page.dataset.group || page.id) : pageId;
+  const groupDiv = tocEl.querySelector('.toc-group[data-group="' + gSlug + '"]');
+
+  if (!groupDiv) return;
+  groupDiv.querySelector('.toc-group-label').classList.add('active');
+
+  const subLink = groupDiv.querySelector('.toc-sub[data-page-id="' + pageId + '"]');
+  if (subLink) {
+    subLink.classList.add('active');
+    subLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  } else {
+    groupDiv.querySelector('.toc-group-label').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) setActiveById(e.target.id); });
+}, { root: null, threshold: 0.25 });
+pages.forEach(p => obs.observe(p));
+
+sidebarToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  sidebarOverlay.classList.toggle('open');
+});
+sidebarOverlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('open');
+  }
+});
+tocEl.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    }
+  });
+});
+
+pages.forEach((page, i) => {
+  const inner = page.querySelector('.page-inner');
+  if (!inner) return;
+  const foot = document.createElement('div');
+  foot.className = 'page-foot';
+  if (i > 0) {
+    const prev = pages[i - 1];
+    const btn  = document.createElement('a');
+    btn.className = 'pf-btn pf-prev';
+    btn.href = '#' + prev.id;
+    btn.textContent = '← ' + (prev.dataset.title || prev.id);
+    foot.appendChild(btn);
+  }
+  if (i < pages.length - 1) {
+    const next = pages[i + 1];
+    const btn  = document.createElement('a');
+    btn.className = 'pf-btn pf-next';
+    btn.href = '#' + next.id;
+    btn.textContent = (next.dataset.title || next.id) + ' →';
+    foot.appendChild(btn);
+  }
+  if (foot.children.length > 0) inner.appendChild(foot);
+});
+
+window.addEventListener('scroll', () => {
+  const doc     = document.documentElement;
+  const scrolled = doc.scrollTop || document.body.scrollTop;
+  const total   = doc.scrollHeight - doc.clientHeight;
+  if (total > 0) progressBar.style.transform = 'scaleX(' + (scrolled / total) + ')';
+}, { passive: true });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); jumpSection(1); }
+  if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')  { e.preventDefault(); jumpSection(-1); }
+});
+function jumpSection(dir) {
+  const active = tocEl.querySelector('.toc-sub.active') ||
+                 tocEl.querySelector('.toc-group-label.active');
+  if (!active) { pages[0] && pages[0].scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  const targetId = active.dataset.pageId || (active.getAttribute('href') || '').slice(1);
+  const idx = pages.findIndex(p => p.id === targetId);
+  const newIdx = Math.max(0, Math.min(pages.length - 1, idx + dir));
+  if (newIdx !== idx) pages[newIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+const themeBtn = document.getElementById('theme-btn');
+const root     = document.documentElement;
+const saved    = localStorage.getItem('explainer-theme');
+if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
+themeBtn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  localStorage.setItem('explainer-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
+});
+
+function switchTab(btn, panelId) {
+  btn.closest('.tabs-nav').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tabs-panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(panelId);
+  if (target) target.classList.add('active');
+}
+
+function toggleAccordion(btn) {
+  btn.closest('.accordion-item').classList.toggle('open');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.copy-wrap').querySelector('pre code');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
