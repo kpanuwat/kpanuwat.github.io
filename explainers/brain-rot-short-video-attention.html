@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Rot: คลิปสั้นกับสมาธิที่หายไป</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (mirrors marp-deck 26-token :root) ── */
+:root {
+  --ink: #1e293b;
+  --ink-dim: #475569;
+  --muted: #94a3b8;
+  --paper: #ffffff;
+  --soft: #f1f5f9;
+  --soft-2: #e2e8f0;
+  --accent: #3b82f6;
+  --accent-deep: #1e3a8a;
+  --accent-wash: #dbeafe;
+  --gold: #d4af37;
+  --danger: #dc2626;
+  --danger-wash: #fee2e2;
+  --danger-ink: #991b1b;
+  --success: #16a34a;
+  --success-wash: #dcfce7;
+  --success-ink: #14532d;
+  --warning: #f59e0b;
+  --warning-wash: #fef3c7;
+  --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 52px;
+  --page-max: 960px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9;
+  --ink-dim: #94a3b8;
+  --muted: #475569;
+  --paper: #0f172a;
+  --soft: #1e293b;
+  --soft-2: #334155;
+  --accent-wash: #1e3a8a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+}
+code, kbd, pre, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Nav bar ── */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--soft-2);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  box-shadow: var(--shadow-sm);
+}
+#nav .brand {
+  font-weight: 700; font-size: 15px; color: var(--ink);
+  margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 240px;
+}
+#nav .page-links {
+  display: flex; gap: 2px; overflow-x: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+#nav .page-links::-webkit-scrollbar { display: none; }
+#nav .page-links a {
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--ink-dim); white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+#nav .page-links a:hover,
+#nav .page-links a.active {
+  background: var(--accent-wash); color: var(--accent);
+  text-decoration: none;
+}
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button {
+  background: none; border: 1px solid var(--soft-2);
+  border-radius: var(--radius-sm); padding: 5px 10px;
+  font-size: 13px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+#nav .controls button:hover { background: var(--soft); }
+
+/* ── Sections (document scroll) ── */
+#scroll-root {
+  padding-top: var(--nav-h);
+}
+.page {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+  padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.page-inner {
+  width: 100%; max-width: var(--page-max);
+  display: flex; flex-direction: column; gap: 28px;
+}
+.page.cover {
+  min-height: calc(100vh - var(--nav-h));
+  background: linear-gradient(135deg, #0f172a 0%, #7c3aed 100%);
+  color: white; justify-content: center; align-items: center; text-align: center;
+}
+.page.cover .page-inner { align-items: center; }
+
+/* ── Typography ── */
+h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+
+/* ── Prose flow (brochure density) ── */
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
+.prose-block { display: flex; flex-direction: column; gap: 0; }
+.prose-block + .prose-block { margin-top: 4px; }
+.section-label {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.page-number {
+  font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 24px;
+  align-self: flex-end;
+}
+
+/* ── Cover mark ── */
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+
+/* ── Card system ── */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+  border-left: 4px solid var(--accent);
+  box-sizing: border-box;
+}
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card.purple  { border-left-color: #7c3aed; }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card h3      { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p       { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul      { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+
+/* ── Bento grid ── */
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 640px) {
+  .bento.cols-2, .bento.cols-3, .bento.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Takeaway banner ── */
+.takeaway {
+  border-left: 4px solid var(--accent);
+  background: var(--soft);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 15px; line-height: 1.6;
+}
+.takeaway b { color: var(--accent); }
+
+/* ── Steps list ── */
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.steps li .step-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--accent); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+
+/* ── Callout ── */
+.callout {
+  background: var(--accent-wash);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 15px; color: var(--accent-deep);
+  border: 1px solid var(--accent);
+}
+[data-theme="dark"] .callout { color: var(--accent-wash); border-color: var(--accent); }
+.callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+
+/* ── Inline code ── */
+code {
+  background: var(--soft-2); color: var(--danger-ink); font-size: .875em;
+  padding: 2px 6px; border-radius: 4px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6;
+}
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+
+/* ── Progressive disclosure (native details) ── */
+details.disclosure {
+  border-left: 3px solid var(--accent);
+  background: var(--soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 12px 0;
+}
+details.disclosure summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  user-select: none;
+}
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after {
+  content: "▾";
+  font-size: 12px; color: var(--muted);
+  transition: transform .2s;
+  margin-left: auto;
+}
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body {
+  padding: 4px 16px 16px;
+  font-size: 14px; color: var(--ink-dim); line-height: 1.7;
+}
+details.disclosure .details-body p { font-size: 14px; }
+
+/* ── Comparison table ── */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+
+/* ── Accordion ── */
+.accordion { border: 1px solid var(--soft-2); border-radius: var(--radius-sm); overflow: hidden; }
+.accordion-item { border-top: 1px solid var(--soft-2); }
+.accordion-item:first-child { border-top: none; }
+.accordion-btn {
+  width: 100%; background: none; border: none; padding: 14px 16px;
+  text-align: left; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; font-size: 15px; color: var(--ink);
+  transition: background .15s;
+}
+.accordion-btn:hover { background: var(--soft); }
+.accordion-btn::after { content: "▾"; font-size: 12px; color: var(--muted); transition: transform .2s; }
+.accordion-item.open .accordion-btn::after { transform: rotate(-180deg); }
+.accordion-body { display: none; padding: 0 16px 16px; color: var(--ink-dim); font-size: 14px; line-height: 1.7; }
+.accordion-item.open .accordion-body { display: block; }
+
+/* ── Print ── */
+@media print {
+  #nav { display: none; }
+  #scroll-root { padding-top: 0; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .page { padding: 32px 16px; }
+  h2 { font-size: 22px; }
+  #nav .brand { max-width: 120px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav id="nav">
+  <span class="brand">Brain Rot</span>
+  <div class="page-links" id="page-links">
+    <!-- JS fills in anchors -->
+  </div>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">☀︎</button>
+    <button onclick="window.print()" title="Print / save as PDF">⎙</button>
+  </div>
+</nav>
+
+<div id="scroll-root">
+
+<!-- ════════════════════════════════════════════
+  PAGE 1: COVER
+════════════════════════════════════════════ -->
+<section class="page cover" id="p1" data-title="หน้าปก">
+  <div class="page-inner" style="align-items:center;text-align:center;gap:16px">
+    <div class="mark"></div>
+    <h1>Brain Rot</h1>
+    <p class="tag" style="font-size:20px;color:rgba(255,255,255,.85);max-width:640px;font-weight:600">
+      คลิปสั้นกับสมาธิที่หายไป
+    </p>
+    <p style="font-size:16px;color:rgba(255,255,255,.7);max-width:580px;margin-top:-8px">
+      วิทยาศาสตร์เบื้องหลัง Dopamine Loop, Carryover Effect, และสิ่งที่งานวิจัยบอกจริงๆ เรื่องสายตากับแสงสีฟ้า
+    </p>
+    <div class="bento cols-3" style="margin-top:24px;max-width:640px">
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">Meta-analysis ขนาด</p>
+        <h3 style="color:white">~100,000</h3>
+        <p style="color:rgba(255,255,255,.65);font-size:12px">คน พบ negative correlation ชัดเจนระหว่าง short-form video กับ sustained attention</p>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">เวลา refocus หลัง interrupt</p>
+        <h3 style="color:white">23 นาที</h3>
+        <p style="color:rgba(255,255,255,.65);font-size:12px">สมองต้องใช้เวลาเฉลี่ยนานเท่านี้เพื่อกลับมา deep focus ได้เต็มที่</p>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">Rule ที่วิทยาศาสตร์รองรับ</p>
+        <h3 style="color:white">20-20-20</h3>
+        <p style="color:rgba(255,255,255,.65);font-size:12px">ทุก 20 นาที มองจุดห่าง 20 ฟุต นาน 20 วินาที — ได้ผลกว่าแว่นกรองแสง</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 2: TL;DR / OVERVIEW
+════════════════════════════════════════════ -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Overview</p>
+      <h2>Brain Rot คืออะไร และทำไมถึงสำคัญกว่าที่คิด</h2>
+      <p class="section-lead">
+        Brain rot ไม่ใช่แค่คำสแลงที่เด็กใช้บน TikTok — มันอธิบายปรากฏการณ์ทางประสาทวิทยาที่เกิดขึ้นจริงเมื่อสมองถูก condition ซ้ำๆ
+        ด้วย rapid stimulation จนสูญเสียความสามารถในการ sustain attention ในระยะยาว
+        เข้าใจกลไกนี้แล้ว คุณจะเห็นทางออกที่ไม่ใช่แค่ "ใช้ willpower มากขึ้น"
+        แต่เป็นการ retrain สมองอย่างเป็นระบบ
+      </p>
+    </div>
+    <div class="bento cols-2">
+      <div class="card purple">
+        <p class="label">ประเด็นที่ 1</p>
+        <h3>Dopamine Reward Loop</h3>
+        <p>แต่ละคลิปใหม่กระตุ้น dopamine ซ้ำๆ สร้าง reinforcement loop ที่ทรงพลังกว่า social media รุ่นก่อนมาก เพราะ algorithm ออกแบบมาให้ตรง preference ของคุณโดยเฉพาะ</p>
+      </div>
+      <div class="card danger">
+        <p class="label">ประเด็นที่ 2</p>
+        <h3>Carryover Effect</h3>
+        <p>ผลของคลิปสั้นไม่หยุดแค่ตอนดู — cognitive cost ตกค้างไปรบกวนงานถัดไปหลายสิบนาที แม้คุณจะปิดแอปแล้วก็ตาม</p>
+      </div>
+      <div class="card warning">
+        <p class="label">ประเด็นที่ 3</p>
+        <h3>Digital Eye Strain — ความจริง</h3>
+        <p>ปัญหาตาจากจอมาจาก reduced blinking และกล้ามเนื้อตาล้า ไม่ใช่ blue light damage — งานวิจัยชั้นนำระบุว่าแว่นกรองแสงไม่มีหลักฐานรองรับเพียงพอ</p>
+      </div>
+      <div class="card success">
+        <p class="label">ประเด็นที่ 4</p>
+        <h3>Content Creator Strategy</h3>
+        <p>คลิปสั้น = ช่องทางค้นพบ (Discovery); คลิปยาว = ฐานแฟนแท้ (True Fans) — ทั้งสองต้องอยู่ในกลยุทธ์เดียวกันเสมอ ไม่ใช่เลือกอย่างใดอย่างหนึ่ง</p>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>สิ่งที่ brochure นี้ทำแตกต่าง:</strong> เนื้อหาอิงงานวิจัย peer-reviewed และ meta-analysis ขนาดใหญ่ รวมถึงชี้จุดที่ความเชื่อทั่วไป (เช่น แว่นกรองแสง) ขัดกับหลักฐานทางวิทยาศาสตร์ปัจจุบัน
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Brain rot คือ neurochemical conditioning ไม่ใช่นิสัยแย่ — เข้าใจกลไกแล้วถึงแก้ได้ถูกจุด</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 3: DEEP-DIVE PROTOCOL
+════════════════════════════════════════════ -->
+<section class="page" id="p3" data-title="Deep-Dive">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol</p>
+      <h2>ส่วนประกอบหลัก สมมติฐานที่ซ่อนอยู่ และ Key Takeaways</h2>
+      <p class="section-lead">
+        ก่อนลงลึกในแต่ละประเด็น ส่วนนี้วางโครงกระดูกของเรื่องทั้งหมด:
+        ส่วนประกอบหลักที่ต้องให้ชื่อก่อนจึงจะเข้าใจภาพรวมได้ สมมติฐานที่ซ่อนอยู่
+        ซึ่งผู้เริ่มต้นมักมองข้ามและทำให้เข้าใจผิดเรื่องวิธีแก้ปัญหา
+        และ insight สำคัญที่จะเป็น backbone ของ brochure ทั้งหมด
+      </p>
+    </div>
+
+    <div>
+      <h3>ส่วนประกอบหลัก <span lang="en">(Components)</span></h3>
+      <div class="bento cols-3">
+        <div class="card purple">
+          <p class="label">Component 1</p>
+          <h3>Dopamine Reward Loop</h3>
+          <p>สมองปล่อย dopamine ทุกครั้งที่คลิปเปลี่ยน สร้าง reinforcement loop ที่ algorithm ออกแบบมาให้แรงกว่า slot machine</p>
+        </div>
+        <div class="card danger">
+          <p class="label">Component 2</p>
+          <h3>Prefrontal Cortex Fatigue</h3>
+          <p>ส่วนควบคุม impulse และ sustained focus ที่ถูก underuse เมื่อสมองคุ้นชิน passive stimulation มากเกินไป</p>
+        </div>
+        <div class="card warning">
+          <p class="label">Component 3</p>
+          <h3>Carryover Effect</h3>
+          <p>ผลตกค้างหลังดูคลิปจบ: cognitive cost ยังคงรบกวนงานถัดไปแม้จะปิดแอปแล้ว — เป็นเหตุผลที่ดูระหว่างพักแล้วยิ่งเหนื่อย</p>
+        </div>
+        <div class="card gold">
+          <p class="label">Component 4</p>
+          <h3>Digital Eye Strain</h3>
+          <p>ความล้าของตาจากการจ้องจอ — กลไกจริงคือ reduced blinking rate และ ciliary muscle fatigue ไม่ใช่ blue light radiation</p>
+        </div>
+        <div class="card success">
+          <p class="label">Component 5</p>
+          <h3>Creator Economics</h3>
+          <p>สมการ: Short clips = Discovery reach; Long clips = True fan value — ทั้งสองต้องอยู่คู่กัน ขาดอย่างใดอย่างหนึ่งกลยุทธ์พัง</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <svg viewBox="0 0 860 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="70" width="140" height="60" rx="10" fill="var(--soft)" stroke="var(--soft-2)" stroke-width="1.5"/>
+        <text x="80" y="97" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Dopamine</text>
+        <text x="80" y="113" font-size="12" font-weight="700" fill="var(--ink)" text-anchor="middle" font-family="system-ui">Reward Loop</text>
+        <path d="M150 100 L188 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#br-arr)"/>
+        <rect x="188" y="70" width="140" height="60" rx="10" fill="var(--danger-wash)" stroke="var(--danger)" stroke-width="1.5"/>
+        <text x="258" y="97" font-size="12" font-weight="700" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Prefrontal</text>
+        <text x="258" y="113" font-size="12" font-weight="700" fill="var(--danger-ink)" text-anchor="middle" font-family="system-ui">Cortex Fatigue</text>
+        <path d="M328 100 L366 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#br-arr)"/>
+        <rect x="366" y="60" width="128" height="80" rx="10" fill="var(--accent-wash)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="430" y="93" font-size="13" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Carryover</text>
+        <text x="430" y="109" font-size="13" font-weight="700" fill="var(--accent-deep)" text-anchor="middle" font-family="system-ui">Effect</text>
+        <path d="M494 100 L532 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#br-arr)"/>
+        <rect x="532" y="70" width="140" height="60" rx="10" fill="var(--warning-wash)" stroke="var(--warning)" stroke-width="1.5"/>
+        <text x="602" y="97" font-size="12" font-weight="700" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">Digital Eye</text>
+        <text x="602" y="113" font-size="12" font-weight="700" fill="var(--warning-ink)" text-anchor="middle" font-family="system-ui">Strain</text>
+        <path d="M672 100 L710 100" stroke="var(--accent)" stroke-width="2" marker-end="url(#br-arr)"/>
+        <rect x="710" y="70" width="140" height="60" rx="10" fill="var(--success-wash)" stroke="var(--success)" stroke-width="1.5"/>
+        <text x="780" y="97" font-size="12" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Creator</text>
+        <text x="780" y="113" font-size="12" font-weight="700" fill="var(--success-ink)" text-anchor="middle" font-family="system-ui">Economics</text>
+        <defs>
+          <marker id="br-arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="text-align:center;font-size:13px;color:var(--muted)">5 ส่วนประกอบหลักของปรากฏการณ์ Brain Rot — Dopamine Loop เป็นต้นเหตุ; Carryover Effect คือจุดที่ทำให้เห็นผลกระทบที่ชัดเจนที่สุดในชีวิตประจำวัน</p>
+    </div>
+
+    <div>
+      <h3>สมมติฐานที่ซ่อนอยู่ — สิ่งที่ผู้เริ่มต้นมักเข้าใจผิด</h3>
+      <ul>
+        <li><strong>สมมติฐาน 1: Brain rot คือปัญหา willpower</strong> — จริงๆ แล้วเป็น neurochemical conditioning ที่เกิดขึ้นในระดับสมอง การบอกตัวเองให้ "ตั้งใจมากขึ้น" โดยไม่เปลี่ยน environment จึงไม่ได้ผล</li>
+        <li><strong>สมมติฐาน 2: ดูคลิประหว่างพักช่วยสมองพักผ่อน</strong> — passive stimulation ไม่ใช่ rest งานวิจัยชี้ว่าสมองต้องการ "cognitive rest" ที่แท้จริง (เช่น เดิน มองธรรมชาติ) ไม่ใช่ input ที่เปลี่ยนเร็ว</li>
+        <li><strong>สมมติฐาน 3: แว่นกรองแสงสีฟ้าป้องกันสายตาจากจอ</strong> — American Academy of Ophthalmology ระบุชัดว่าไม่มีหลักฐานทางวิทยาศาสตร์ว่าแสงจากจอคอมพิวเตอร์ทำลายตา; 20-20-20 rule มีประสิทธิภาพจริงและมีงานวิจัยรองรับ</li>
+      </ul>
+    </div>
+
+    <div>
+      <h3>Key Takeaways — จากใหญ่ไปเล็ก จาก intuition ไปสู่ action</h3>
+      <div class="bento cols-2">
+        <div class="card compact">
+          <p class="label">Takeaway 1 — Big Picture</p>
+          <h3>Brain rot = neurochemical conditioning</h3>
+          <p>ไม่ใช่นิสัยแย่ แต่เป็นการ train สมองซ้ำๆ ให้ต้องการ dopamine spike สั้นๆ บ่อยๆ จนสูญเสีย sustained focus</p>
+        </div>
+        <div class="card compact danger">
+          <p class="label">Takeaway 2 — Carryover</p>
+          <h3>คลิปสั้นสร้าง cognitive debt</h3>
+          <p>ผลตกค้างหลังดูจบทำให้งานถัดไปมีประสิทธิภาพต่ำลงอย่างมีนัยสำคัญ แม้ดูแค่ไม่กี่คลิปก็ตาม</p>
+        </div>
+        <div class="card compact warning">
+          <p class="label">Takeaway 3 — Eye Health</p>
+          <h3>20-20-20 rule &gt; แว่นกรองแสง</h3>
+          <p>ปัญหาตาจากจอมาจากกล้ามเนื้อตาล้า ไม่ใช่ blue light — พักสายตาสม่ำเสมอได้ผลจริงและฟรี</p>
+        </div>
+        <div class="card compact success">
+          <p class="label">Takeaway 4 — Creator</p>
+          <h3>Short clip = traffic, Long clip = value</h3>
+          <p>ผู้สร้างคอนเทนต์ที่ประสบความสำเร็จใช้คลิปสั้นดึงคนเข้า แล้วสร้างคุณค่าจริงผ่านคลิปยาว</p>
+        </div>
+        <div class="card compact purple">
+          <p class="label">Takeaway 5 — Recovery</p>
+          <h3>Gradual retraining ไม่ใช่ cold turkey</h3>
+          <p>แก้ brain rot ด้วยการเพิ่มระยะเวลา focus ทีละน้อย ไม่ใช่งดทันทีซึ่งมักล้มเหลวภายใน 1-2 สัปดาห์</p>
+        </div>
+        <div class="card compact gold">
+          <p class="label">Takeaway 6 — Rest</p>
+          <h3>Real rest ≠ passive stimulation</h3>
+          <p>การพักที่แท้จริงระหว่างทำงานคือการเดิน มองออกไปนอกหน้าต่าง หรือหายใจลึกๆ ไม่ใช่ดูคลิปสั้น</p>
+        </div>
+      </div>
+    </div>
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> เข้าใจ 5 components แล้วทุกประเด็นในส่วนถัดไปจะ click เข้าที่ทันที</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 4: DOPAMINE LOOP & BRAIN CONDITIONING
+════════════════════════════════════════════ -->
+<section class="page" id="p4" data-title="Dopamine Loop">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — กลไกสมอง</p>
+      <h2>Dopamine Loop: ทำไมสมองถึงติดคลิปสั้นได้เร็วกว่าที่คิด</h2>
+      <p class="section-lead">
+        เมื่อคุณเลื่อน feed แล้วเห็นคลิปใหม่ที่น่าสนใจ สมองส่วน nucleus accumbens
+        ปล่อย dopamine ออกมาในทันที — นี่คือกลไกเดิมที่วิวัฒนาการสร้างมาเพื่อให้เราตื่นตัวต่อสิ่งใหม่
+        ปัญหาคือ TikTok, Reels, และ YouTube Shorts ออกแบบมาให้กระตุ้นกลไกนี้
+        ทุก 15-60 วินาทีโดยไม่หยุด ซึ่งแตกต่างจากสิ่งใดๆ ที่สมองมนุษย์เคยเจอในประวัติศาสตร์
+        ผลที่ตามมาคือการ condition สมองให้คาดหวัง novelty ที่เปลี่ยนเร็วมากขึ้นเรื่อยๆ
+        และสูญเสียความสามารถในการ sustain attention กับสิ่งที่ "ช้ากว่า"
+      </p>
+    </div>
+
+    <div>
+      <h3>กลไก Dopamine — เหตุใด Algorithm จึงทรงพลังกว่า Slot Machine</h3>
+      <p>
+        งานวิจัยคลาสสิกของ Schultz et al. (1997) แสดงว่า dopamine ถูกปล่อยออกมาไม่ใช่ตอนได้รางวัล
+        แต่ตอน "คาดว่าจะได้รางวัล" — นี่คือเหตุผลที่ slot machine ติดมากกว่าการได้เงินตรงๆ
+        เพราะความไม่แน่นอนของรางวัลสร้าง dopamine spike ที่แรงกว่า
+        Algorithm ของ TikTok ทำสิ่งเดียวกันในระดับที่ซับซ้อนกว่า:
+        มันเรียนรู้ว่าคลิปประเภทไหนที่ทำให้คุณหยุดดูนานกว่า แล้วเสิร์ฟมันให้คุณในอัตราที่พอดีกับ
+        "variable reward schedule" ที่ทรงพลังที่สุด ซึ่งนักจิตวิทยาพฤติกรรม B.F. Skinner
+        พิสูจน์ว่าเป็นตารางการให้รางวัลที่ทำให้สัตว์เสพติดได้มากที่สุด
+      </p>
+      <p>
+        สิ่งที่ทำให้ short-form video แตกต่างจาก TV รุ่นเก่าคือ feedback loop ที่รวดเร็วและ personalized
+        TV ให้คุณดูคอนเทนต์ที่คนอื่นก็ดูเหมือนกัน แต่ TikTok สร้าง "For You Page" ที่ออกแบบมาเฉพาะคุณ
+        โดยประมวลผลจาก interaction ทุกอย่างของคุณ รวมถึง watch time แม้แต่ไม่กี่วินาที
+        ผลคือ signal-to-noise ratio ของ dopamine stimulus สูงกว่า TV มากจนไม่สามารถเปรียบกันได้
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึกกลไก — Prefrontal Cortex และ Adolescent Vulnerability</summary>
+        <div class="details-body">
+          <p>
+            Prefrontal cortex (PFC) คือส่วนของสมองที่ควบคุม impulse, การวางแผน, และ sustained attention
+            แต่มีข้อสำคัญ: PFC พัฒนาเต็มที่ช้ากว่าส่วนอื่นของสมอง — ในมนุษย์ใช้เวลาถึงอายุ 25-26 ปี
+            ในขณะที่ระบบ dopaminergic (ที่ตอบสนองต่อรางวัล) พัฒนาเร็วกว่าในช่วงวัยรุ่น
+          </p>
+          <p>
+            ความไม่สมดุลนี้ทำให้วัยรุ่นมีความเสี่ยงสูงกว่าผู้ใหญ่ต่อ dopamine-driven apps
+            เพราะสมองส่วนที่ต้องการรางวัลทันทีแข็งแรงกว่าส่วนที่ยับยั้งชั่งใจ
+            งานวิจัยหลายชิ้นพบว่า heavy short-form video users ที่เป็นวัยรุ่นมี markers ของ
+            prefrontal executive function ต่ำกว่ากลุ่มควบคุมอย่างมีนัยสำคัญ
+          </p>
+          <p>
+            สำหรับผู้ใหญ่ PFC พัฒนาเต็มที่แล้วแต่ก็ยังได้รับผลกระทบ — แค่ช้ากว่า
+            งาน meta-analysis ที่ครอบคลุมกลุ่มตัวอย่าง ~100,000 คน พบว่า heavy users
+            ทุกช่วงอายุมีคะแนน attention, inhibitory control, และ working memory ต่ำกว่า
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>Rapid Context Switching — เมื่อสมองถูก Train ให้ต้องการ Novelty ทุก 60 วินาที</h3>
+      <p>
+        ลองนึกถึงสมองเหมือน muscle ที่ต้องการ training — ถ้าคุณ train มันด้วยการ lift น้ำหนักเบาซ้ำๆ
+        เร็วๆ เป็นเวลาหลายเดือน มัน adapt ไปทิศทางนั้น และการ lift น้ำหนักหนักกลายเป็นเรื่องยากขึ้น
+        สมองทำแบบเดียวกัน เมื่อถูก train ด้วย rapid context switching ซ้ำๆ
+        (คือการเปลี่ยน "หัวข้อ" ทุก 15-60 วินาที ตามธรรมชาติของคลิปสั้น)
+        มัน adapt ไปคาดหวัง novelty ที่ความถี่นั้น
+      </p>
+      <p>
+        ผลคือเมื่อคุณพยายามนั่ง focus กับงานชิ้นเดียวที่ใช้เวลา 45 นาที
+        สมองจะเริ่ม "เรียกร้อง" novelty ตามช่วงเวลาที่มัน conditioned ไว้
+        นี่คือเหตุผลที่คนที่ดูคลิปสั้นมากมักรู้สึกว่า "นั่งอ่านหนังสือ 20 นาทีไม่ได้"
+        ไม่ใช่เพราะหนังสือน่าเบื่อ แต่เพราะสมองถูก train มาให้ต้องการการเปลี่ยนที่เร็วกว่า
+      </p>
+      <p>
+        งานวิจัยโดย Asif และ Kazi (2024) พบ negative correlation ที่ชัดเจนระหว่าง
+        ชั่วโมงการดู TikTok ต่อวันกับ academic performance โดยนักศึกษาที่ดูมากกว่า 3 ชั่วโมง/วัน
+        มีคะแนนสอบต่ำกว่ากลุ่มที่ดูน้อยกว่า 1 ชั่วโมง/วัน อย่างมีนัยสำคัญทางสถิติ
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก — "TikTok Brain" คืออะไร และวัดได้อย่างไร?</summary>
+        <div class="details-body">
+          <p>
+            นักประสาทวิทยาใช้คำว่า "TikTok Brain" เพื่ออธิบาย neuropsychological pattern
+            ที่ประกอบด้วย: impulsivity สูง, preference for novelty แรง, low tolerance for delayed gratification,
+            และ difficulty maintaining attention แม้กับสิ่งที่ผู้ใช้บอกว่าชอบ
+          </p>
+          <p>
+            วัดได้ผ่านหลายวิธี: Continuous Performance Test (CPT) วัดความสามารถในการ sustain attention,
+            Stop-Signal Task (SST) วัด inhibitory control, และ N-Back Task วัด working memory
+            งานวิจัยที่ผ่าน peer-review พบว่า heavy short-form video users มีคะแนนต่ำกว่า
+            ในทุกมิติเหล่านี้เมื่อเปรียบกับกลุ่มควบคุม
+          </p>
+          <p>
+            สิ่งที่น่าสนใจคือผลนี้ไม่ได้แค่ correlate กับเวลาที่ใช้บนแอป
+            แต่ correlate กับ frequency ของการ switch — ผู้ที่ดูคลิปยาวบนเวลาเท่ากันมีผลกระทบน้อยกว่า
+            นี่สนับสนุน hypothesis ว่า rapid context switching คือ mechanism ที่แท้จริง ไม่ใช่แค่ screen time
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>ทำไมการ "หยุดดูด้วย Willpower" มักไม่ได้ผล</h3>
+      <p>
+        ความเข้าใจผิดที่พบบ่อยที่สุดเรื่อง brain rot คือการมองว่ามันเป็นปัญหา willpower
+        ถ้าเป็นแบบนั้น การบอกตัวเองให้ "ตั้งใจมากขึ้น" หรือ "มีวินัยกว่านี้" ก็น่าจะแก้ได้
+        แต่ความจริงคือ willpower ทำงานบน prefrontal cortex — ซึ่งเป็นส่วนที่อ่อนแอลงพอดีจาก brain rot
+        จึงเหมือนการบอกคนที่ขาหักให้ "เดินให้แข็งแรงขึ้น" โดยไม่ได้รักษาขาก่อน
+      </p>
+      <p>
+        วิธีที่ได้ผลกว่าคือการเปลี่ยน environment และ retrain สมองอย่างค่อยเป็นค่อยไป
+        ซึ่งเราจะกล่าวถึงในส่วน Takeaways — แนวทางเหล่านี้ไม่ต้องอาศัย willpower มาก
+        แต่อาศัย structural change ที่ทำให้ brain rot เป็นไปได้ยากขึ้นโดย default
+      </p>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> สมองถูก train โดย algorithm ให้ต้องการ novelty ทุก 60 วินาที — การแก้ต้องเป็น retraining ไม่ใช่ willpower</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 5: CARRYOVER EFFECT
+════════════════════════════════════════════ -->
+<section class="page" id="p5" data-title="Carryover Effect">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — ผลกระทบต่อการทำงานและเรียน</p>
+      <h2>Carryover Effect: ทำไมดูระหว่างพักแล้วยิ่งทำงานได้แย่ลง</h2>
+      <p class="section-lead">
+        สัญชาตญาณบอกว่าการพักด้วยคลิปสั้นน่าจะช่วยให้สมองฟื้นตัว
+        แต่งานวิจัยชี้ตรงกันข้าม: กลุ่มที่ดูคลิปสั้นระหว่างพักมีประสิทธิภาพในงานถัดไปต่ำกว่า
+        กลุ่มที่เดินออกกำลังกาย หรือแม้แต่กลุ่มที่นั่งเฉยๆ อย่างมีนัยสำคัญ
+        สาเหตุคือ cognitive mode ที่คลิปสั้นบังคับให้สมองอยู่ใน mode นั้น
+        ไม่ใช่ mode ของ recovery — มันเป็น mode ของ passive consumption
+        ที่ขัดขวาง restoration ที่แท้จริง
+      </p>
+    </div>
+
+    <div>
+      <h3>งานวิจัยเรื่อง Carryover Effect — หลักฐานที่ชัดเจน</h3>
+      <p>
+        มีการทดลองที่น่าสนใจหลายชุดที่ศึกษา carryover effect จากคลิปสั้นโดยเฉพาะ
+        รูปแบบทั่วไปของการทดลองคือ: แบ่งกลุ่มตัวอย่างออกเป็น 3-4 กลุ่ม ทุกกลุ่มทำงานชิ้นเดียวกัน
+        จากนั้นพักแตกต่างกัน (ดูคลิปสั้น / เดิน / นั่งเฉยๆ / ไม่มีพัก) แล้วประเมินผลงานชิ้นถัดไป
+        ผลที่ได้สม่ำเสมอในหลายการทดลองคือ กลุ่มที่ดูคลิปสั้นระหว่างพักมี performance ต่ำกว่ากลุ่มอื่น
+        ทั้งในด้าน accuracy, response time, และ working memory
+      </p>
+      <p>
+        สิ่งที่น่าสนใจกว่านั้นคือ subjective experience ของผู้เข้าร่วม:
+        กลุ่มที่ดูคลิปสั้นรายงานว่า "รู้สึกพักแล้ว" แต่ผลงานจริงต่ำกว่า
+        นี่คือ disconnect ที่สำคัญ — คลิปสั้นให้ความรู้สึก pleasant และ engaging
+        ที่สมองตีความว่า "พักผ่อน" แต่กลไกภายในไม่ได้อยู่ใน restoration mode เลย
+        สมองยังคง process สิ่งเร้าใหม่อย่างต่อเนื่องผ่าน visual cortex, auditory cortex,
+        และ attention network ทั้งหมด
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก — ทำไม "ดูเพลิน" ถึงไม่เท่ากับ "พักผ่อน" ทางประสาทวิทยา</summary>
+        <div class="details-body">
+          <p>
+            เมื่อสมองพักจริงๆ สิ่งที่เกิดขึ้นคือ Default Mode Network (DMN) เปิดทำงาน
+            DMN คือ network ที่ active ตอนที่เราไม่ได้ focus กับงานที่ต้องใช้ความคิดมาก
+            มันทำหน้าที่สำคัญคือ consolidate memories, process ประสบการณ์, และ reset attention resources
+          </p>
+          <p>
+            การดูคลิปสั้น suppress DMN ออกจากทำงาน เพราะสมองต้องอยู่ใน externally-directed attention mode
+            ตลอดเวลา ผลคือกระบวนการ restoration ที่ควรเกิดขึ้นระหว่างพักถูกขัดจังหวะ
+            และคุณกลับไปทำงานด้วยสมองที่ยังไม่ได้ restore attention resources
+          </p>
+          <p>
+            ตรงกันข้าม การเดินหรือมองออกไปนอกหน้าต่างอนุญาตให้ DMN ทำงานได้
+            นี่คือเหตุผลที่หลายคนรายงานว่า idea ดีๆ มักเกิดตอนเดินหรืออาบน้ำ
+            ไม่ใช่ตอนนั่งดูจอ — DMN ที่ทำงานได้อย่างเต็มที่คือ incubation engine ของ creativity
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>ผลกระทบต่อการเรียนรู้ระยะยาว — Attention Residue</h3>
+      <p>
+        นักจิตวิทยา Sophie Leroy บัญญัติคำว่า "attention residue" เพื่ออธิบายปรากฏการณ์ที่
+        เมื่อคุณสลับจากกิจกรรมหนึ่งไปอีกกิจกรรมหนึ่ง ส่วนหนึ่งของ attention ยังคงติดอยู่กับกิจกรรมก่อนหน้า
+        นี่คือสาเหตุว่าทำไมหลังจาก multitasking แม้แต่ครั้งเดียว การ focus กับงานใหม่จึงยากขึ้น
+      </p>
+      <p>
+        คลิปสั้นสร้าง attention residue ที่รุนแรงกว่าการ multitask ธรรมดา เพราะในเวลาสั้นๆ
+        สมองสัมผัสกับ micro-topics จำนวนมาก — แต่ละคลิปคือ context ใหม่ที่สมองต้องประมวลผล
+        เมื่อหยุดดูและพยายาม focus กับงาน ก็มี residue จาก context เหล่านั้นค้างอยู่ในระบบ
+        ตัวเลขที่มักถูกอ้างจากงานวิจัยของ Gloria Mark คือ 23 นาที —
+        เวลาเฉลี่ยที่สมองต้องใช้กลับมา deep focus ได้เต็มที่หลังถูก interrupt เพียงครั้งเดียว
+      </p>
+      <p>
+        หากคุณดูคลิปสั้น 10 คลิประหว่างพักกลางวัน และแต่ละคลิปคือ "interrupt" ในแง่ของ attention
+        การคำนวณง่ายๆ ชี้ว่าบ่ายทั้งบ่ายอาจผ่านไปโดยที่สมองไม่เคยได้กลับมา deep focus เลย
+        แม้จะรู้สึกว่า "ทำงานอยู่" ตลอดก็ตาม
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก — วิธีวัด Cognitive Performance ที่นักวิจัยใช้</summary>
+        <div class="details-body">
+          <p>
+            งานวิจัยในด้านนี้ส่วนใหญ่ใช้ชุดการทดสอบมาตรฐาน:
+          </p>
+          <ul>
+            <li><strong>Stroop Task:</strong> วัด inhibitory control — ความสามารถในการไม่ตอบสนองต่อ automatic response</li>
+            <li><strong>Operation Span Task:</strong> วัด working memory capacity ในขณะที่ต้องทำงานอื่นพร้อมกัน</li>
+            <li><strong>Sustained Attention to Response Task (SART):</strong> วัดความสามารถในการ maintain attention เป็นเวลานาน</li>
+          </ul>
+          <p>
+            ทุก task เหล่านี้สอดคล้องกับ real-world skills ที่ใช้ในการเรียนและทำงาน:
+            การอ่านหนังสือ การเขียน รายงาน การ debug code การฟังบรรยาย
+            การที่ heavy users ทำได้แย่กว่าในทุก task จึงเชื่อมได้โดยตรงกับผลการเรียนและงานที่ตกต่ำ
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>สัญญาณที่บอกว่า Carryover Effect กำลังส่งผล</h3>
+      <p>
+        รู้จัก pattern นี้เพื่อ catch ตัวเองก่อนที่ productivity จะหายไปทั้งวัน:
+        รู้สึกว่าอ่านประโยคเดิมซ้ำหลายรอบแต่ไม่เข้าใจ, หยิบโทรศัพท์โดยไม่รู้ตัวทุก 5-10 นาที,
+        เริ่มทำงานหลายอย่างพร้อมกันโดยไม่ตั้งใจ, หรือรู้สึก "ง่วงสมอง" แม้นอนหลับพอ
+        สัญญาณเหล่านี้บ่งบอกว่า attention resources ยังไม่ restore กลับมาเต็มที่
+        และการพยายาม push ต่อไปโดยไม่แก้ต้นเหตุจะยิ่งทำให้แย่ลง
+      </p>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> ดูคลิปสั้นระหว่างพัก = สมองไม่ได้พักจริง — cognitive debt ตกค้างรบกวนงานถัดไปนานถึง 23 นาทีต่อ interrupt</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 6: DIGITAL EYE STRAIN & BLUE LIGHT
+════════════════════════════════════════════ -->
+<section class="page" id="p6" data-title="สุขภาพตา">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 4 — สุขภาพตาและแสงสีฟ้า</p>
+      <h2>Digital Eye Strain: ความจริงที่ขัดกับความเชื่อทั่วไปเรื่องแว่นกรองแสง</h2>
+      <p class="section-lead">
+        ความเชื่อที่แพร่หลายมากคือ "แสงสีฟ้าจากจอคอมพิวเตอร์ทำลายสายตา
+        และแว่นกรองแสงสีฟ้าช่วยป้องกันได้"
+        แต่ American Academy of Ophthalmology (AAO) — องค์กรจักษุแพทย์ระดับโลก —
+        ระบุชัดเจนในปี 2023-2024 ว่าไม่มีหลักฐานทางวิทยาศาสตร์เพียงพอที่จะสนับสนุนความเชื่อนี้
+        Cochrane Review ล่าสุด (การวิเคราะห์ระดับสูงสุดของ evidence-based medicine)
+        สรุปว่าแว่นกรองแสงสีฟ้าไม่ช่วยลด eye strain อย่างมีนัยสำคัญ
+        สิ่งที่ได้ผลจริงมีอยู่ และมันไม่ต้องเสียเงินซื้อแว่นราคาแพง
+      </p>
+    </div>
+
+    <div>
+      <h3>กลไกจริงของ Digital Eye Strain — ไม่ใช่ Blue Light</h3>
+      <p>
+        Digital Eye Strain (DES) หรือที่รู้จักในชื่อ Computer Vision Syndrome (CVS)
+        เป็นกลุ่มอาการที่ประกอบด้วย ตาล้า, ตาแห้ง, ปวดศีรษะ, มองพร่า, และปวดคอ
+        อาการเหล่านี้เกิดจากกลไก 3 อย่างที่ต่างจากที่คนทั่วไปเข้าใจ
+      </p>
+      <p>
+        กลไกหลักที่ 1 คือ <strong>reduced blink rate</strong> — ปกติคนกะพริบตาประมาณ 15-20 ครั้ง/นาที
+        แต่เมื่อจ้องจอ อัตรานี้ลดลงเหลือ 5-7 ครั้ง/นาที เพราะสมองอยู่ใน high-attention mode
+        ที่ suppress automatic behaviors อย่างการกะพริบตา
+        ผลคือ tear film ที่ปกคลุมกระจกตาระเหยออกไปโดยไม่ได้รับการเติมเต็ม ทำให้ตาแห้งและระคายเคือง
+      </p>
+      <p>
+        กลไกที่ 2 คือ <strong>ciliary muscle fatigue</strong> — กล้ามเนื้อ ciliary ในตาทำหน้าที่ปรับ lens
+        เพื่อ focus ที่ระยะต่างๆ เมื่อจ้องจอที่ระยะใกล้เดิมๆ เป็นเวลานาน กล้ามเนื้อนี้ contract
+        อยู่ในตำแหน่งเดิมนานเกินไปโดยไม่ได้ relax จึงเกิด fatigue ทำให้มองภาพที่ระยะอื่นไม่ชัด
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก — ทำไม Blue Light จากจอจึงไม่น่าจะทำลายตา</summary>
+        <div class="details-body">
+          <p>
+            ความกังวลเรื่อง blue light มาจากงานวิจัยที่พบว่า blue light ในปริมาณสูงมากทำลาย retinal cells
+            ในห้องทดลอง แต่ปริมาณที่ใช้ในการทดลองนั้นสูงกว่าแสงจากจอคอมพิวเตอร์มากหลายระดับ
+          </p>
+          <p>
+            AAO ชี้ว่า: แสงจากดวงอาทิตย์มี blue light มากกว่าจอคอมพิวเตอร์ถึง 1,000 เท่า
+            ดังนั้นหากแสงจากจอจะทำลายตาได้ มนุษย์ที่ออกไปข้างนอกเป็นปกติก็น่าจะตาบอดนานแล้ว
+          </p>
+          <p>
+            ยิ่งกว่านั้น แว่นกรองแสงสีฟ้าทั่วไปกรองแสงได้เพียง 10-25% ของ blue light
+            เท่านั้น และ Cochrane Review 2023 ที่วิเคราะห์ randomized controlled trials
+            สรุปว่าแว่นกรองแสงสีฟ้าไม่ช่วยลด eye strain อย่างมีนัยสำคัญ
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>20-20-20 Rule — วิธีที่ได้ผลจริงและวิทยาศาสตร์รองรับ</h3>
+      <p>
+        Rule นี้ง่าย: ทุก <strong>20 นาที</strong>, มองจุดที่ห่างออกไป <strong>20 ฟุต</strong> (ประมาณ 6 เมตร), นาน <strong>20 วินาที</strong>
+        วิธีนี้แก้ทั้ง 2 กลไกหลักของ Digital Eye Strain ในคราวเดียว:
+        การหยุดมองจอบังคับให้ blink rate กลับมาเป็นปกติ และการมองระยะไกลช่วยให้ ciliary muscle relax
+        จาก contraction ที่ยาวนาน
+      </p>
+      <p>
+        จุดสำคัญอีกอย่างคือ <strong>ระยะห่างจอ</strong> — มาตรฐานคือ arm's length หรือประมาณ 50-70 cm
+        ยิ่งจอใกล้มากเท่าไร ciliary muscle ต้อง contract แรงมากขึ้น และ blink rate ลดลงมากขึ้น
+        ในเด็กและวัยรุ่นที่มักนั่งชิดจอ ปัญหานี้รุนแรงกว่าผู้ใหญ่ที่ทำงานกับ monitor ใหญ่
+      </p>
+      <p>
+        สำหรับ <strong>ความสว่างและ contrast</strong>: ความแตกต่างของความสว่างระหว่างจอและสภาพแวดล้อม
+        บังคับ pupil ให้ปรับตัวบ่อยกว่า ทำให้ตาล้าเร็วกว่า วิธีแก้คือ auto-brightness
+        หรือปรับความสว่างจอให้ใกล้เคียงกับแสงในห้อง ไม่ใช่ใช้แว่นกรองแสง
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก — งานวิจัยอื่นที่สนับสนุน 20-20-20 Rule</summary>
+        <div class="details-body">
+          <p>
+            PMC study ปี 2025 เรื่อง "Long-Term Use of Blue Light-Filtering Glasses and Symptom Improvement
+            in Digital Eye Strain" แม้จะพบว่าผู้ใช้แว่นกรองแสงรายงาน symptom ลดลง
+            แต่นักวิจัยระบุว่าอาจเป็น placebo effect และการที่ผู้ใช้แว่นมักปฏิบัติ
+            eye care habits อื่นๆ ด้วย (เช่น พักสายตาบ่อยกว่า)
+          </p>
+          <p>
+            Intervention ที่มีหลักฐานชัดเจนที่สุดจากการ review คือ:
+            <ul>
+              <li>20-20-20 rule — ลด ciliary fatigue ได้ตรงกลไก</li>
+              <li>Artificial tears / lubricating eye drops — แก้ dry eye จาก reduced blink rate</li>
+              <li>Room lighting optimization — ลด pupil dilation fluctuation</li>
+              <li>Ergonomic monitor positioning — ลด neck/shoulder strain ที่มาพร้อมกัน</li>
+            </ul>
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>คำแนะนำที่ถูกต้องสำหรับเด็กและผู้ปกครอง</h3>
+      <p>
+        สำหรับเด็กอายุต่ำกว่า 18 ปี ความเสี่ยงหลักไม่ใช่ blue light damage ต่อ retina
+        แต่คือ myopia progression (สายตาสั้นที่เพิ่มขึ้นเร็ว) ซึ่งเกิดจากการมองระยะใกล้นาน
+        งานวิจัยจาก Singapore และ Taiwan ชี้ว่า outdoor time ของเด็กมีความสัมพันธ์ inverse
+        กับ myopia progression อย่างชัดเจน — การออกไปข้างนอกในแสงธรรมชาติ
+        ช่วยลดความเสี่ยง myopia ได้จริงและมีหลักฐานรองรับ
+      </p>
+      <p>
+        สรุปคำแนะนำที่ evidence-based: พักสายตาทุก 20 นาที (20-20-20 rule),
+        ออกข้างนอกอย่างน้อย 1-2 ชั่วโมง/วัน, รักษาระยะห่างจากจอ, และ adjust ความสว่างจอ
+        ไม่จำเป็นต้องซื้อแว่นกรองแสงราคาแพงเพื่อผลลัพธ์เหล่านี้
+      </p>
+    </div>
+
+    <div class="callout danger">
+      <strong>ข้อควรระวัง:</strong> ถ้าตาแดง เจ็บตา มองพร่าต่อเนื่อง หรืออาการไม่ดีขึ้นแม้พักสายตาแล้ว ควรพบจักษุแพทย์ อาการเหล่านี้อาจมาจากสาเหตุอื่นที่ต้องได้รับการตรวจโดยผู้เชี่ยวชาญ
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> ปัญหาตาจากจอมาจากกล้ามเนื้อตาล้าและตาแห้ง ไม่ใช่ blue light — 20-20-20 rule ฟรีและได้ผลกว่าแว่นกรองแสง</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 7: CONTENT CREATOR STRATEGY
+════════════════════════════════════════════ -->
+<section class="page" id="p7" data-title="Content Creator">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 5 — กลยุทธ์ผู้สร้างคอนเทนต์</p>
+      <h2>Short vs Long: กลยุทธ์ที่ผู้สร้างคอนเทนต์ต้องเข้าใจก่อน Burnout</h2>
+      <p class="section-lead">
+        ผู้สร้างคอนเทนต์มักถูก pressure ให้เลือกระหว่างคลิปสั้นหรือคลิปยาว
+        แต่ framework ที่ถูกต้องคือการมองทั้งสองแบบเป็น "คนละ function" ในกลยุทธ์เดียว
+        ไม่ใช่ตัวเลือกที่ต้องเลือกอย่างใดอย่างหนึ่ง
+        เข้าใจสมการนี้แล้ว การสร้างคอนเทนต์จะมีทิศทางที่ชัดเจน
+        และ Burnout จากการไม่รู้ว่า "ทำไปเพื่ออะไร" จะลดลงอย่างมาก
+      </p>
+    </div>
+
+    <div>
+      <h3>Short Clips = Discovery Engine — หน้าที่ของคลิปสั้น</h3>
+      <p>
+        คลิปสั้น (TikTok, Reels, YouTube Shorts) มีหน้าที่หลักเดียว: <strong>ทำให้คนที่ยังไม่รู้จักคุณมาเจอคุณ</strong>
+        Algorithm ของแพลตฟอร์มเหล่านี้ออกแบบมาเพื่อ distribution ให้กับ content ที่คนที่ยังไม่ follow
+        มีโอกาสเห็น — นี่คือสิ่งที่ long-form content ทำได้ยากกว่ามากในระยะสั้น
+      </p>
+      <p>
+        จุดสำคัญที่ creator หลายคนเข้าใจผิดคือการ optimize คลิปสั้นเพื่อ <strong>watch time</strong> ในตัวเอง
+        แทนที่จะ optimize เพื่อ <strong>click-through rate ไปยัง long-form content</strong>
+        คลิปสั้นที่ดีไม่ใช่คลิปที่คนดูจบแล้วเลื่อนไปคลิปถัดไป
+        แต่คือคลิปที่ทำให้คนรู้สึก "อยากรู้มากกว่านี้" แล้ว follow หรือไปดูคลิปยาวต่อ
+      </p>
+      <p>
+        ตัวอย่างที่ชัดเจน: creator ด้าน finance ที่ประสบความสำเร็จหลายคน
+        ใช้คลิปสั้นเพื่อ drop hook หรือ counterintuitive fact แล้วบอกว่า "อธิบายทั้งหมดใน video ยาว"
+        คลิปสั้นไม่ได้ตอบคำถาม — มันสร้างคำถามที่ viewer ต้องการคำตอบ
+        และนั่นคือ mechanism ที่ดึงคน navigate ไปหา long-form content
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก — Algorithm ของแพลตฟอร์มต่างๆ และวิธีที่คลิปสั้นถูกกระจาย</summary>
+        <div class="details-body">
+          <p>
+            TikTok ใช้ "For You Page" algorithm ที่เรียนรู้จาก interaction ทุกอย่าง:
+            watch completion rate, replay rate, likes, comments, shares, และ follows
+            คลิปใหม่จะถูก expose ไปยัง cohort เล็กๆ ก่อน ถ้า engagement metrics ดี
+            จะถูก push ไปยัง cohort ใหญ่ขึ้น — นี่คือเหตุผลที่ creator ใหม่
+            สามารถ viral ได้โดยไม่ต้องมี follower มาก่อน
+          </p>
+          <p>
+            YouTube Shorts มี mechanics คล้ายกันแต่มีข้อได้เปรียบพิเศษ:
+            algorithm เชื่อมต่อกับ main YouTube feed ทำให้คนที่ discover ผ่าน Shorts
+            มีโอกาสสูงกว่าที่จะกดเข้าไปดู long-form video ในช่อง YouTube เดียวกัน
+            ซึ่งเป็นข้อได้เปรียบที่ TikTok หรือ Instagram Reels ไม่มี
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>Long-Form = Value Engine — หัวใจของ Sustainable Creator Business</h3>
+      <p>
+        คลิปยาว (YouTube 10+ นาที, Podcast, Blog, Newsletter) มีหน้าที่ที่แตกต่างออกไปอย่างสิ้นเชิง:
+        <strong>สร้าง trust, authority, และ true fans</strong> ที่จะ support creator ในระยะยาว
+        Kevin Kelly เคยเขียนใน essay ที่โด่งดังว่า creator ต้องการแค่ "1,000 True Fans" —
+        คนที่ลงทุนใน content ของคุณจริงๆ ไม่ว่าจะซื้อสินค้า, สมัครสมาชิก, หรือไปดูงาน
+        True fans เหล่านี้ไม่ได้มาจากคลิปสั้น แต่มาจากการที่คุณให้คุณค่าที่ลึกพอ
+        จนเขาตัดสินใจว่า "คนนี้คุ้มค่าที่จะ follow อย่างจริงจัง"
+      </p>
+      <p>
+        Long-form content ยังมีข้อได้เปรียบเชิงธุรกิจที่สำคัญ: มันมีอายุที่ยาวกว่า (evergreen content)
+        คลิปสั้นมักหมด relevance ภายใน 24-72 ชั่วโมงตาม algorithm lifecycle
+        แต่ tutorial ที่ดี, analysis เชิงลึก, หรือ documentary-style content
+        สามารถ drive views และ revenue ได้นานเป็นปี ๆ จาก search traffic
+      </p>
+
+      <details class="disclosure">
+        <summary>เจาะลึก — ทำไม YouTube Monetization ถึงยังให้ความสำคัญกับ Long-Form</summary>
+        <div class="details-body">
+          <p>
+            ตัวเลขที่ creator มักไม่รู้: YouTube Shorts RPM (Revenue Per Mille หรือรายได้ต่อ 1,000 views)
+            ต่ำกว่า long-form video มากถึง 5-10 เท่า เพราะโฆษณา mid-roll ที่ให้ revenue สูงสุด
+            ไม่สามารถใส่ใน short-form content ได้
+          </p>
+          <p>
+            ดังนั้น creator ที่ใช้เวลาทั้งหมดสร้างคลิปสั้น แม้จะมี views สูง
+            มักทำเงินต่อชั่วโมงทำงานได้น้อยกว่า creator ที่ balance ทั้งสองรูปแบบ
+            กลยุทธ์ที่ sustainable คือ: ใช้คลิปสั้น repurpose จาก long-form content
+            ไม่ใช่สร้างคลิปสั้นแบบ standalone ทุกครั้ง — ประหยัดเวลาและ leverage content ที่มีอยู่แล้ว
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div>
+      <h3>Framework ในทางปฏิบัติ: Content Funnel สำหรับ Creator</h3>
+      <p>
+        Framework ที่ใช้ได้จริงสำหรับ creator ทุกระดับ:
+      </p>
+      <ol class="steps">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>สร้าง Long-form ก่อน</strong>
+            <p>กำหนด thesis หรือ insight หลักที่มีคุณค่าจริงๆ แล้ว expand เป็น video ยาว, podcast, หรือ article — นี่คือ core asset</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Repurpose เป็น Short Clips</strong>
+            <p>ตัด hook ที่แรงที่สุด, moment ที่ counterintuitive ที่สุด หรือ stat ที่น่าตกใจที่สุด แล้วทำเป็นคลิปสั้น 15-60 วินาที</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>ใส่ Call-to-Action ที่ชัดเจน</strong>
+            <p>คลิปสั้นทุกตัวต้องมี CTA ที่ point ไปยัง long-form content — "ดูอธิบายเต็มๆ ที่ link ใน bio" หรือ "video เต็มอยู่ในช่อง"</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>วัด Conversion ไม่ใช่ Vanity Metrics</strong>
+            <p>วัดว่ากี่คนจากคลิปสั้น navigate ไปยัง long-form, subscribe, หรือซื้อ — ไม่ใช่แค่ views หรือ likes ของคลิปสั้น</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="takeaway"><b>★ สาระสำคัญ:</b> Short clips = discovery traffic; Long-form = value และ revenue — ใช้คลิปสั้น repurpose จาก long-form เพื่อ leverage ที่สูงสุดโดยใช้เวลาน้อยที่สุด</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 8: KEY TAKEAWAYS & REFERENCES
+════════════════════════════════════════════ -->
+<section class="page" id="p8" data-title="Key Takeaways">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">สรุป — Key Takeaways &amp; References</p>
+      <h2>สิ่งที่ต้องจำ: 7 ข้อจาก Brain Rot ถึง Content Creator Strategy</h2>
+      <p class="section-lead">
+        จาก neurochemistry ถึง eye health ถึง content economics —
+        ทั้งหมดเชื่อมกันด้วยธีมเดียว: ความเข้าใจที่ถูกต้องเกี่ยวกับกลไก
+        นำไปสู่วิธีแก้ที่ได้ผล ส่วนความเชื่อที่ผิดนำไปสู่ solution ที่เสียทั้งเงินและเวลา
+      </p>
+    </div>
+
+    <div>
+      <ol style="padding-left:20px;display:flex;flex-direction:column;gap:16px">
+        <li style="line-height:1.8;color:var(--ink-dim)">
+          <strong style="color:var(--ink)">Brain rot คือ neurochemical conditioning ไม่ใช่ willpower failure</strong><br>
+          สมองถูก condition ด้วย dopamine loop ซ้ำๆ จนต้องการ novelty ที่เปลี่ยนเร็ว วิธีแก้คือ retraining environment ไม่ใช่การบังคับตัวเอง
+        </li>
+        <li style="line-height:1.8;color:var(--ink-dim)">
+          <strong style="color:var(--ink)">Algorithm ออกแบบให้ทรงพลังกว่า slot machine</strong><br>
+          Variable reward schedule + personalized content = dopamine stimulus ที่สมองมนุษย์ไม่เคยเจอมาก่อนในประวัติศาสตร์วิวัฒนาการ
+        </li>
+        <li style="line-height:1.8;color:var(--ink-dim)">
+          <strong style="color:var(--ink)">Carryover effect ทำให้ดูระหว่างพักแล้วยิ่งทำงานได้แย่ลง</strong><br>
+          สมองต้องการ cognitive rest ผ่าน Default Mode Network ไม่ใช่ passive stimulation — เดินหรือมองออกไปข้างนอกดีกว่าดูคลิปสั้น 23x
+        </li>
+        <li style="line-height:1.8;color:var(--ink-dim)">
+          <strong style="color:var(--ink)">ปัญหาตาจากจอมาจากกล้ามเนื้อตาล้าและตาแห้ง ไม่ใช่ blue light</strong><br>
+          American Academy of Ophthalmology ยืนยันว่าไม่มีหลักฐานว่าแสงจากจอทำลายตา — แว่นกรองแสงไม่ได้รับการรองรับจาก Cochrane Review
+        </li>
+        <li style="line-height:1.8;color:var(--ink-dim)">
+          <strong style="color:var(--ink)">20-20-20 rule ฟรีและได้ผลจริง</strong><br>
+          ทุก 20 นาที มองจุดห่าง 20 ฟุต นาน 20 วินาที — แก้ ciliary fatigue และ dry eye ได้ตรงกลไก
+        </li>
+        <li style="line-height:1.8;color:var(--ink-dim)">
+          <strong style="color:var(--ink)">Short clips = discovery; Long-form = value และ revenue</strong><br>
+          Creator ที่ประสบความสำเร็จใช้ทั้งสองร่วมกัน ไม่ใช่เลือกอย่างใดอย่างหนึ่ง — repurpose long-form เป็น short clips เพื่อ leverage สูงสุด
+        </li>
+        <li style="line-height:1.8;color:var(--ink-dim)">
+          <strong style="color:var(--ink)">แก้ brain rot ด้วย gradual retraining ไม่ใช่ cold turkey</strong><br>
+          เพิ่มระยะเวลา focus ทีละน้อย เปลี่ยน environment เพื่อลด friction ของ brain rot และเพิ่ม friction ของการหยิบโทรศัพท์
+        </li>
+      </ol>
+    </div>
+
+    <div>
+      <h3>แนวทางเริ่มต้น — 3 สัปดาห์แรก</h3>
+      <div class="bento cols-3">
+        <div class="card warning">
+          <p class="label">สัปดาห์ที่ 1</p>
+          <h3>Audit &amp; Environment</h3>
+          <p>Track เวลาที่ใช้กับคลิปสั้นจริงๆ (Screen Time) แล้วเอาแอปออกจาก Home Screen — ไม่ต้องลบ แค่เพิ่ม friction</p>
+        </div>
+        <div class="card">
+          <p class="label">สัปดาห์ที่ 2</p>
+          <h3>No-Phone Breaks</h3>
+          <p>ระหว่างพักงานทุกครั้ง ให้เดินหรือมองออกไปข้างนอก 10 นาที ไม่ใช่ดูโทรศัพท์ สังเกตว่า afternoon slump ดีขึ้นหรือไม่</p>
+        </div>
+        <div class="card success">
+          <p class="label">สัปดาห์ที่ 3</p>
+          <h3>Deep Work Blocks</h3>
+          <p>เพิ่ม focus block ต่อเนื่อง: เริ่มที่ 25 นาที (Pomodoro) แล้วค่อยๆ เพิ่มเป็น 45 นาทีและ 90 นาทีเมื่อสมองพร้อม</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>References</h3>
+      <ol style="font-size:14px;color:var(--ink-dim);display:flex;flex-direction:column;gap:8px;padding-left:20px">
+        <li>Short-form Video Use and Sustained Attention: A Narrative Review (2019–2025) — <a href="https://www.espjournals.org/IJCESA/ijcesa-v2i4p108" target="_blank" rel="noopener">International Journal of Cognitive Enhancement and Self-Advancement, Vol 2, Issue 4</a></li>
+        <li>American Academy of Ophthalmology — <a href="https://www.aao.org/eye-health/tips-prevention/are-computer-glasses-worth-it" target="_blank" rel="noopener">Are Blue Light-Blocking Glasses Worth It?</a></li>
+        <li>Cochrane Review 2023 — Blue light filtering spectacle lenses for visual performance, sleep, and macular health in adults (สรุปใน <a href="https://www.macularsociety.org/about/media/news/2023/september/is-blue-light-damaging-and-are-filters-worth-it/" target="_blank" rel="noopener">Macular Society</a>)</li>
+        <li>PMC 2025 — <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12661913/" target="_blank" rel="noopener">Long-Term Use of Blue Light-Filtering Glasses and Symptom Improvement in Digital Eye Strain</a></li>
+        <li>Revere Health — <a href="https://reverehealth.com/live-better/short-form-videos-brain-rot/" target="_blank" rel="noopener">Brain Rot: How Short-Form Videos Are Changing Our Brains and Attention Spans</a></li>
+        <li>YouTube (source video) — <a href="https://youtu.be/NoAfefTpWuQ" target="_blank" rel="noopener">คลิปสั้น ส่งผลกับสมองนักเรียน (และผู้ใหญ่) อย่างไร?</a></li>
+        <li>Gloria Mark — Attention spans research: "23-minute recovery from interruption" (UC Irvine Department of Informatics)</li>
+      </ol>
+    </div>
+
+    <div>
+      <h3>Glossary</h3>
+      <dl style="font-size:13px;color:var(--ink-dim);line-height:1.8">
+        <dt style="font-weight:600;color:var(--ink)">Brain Rot</dt>
+        <dd style="margin:0 0 8px 12px">ปรากฏการณ์ที่สมองถูก condition ด้วย rapid stimulation ซ้ำๆ จนสูญเสีย sustained attention — เป็น neurochemical conditioning ไม่ใช่นิสัยแย่</dd>
+        <dt style="font-weight:600;color:var(--ink)">Dopamine Reward Loop</dt>
+        <dd style="margin:0 0 8px 12px">วงจรที่สมองปล่อย dopamine เพื่อ anticipate รางวัลใหม่ ทำให้เกิด reinforcement behavior — algorithm ใช้ variable reward schedule เพื่อ maximize วงจรนี้</dd>
+        <dt style="font-weight:600;color:var(--ink)">Carryover Effect</dt>
+        <dd style="margin:0 0 8px 12px">ผลตกค้างของ cognitive mode จากกิจกรรมหนึ่งที่รบกวนกิจกรรมถัดไป — คลิปสั้นระหว่างพักทำให้งานถัดไปมีประสิทธิภาพต่ำลงเป็นชั่วโมง</dd>
+        <dt style="font-weight:600;color:var(--ink)">Digital Eye Strain (DES)</dt>
+        <dd style="margin:0 0 8px 12px">กลุ่มอาการตาล้า, ตาแห้ง, ปวดศีรษะ ที่เกิดจาก reduced blinking และ ciliary muscle fatigue — ไม่ใช่ blue light damage</dd>
+        <dt style="font-weight:600;color:var(--ink)">20-20-20 Rule</dt>
+        <dd style="margin:0 0 8px 12px">ทุก 20 นาที มองจุดห่าง 20 ฟุต นาน 20 วินาที — วิธีที่ ophthalmologist แนะนำและมีหลักฐานว่าช่วยลด Digital Eye Strain ได้จริง</dd>
+        <dt style="font-weight:600;color:var(--ink)">Default Mode Network (DMN)</dt>
+        <dd style="margin:0 0 8px 12px">network ในสมองที่ active ตอนพักจริงๆ ทำหน้าที่ consolidate memory และ reset attention — การดูคลิปสั้น suppress DMN และขัดขวาง restoration</dd>
+      </dl>
+    </div>
+
+    <div class="takeaway">
+      <b>★ ถ้าจำได้อย่างเดียว:</b> Brain rot แก้ได้ด้วย retraining ไม่ใช่ willpower; ตาล้าแก้ด้วย 20-20-20 ไม่ใช่แว่นกรองแสง; และ creator ที่ยั่งยืนใช้ทั้ง short และ long-form ในกลยุทธ์เดียว
+    </div>
+  </div>
+</section>
+
+</div><!-- /scroll-root -->
+
+<script>
+// ── Hash-based page nav ──
+const pageLinks = document.getElementById('page-links');
+const pages = Array.from(document.querySelectorAll('.page'));
+
+pages.forEach((page) => {
+  const a = document.createElement('a');
+  a.href = '#' + page.id;
+  a.textContent = page.dataset.title || page.id;
+  pageLinks.appendChild(a);
+});
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('#page-links a').forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`#page-links a[href="#${e.target.id}"]`);
+      if (active) {
+        active.classList.add('active');
+        active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+      }
+    }
+  });
+}, { root: null, threshold: 0.3 });
+pages.forEach(p => obs.observe(p));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); jumpSection(1); }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); jumpSection(-1); }
+});
+function jumpSection(dir) {
+  const active = document.querySelector('#page-links a.active');
+  const links = Array.from(document.querySelectorAll('#page-links a'));
+  const idx = links.indexOf(active);
+  const next = links[idx + dir];
+  if (next) next.click();
+}
+
+// ── Theme toggle ──
+const themeBtn = document.getElementById('theme-btn');
+const root = document.documentElement;
+const saved = localStorage.getItem('brochure-theme');
+if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
+themeBtn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  localStorage.setItem('brochure-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
+});
+
+// ── Accordion ──
+function toggleAccordion(btn) {
+  btn.closest('.accordion-item').classList.toggle('open');
+}
+</script>
+</body>
+</html>
