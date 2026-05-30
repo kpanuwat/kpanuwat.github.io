@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESP32 AI Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1e293b; --ink-dim: #475569; --muted: #94a3b8;
+  --paper: #ffffff; --soft: #f1f5f9; --soft-2: #e2e8f0;
+  --accent: #3b82f6; --accent-deep: #1e3a8a; --accent-wash: #dbeafe;
+  --gold: #d4af37; --danger: #dc2626; --danger-wash: #fee2e2; --danger-ink: #991b1b;
+  --success: #16a34a; --success-wash: #dcfce7; --success-ink: #14532d;
+  --warning: #f59e0b; --warning-wash: #fef3c7; --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06); --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px; --radius-sm: 8px; --nav-h: 52px; --page-max: 960px; --sidebar-w: 240px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9; --ink-dim: #94a3b8; --muted: #475569;
+  --paper: #0f172a; --soft: #1e293b; --soft-2: #334155;
+  --accent-wash: #1e3a8a; --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4); --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe; --danger-wash: #450a0a; --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac; --warning-wash: #422006; --warning-ink: #fcd34d;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Sarabun',-apple-system,'Segoe UI','Noto Sans Thai',sans-serif;background:var(--paper);color:var(--ink);line-height:1.65;font-size:16px}
+code,kbd,pre,.mono{font-family:'JetBrains Mono','Fira Code','Cascadia Code',ui-monospace,monospace}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+#progress-bar{position:fixed;top:0;left:0;right:0;z-index:200;height:3px;background:var(--accent);transform-origin:left;transform:scaleX(0);transition:transform .1s linear;pointer-events:none}
+#nav{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--nav-h);background:var(--paper);border-bottom:1px solid var(--soft-2);display:flex;align-items:center;gap:0;padding:0 16px;box-shadow:var(--shadow-sm)}
+#sidebar-toggle{background:none;border:none;cursor:pointer;font-size:20px;color:var(--ink);padding:4px 8px;margin-right:8px;border-radius:var(--radius-sm);line-height:1;flex-shrink:0;transition:background .15s}
+#sidebar-toggle:hover{background:var(--soft)}
+#nav .brand{font-weight:700;font-size:15px;color:var(--ink);margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#nav .controls{display:flex;gap:6px;margin-left:8px;flex-shrink:0}
+#nav .controls button{background:none;border:1px solid var(--soft-2);border-radius:var(--radius-sm);padding:5px 10px;font-size:13px;cursor:pointer;color:var(--ink-dim);transition:background .15s}
+#nav .controls button:hover{background:var(--soft)}
+#sidebar{position:fixed;top:var(--nav-h);left:0;bottom:0;width:var(--sidebar-w);background:var(--soft);border-right:1px solid var(--soft-2);overflow-y:auto;overflow-x:hidden;padding:16px 0 40px;z-index:90;transition:transform .25s ease;scrollbar-width:thin;scrollbar-color:var(--soft-2) transparent}
+#sidebar::-webkit-scrollbar{width:4px}#sidebar::-webkit-scrollbar-track{background:transparent}#sidebar::-webkit-scrollbar-thumb{background:var(--soft-2);border-radius:2px}
+#sidebar-overlay{display:none;position:fixed;inset:0;z-index:89;background:rgba(15,23,42,.4)}
+.toc-group{margin-bottom:2px}
+.toc-group-label{display:block;padding:8px 16px;font-size:13px;font-weight:600;color:var(--ink-dim);cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:none}
+.toc-group-label:hover{background:var(--soft-2);color:var(--ink);text-decoration:none}
+.toc-group-label.active{color:var(--accent);font-weight:700}
+.toc-subs{padding:0;list-style:none;margin-bottom:4px}
+.toc-sub{display:block;padding:5px 16px 5px 30px;font-size:12px;color:var(--muted);cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:none}
+.toc-sub:hover{background:var(--soft-2);color:var(--ink);text-decoration:none}
+.toc-sub.active{color:var(--accent);font-weight:600;background:var(--accent-wash);border-right:2px solid var(--accent)}
+#scroll-root{padding-top:var(--nav-h);margin-left:var(--sidebar-w)}
+.page{scroll-margin-top:calc(var(--nav-h) + 16px);padding:64px 24px;display:flex;flex-direction:column;align-items:center}
+.page-inner{width:100%;max-width:var(--page-max);display:flex;flex-direction:column;gap:28px}
+.page.cover{min-height:calc(100vh - var(--nav-h));background:linear-gradient(135deg,#0f172a 0%,var(--accent-deep) 100%);color:white;justify-content:center;align-items:center;text-align:center}
+.page.cover .page-inner{align-items:center}
+.page-foot{display:flex;justify-content:space-between;align-items:center;padding-top:32px;margin-top:8px;border-top:1px solid var(--soft-2)}
+.page-foot .pf-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);background:var(--soft);border:1px solid var(--soft-2);font-size:13px;color:var(--ink-dim);cursor:pointer;transition:background .15s,color .15s;text-decoration:none;white-space:nowrap}
+.page-foot .pf-btn:hover{background:var(--accent-wash);color:var(--accent);text-decoration:none}
+.page-foot .pf-next{margin-left:auto}
+h1{font-size:clamp(28px,5vw,48px);font-weight:800;line-height:1.15}
+h2{font-size:clamp(20px,3vw,28px);font-weight:700;margin-bottom:8px;margin-top:8px}
+h3{font-size:18px;font-weight:700;margin-top:28px;margin-bottom:10px;color:var(--ink)}
+h4{font-size:15px;font-weight:600;color:var(--ink-dim);margin-top:20px;margin-bottom:6px}
+p{color:var(--ink-dim);line-height:1.8;margin-bottom:.85em}p:last-child{margin-bottom:0}
+ul,ol{padding-left:20px;color:var(--ink-dim)}li{margin-bottom:8px;line-height:1.7}
+.cover h1,.cover p,.cover li{color:white}.cover p{color:rgba(255,255,255,.8)}
+.section-lead{font-size:17px;color:var(--ink);line-height:1.8;font-weight:400}
+.section-divider{height:1px;background:var(--soft-2);margin:40px 0}
+.section-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.mark{width:56px;height:4px;background:var(--gold);border-radius:2px;margin-bottom:20px}
+.cover .tag{font-size:18px;color:rgba(255,255,255,.75);margin-top:12px}
+.cheatsheet{display:flex;flex-direction:column;align-items:center;gap:10px;min-height:0}
+.cheatsheet img{max-width:100%;max-height:78vh;width:auto;height:auto;object-fit:contain;border-radius:var(--radius);box-shadow:var(--shadow-md);background:var(--paper)}
+.cheatsheet figcaption{font-size:13px;color:var(--muted);text-align:center}
+.card{background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:18px 20px;border-left:4px solid var(--accent);box-sizing:border-box}
+.card.success{border-left-color:var(--success)}.card.danger{border-left-color:var(--danger)}.card.warning{border-left-color:var(--warning)}.card.gold{border-left-color:var(--gold)}
+.card .label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.card h3{margin:0 0 6px;font-size:17px;color:var(--ink);font-weight:700}
+.card p{margin:0 0 4px;font-size:14px;color:var(--ink-dim);line-height:1.65}
+.card ul{margin:0;padding-left:16px;font-size:14px;color:var(--ink-dim);line-height:1.8}
+.card.compact{padding:10px 14px}.card.compact h3{font-size:14px;margin-bottom:4px}.card.compact p,.card.compact .label{font-size:12px}
+.bento{display:grid;gap:12px;width:100%}.bento.cols-2{grid-template-columns:1fr 1fr}.bento.cols-3{grid-template-columns:1fr 1fr 1fr}.bento.cols-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:640px){.bento.cols-2,.bento.cols-3,.bento.cols-4{grid-template-columns:1fr}}
+.takeaway{border-left:4px solid var(--accent);background:var(--soft);padding:14px 18px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:15px;line-height:1.6}
+.takeaway b{color:var(--accent)}
+.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:16px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--soft);border-radius:var(--radius-sm);padding:14px 16px}
+.steps li .step-num{width:28px;height:28px;flex-shrink:0;background:var(--accent);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.steps li .step-body{flex:1}.steps li .step-body strong{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
+.steps li .step-body p{font-size:13px;margin:0}
+.callout{background:var(--accent-wash);border-radius:var(--radius-sm);padding:16px 20px;font-size:15px;color:var(--accent-deep);border:1px solid var(--accent)}
+.callout.danger{background:var(--danger-wash);border-color:var(--danger);color:var(--danger-ink)}
+.callout.success{background:var(--success-wash);border-color:var(--success);color:var(--success-ink)}
+.callout.warning{background:var(--warning-wash);border-color:var(--warning);color:var(--warning-ink)}
+code{background:var(--soft-2);color:var(--danger-ink);font-size:.875em;padding:2px 6px;border-radius:4px}
+pre{background:#0f172a;color:#e2e8f0;padding:16px 20px;border-radius:var(--radius-sm);overflow-x:auto;font-size:13px;line-height:1.6}
+pre code{background:none;color:inherit;padding:0;border-radius:0}
+kbd{background:var(--soft-2);border:1px solid var(--soft-2);border-bottom-color:var(--muted);border-radius:4px;font-size:.8em;padding:2px 7px;box-shadow:0 1px 0 var(--muted)}
+.copy-wrap{position:relative}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--soft-2);border:none;border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--ink-dim);transition:background .15s}
+.copy-btn:hover{background:var(--accent-wash);color:var(--accent)}.copy-btn.copied{background:var(--success-wash);color:var(--success-ink)}
+.tabs-nav{display:flex;gap:2px;border-bottom:2px solid var(--soft-2);margin-bottom:16px}
+.tabs-nav button{background:none;border:none;padding:8px 14px;cursor:pointer;font-size:14px;color:var(--ink-dim);border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:var(--radius-sm) var(--radius-sm) 0 0;transition:color .15s,border-color .15s}
+.tabs-nav button:hover{color:var(--ink)}.tabs-nav button.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tabs-panel{display:none}.tabs-panel.active{display:block}
+.accordion{border:1px solid var(--soft-2);border-radius:var(--radius-sm);overflow:hidden}
+.accordion-item{border-top:1px solid var(--soft-2)}.accordion-item:first-child{border-top:none}
+.accordion-btn{width:100%;background:none;border:none;padding:14px 16px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--ink);transition:background .15s}
+.accordion-btn:hover{background:var(--soft)}.accordion-btn::after{content:"▾";font-size:12px;color:var(--muted);transition:transform .2s}
+.accordion-item.open .accordion-btn::after{transform:rotate(-180deg)}.accordion-body{display:none;padding:0 16px 16px;color:var(--ink-dim);font-size:14px;line-height:1.7}
+.accordion-item.open .accordion-body{display:block}
+details.disclosure{border-left:3px solid var(--accent);background:var(--soft);border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin:12px 0}
+details.disclosure summary{list-style:none;padding:12px 16px;cursor:pointer;font-size:15px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;user-select:none}
+details.disclosure summary::-webkit-details-marker{display:none}
+details.disclosure summary::after{content:"▾";font-size:12px;color:var(--muted);transition:transform .2s;margin-left:auto}
+details.disclosure[open] summary::after{transform:rotate(-180deg)}
+details.disclosure summary:hover{background:var(--soft-2);border-radius:0 var(--radius-sm) 0 0}
+details.disclosure .details-body{padding:4px 16px 16px;font-size:14px;color:var(--ink-dim);line-height:1.7}
+details.disclosure .details-body p{font-size:14px}details.disclosure .details-body pre{margin:8px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--soft);font-weight:600;color:var(--ink)}th,td{padding:10px 14px;border:1px solid var(--soft-2);text-align:left}
+tr:hover td{background:var(--soft)}.check{color:var(--success)}.cross{color:var(--danger)}
+@media print{#nav,#sidebar,#sidebar-overlay,#progress-bar,.page-foot{display:none}#scroll-root{padding-top:0;margin-left:0}.page{page-break-after:always}.page:last-child{page-break-after:avoid}}
+@media(max-width:768px){#sidebar{transform:translateX(-100%);box-shadow:none}#sidebar.open{transform:translateX(0);box-shadow:var(--shadow-lg)}#sidebar-overlay.open{display:block}#scroll-root{margin-left:0}}
+@media(max-width:480px){.page{padding:32px 16px}h2{font-size:22px}#nav .brand{font-size:13px}}
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<nav id="nav">
+  <button id="sidebar-toggle" title="Toggle navigation" aria-label="Toggle navigation">&#9776;</button>
+  <span class="brand">ESP32 AI Workbench</span>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">&#9788;&#65038;</button>
+    <button onclick="window.print()" title="Print / save as PDF">&#9113;</button>
+  </div>
+</nav>
+<aside id="sidebar"><nav id="toc"></nav></aside>
+<div id="sidebar-overlay"></div>
+<div id="scroll-root">
+
+<!-- p1: Cover -->
+<section class="page cover" id="p1" data-title="หน้าปก">
+  <div class="page-inner" style="align-items:center;text-align:center;gap:16px">
+    <div class="mark"></div>
+    <h1>ESP32 AI Workbench</h1>
+    <p class="tag">ห้องแล็บ hardware อัตโนมัติ — ให้ AI เขียนโค้ด, flash, และทดสอบ ESP32 ได้โดยไม่ต้องแตะสาย USB</p>
+    <div class="bento cols-3" style="margin-top:24px;max-width:560px">
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">เวลาสร้าง Project</p>
+        <h3 style="color:white">~1.5 ชั่วโมง</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">AI Workflow</p>
+        <h3 style="color:white">8 ขั้นตอน</h3>
+      </div>
+      <div class="card compact" style="background:rgba(255,255,255,.08);border:none;color:white">
+        <p class="label" style="color:rgba(255,255,255,.5)">Manual Flash</p>
+        <h3 style="color:white">0 ครั้ง</h3>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- p1b: Cheatsheet -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <div class="page-inner">
+    <figure class="cheatsheet">
+      <img src="assets/esp32-ai-workbench/cheatsheet.png" alt="ESP32 AI Workbench cheat sheet">
+      <figcaption>ภาพสรุปแบบ cheat sheet — บันทึกไว้ดูซ้ำได้</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- p2: Overview -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div class="section-label">Overview</div>
+    <h2>ESP32 AI Workbench คืออะไร</h2>
+    <p class="section-lead">ESP32 AI Workbench คือระบบห้องแล็บ hardware อัตโนมัติที่ใช้ Raspberry Pi Zero 2W เป็นตัวกลางเชื่อมต่อ ESP32 หลายบอร์ดเข้ากับ VM ผ่านเครือข่าย โดยให้ AI agent อย่าง Claude Code เขียนโค้ด, compile, flash firmware, และรัน test case ได้ทั้งหมดโดยอัตโนมัติ — developer แค่เขียน idea เป็น Markdown แล้วปล่อยให้ระบบทำงาน</p>
+    <div class="bento cols-3">
+      <div class="card">
+        <p class="label">Hardware Workbench</p>
+        <h3>Pi Zero 2W + USB Hub</h3>
+        <p>Raspberry Pi Zero 2W เชื่อม ESP32 หลายบอร์ดผ่าน USB Hub แล้ว expose serial ports ข้าม network ไปยัง VM ทำให้ AI ใน container เข้าถึง hardware ได้โดยตรง</p>
+      </div>
+      <div class="card success">
+        <p class="label">AI Workflow</p>
+        <h3>8 ขั้นตอน Automated</h3>
+        <p>ตั้งแต่สร้าง GitHub repo, เขียน FSD spec, generate โค้ด, แก้ compile error, flash firmware, ไปจนถึงรัน test — AI จัดการทุกขั้นตอนในลูปอัตโนมัติ</p>
+      </div>
+      <div class="card gold">
+        <p class="label">Demo Result</p>
+        <h3>iOS Voice Keyboard ใน 1.5 ชม.</h3>
+        <p>โปรเจกต์ตัวอย่าง: iOS app รับเสียง → ส่ง text ผ่าน BLE → ESP32 แปลงเป็น USB HID keyboard → พิมพ์ใน Windows/Linux ได้หลายภาษา สร้างเสร็จใน ~1.5 ชั่วโมง</p>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>Core Insight:</strong> ปัญหาของ embedded development ไม่ใช่แค่ "AI เขียนโค้ดไม่เป็น" แต่คือ AI ไม่มีทาง flash hardware ได้เองถ้าไม่มี physical bridge — workbench นี้แก้ปัญหานั้นโดยตรงด้วย Pi Zero 2W เป็น "remote hands" ที่ AI ใช้สั่งงาน ESP32 ผ่าน network
+    </div>
+    <div class="takeaway"><b>สรุป:</b> workbench = Pi Zero เป็น serial bridge + AI เป็นคนสั่ง + 8-step workflow เป็นโครงสร้าง = embedded dev ที่ไม่ต้องแตะสาย USB เลย</div>
+  </div>
+</section>
+
+<!-- p3a: Deep-Dive Protocol — Components -->
+<section class="page" id="p3a" data-group="protocol" data-group-title="Deep-Dive Protocol" data-title="ส่วนประกอบ">
+  <div class="page-inner">
+    <div class="section-label">Deep-Dive Protocol</div>
+    <h2>ส่วนประกอบทั้ง 8 ของระบบ</h2>
+    <p class="section-lead">ระบบ ESP32 AI Workbench ประกอบด้วย hardware และ software layer ที่ทำงานร่วมกัน แต่ละชิ้นส่วนมีหน้าที่เฉพาะเจาะจง การเข้าใจ role ของแต่ละ component ช่วยให้เห็นว่าระบบทั้งหมด orchestrate กันอย่างไร</p>
+    <div class="bento cols-3">
+      <div class="card">
+        <p class="label">1 — Hardware Bridge</p>
+        <h3>Raspberry Pi Zero 2W</h3>
+        <p>หัวใจของ workbench — รัน Linux, Python, และ USB OTG เพื่อ expose serial ports ของ ESP32 ผ่าน TCP socket ข้าม network ไปยัง VM</p>
+      </div>
+      <div class="card">
+        <p class="label">2 — Multi-Board Connector</p>
+        <h3>USB Hub</h3>
+        <p>ต่อพ่วง ESP32 หลายบอร์ดเข้ากับ Pi Zero 2W พร้อมกัน ทำให้ระบบรองรับการทดสอบหลายบอร์ดในคราวเดียว</p>
+      </div>
+      <div class="card warning">
+        <p class="label">3 — AI Brain</p>
+        <h3>Claude Code Agent</h3>
+        <p>AI agent ที่รันใน terminal ภายใน Docker container — เขียนโค้ด, แก้ error, สั่ง flash, อ่าน serial log, และ iterate โดยอัตโนมัติตาม FSD spec</p>
+      </div>
+      <div class="card">
+        <p class="label">4 — Project Isolation</p>
+        <h3>Docker Container</h3>
+        <p>แยก environment ต่อ project ป้องกัน dependency conflict และ จำกัด blast radius ถ้า AI ทำอะไรผิดพลาด — superclaude shortcut เปิด full env access ใน container</p>
+      </div>
+      <div class="card success">
+        <p class="label">5 — Spec Generator</p>
+        <h3>FSD SOP Skill</h3>
+        <p>Custom AI skill ที่อ่าน idea.md แล้ว auto-generate Functional Specification Document พร้อม MCU selection, protocols, pin assignments, และ test cases</p>
+      </div>
+      <div class="card">
+        <p class="label">6 — Host Environment</p>
+        <h3>VM / Proxmox</h3>
+        <p>รัน Docker containers และ Claude Code — Pi Zero เชื่อมผ่าน Ethernet ทำให้ VM มี "virtual serial ports" ที่ชี้ไปยัง ESP32 จริงๆ บน workbench</p>
+      </div>
+      <div class="card gold">
+        <p class="label">7 — IoT Test Env</p>
+        <h3>Test Simulation Layer</h3>
+        <p>Pi สามารถสร้าง WiFi AP, ปิด MQTT broker, ตัด network กลางอากาศ — จำลอง real-world failure conditions เพื่อทดสอบ error handling ของ firmware</p>
+      </div>
+      <div class="card danger">
+        <p class="label">8 — Hardware Under Test</p>
+        <h3>ESP32 Target Board</h3>
+        <p>บอร์ดที่รับ firmware จาก AI — ต่อผ่าน USB data cable (ไม่ใช่ power-only) ผ่าน USB Hub → Pi Zero → network → VM → Claude Code</p>
+      </div>
+    </div>
+
+    <h3>Architecture Overview</h3>
+    <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;height:auto;background:var(--soft);border-radius:var(--radius-sm);padding:8px">
+      <!-- ESP32 boards -->
+      <rect x="10" y="40" width="90" height="35" rx="6" fill="#3b82f6" opacity=".85"/>
+      <text x="55" y="62" text-anchor="middle" font-size="11" fill="white" font-family="monospace">ESP32 #1</text>
+      <rect x="10" y="85" width="90" height="35" rx="6" fill="#3b82f6" opacity=".85"/>
+      <text x="55" y="107" text-anchor="middle" font-size="11" fill="white" font-family="monospace">ESP32 #2</text>
+      <rect x="10" y="130" width="90" height="35" rx="6" fill="#3b82f6" opacity=".85"/>
+      <text x="55" y="152" text-anchor="middle" font-size="11" fill="white" font-family="monospace">ESP32 #3</text>
+      <!-- USB lines to hub -->
+      <line x1="100" y1="57" x2="145" y2="95" stroke="#94a3b8" stroke-width="1.5"/>
+      <line x1="100" y1="102" x2="145" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+      <line x1="100" y1="147" x2="145" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+      <!-- USB Hub -->
+      <rect x="145" y="72" width="90" height="55" rx="6" fill="#475569"/>
+      <text x="190" y="99" text-anchor="middle" font-size="11" fill="white" font-family="monospace">USB Hub</text>
+      <text x="190" y="116" text-anchor="middle" font-size="10" fill="#94a3b8" font-family="monospace">(powered)</text>
+      <!-- USB line to Pi -->
+      <line x1="235" y1="99" x2="290" y2="99" stroke="#94a3b8" stroke-width="2"/>
+      <text x="263" y="92" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="monospace">USB</text>
+      <!-- Pi Zero -->
+      <rect x="290" y="68" width="110" height="62" rx="6" fill="#16a34a" opacity=".9"/>
+      <text x="345" y="96" text-anchor="middle" font-size="11" fill="white" font-family="monospace">Pi Zero 2W</text>
+      <text x="345" y="113" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)" font-family="monospace">serial bridge</text>
+      <!-- Ethernet line -->
+      <line x1="400" y1="99" x2="460" y2="99" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,3"/>
+      <text x="430" y="92" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="monospace">Ethernet</text>
+      <!-- VM box -->
+      <rect x="460" y="55" width="130" height="90" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="525" y="82" text-anchor="middle" font-size="11" fill="#94a3b8" font-family="monospace">VM / Proxmox</text>
+      <!-- Docker inside VM -->
+      <rect x="475" y="88" width="100" height="45" rx="4" fill="#0f172a" stroke="#3b82f6" stroke-width="1"/>
+      <text x="525" y="108" text-anchor="middle" font-size="10" fill="#3b82f6" font-family="monospace">Docker</text>
+      <text x="525" y="124" text-anchor="middle" font-size="9" fill="#60a5fa" font-family="monospace">Claude Code</text>
+      <!-- Arrow from VM to Claude -->
+      <line x1="590" y1="111" x2="640" y2="111" stroke="#d4af37" stroke-width="1.5"/>
+      <polygon points="640,107 650,111 640,115" fill="#d4af37"/>
+      <!-- Claude Code label -->
+      <rect x="650" y="88" width="120" height="45" rx="6" fill="#1e3a8a"/>
+      <text x="710" y="108" text-anchor="middle" font-size="10" fill="white" font-family="monospace">AI Agent</text>
+      <text x="710" y="124" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.7)" font-family="monospace">write/flash/test</text>
+      <rect x="0" y="0" width="1" height="1" fill="none"/>
+    </svg>
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px">แผนภาพแสดงการไหลของข้อมูล: ESP32 → USB Hub → Pi Zero 2W → Ethernet → VM Docker → Claude Code Agent — AI ควบคุม ESP32 ผ่าน network โดยไม่มีการเชื่อมต่อ USB โดยตรงกับ VM</p>
+  </div>
+</section>
+
+<!-- p3b: Deep-Dive Protocol — Assumptions & Takeaways -->
+<section class="page" id="p3b" data-group="protocol" data-title="สมมติฐาน &amp; Takeaways">
+  <div class="page-inner">
+    <div class="section-label">Deep-Dive Protocol — Advanced</div>
+    <h2>สมมติฐานที่มือใหม่มักมองข้าม</h2>
+    <div class="bento cols-3">
+      <div class="card danger">
+        <p class="label">Assumption 1</p>
+        <h3>ต้องมี VM/Proxmox อยู่แล้ว</h3>
+        <p>Pi bridge ถูกสร้างมาเพื่อแก้ปัญหา serial port limitation ของ VM ไม่ใช่สำหรับ laptop ทั่วไป — ถ้าคอมพิวเตอร์มี USB port ตรงๆ ไม่จำเป็นต้องใช้ Pi เลย</p>
+      </div>
+      <div class="card danger">
+        <p class="label">Assumption 2</p>
+        <h3>Claude Code เป็น paid service</h3>
+        <p>Claude Code ไม่ใช่ open-source free tool — ต้องมี Anthropic API key หรือ Claude Pro subscription และ cost จะขึ้นตามปริมาณ token ที่ใช้ใน each session</p>
+      </div>
+      <div class="card danger">
+        <p class="label">Assumption 3</p>
+        <h3>Initial setup ใช้เวลามาก</h3>
+        <p>Pi Zero, Docker environment, และ FSD SOP AI skill ต้องตั้งค่าครั้งแรกประมาณ 4-8 ชั่วโมง — ความเร็ว 1.5 ชั่วโมงต่อ project เกิดขึ้นหลัง setup ครบแล้วเท่านั้น</p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:32px">7 Takeaways ที่ต้องจำ</h2>
+    <div class="bento cols-2">
+      <div class="card">
+        <p class="label">Big Picture</p>
+        <h3>Automated Hardware Test Loop</h3>
+        <p>workbench คือ automated loop ที่ AI ควบคุมทุกขั้นตอน ตั้งแต่เขียนโค้ดจนถึงเห็น output บน serial monitor — ไม่ใช่แค่ code generator</p>
+      </div>
+      <div class="card success">
+        <p class="label">Mental Model</p>
+        <h3>Pi Zero = "Remote Hands"</h3>
+        <p>Pi Zero 2W คือมือเสมือนที่ทำให้ VM แตะ physical hardware ได้ — เปรียบเหมือน USB-over-network server สำหรับ embedded devices</p>
+      </div>
+      <div class="card warning">
+        <p class="label">Common Trap</p>
+        <h3>AI ไม่ได้เดาเขียนโค้ด</h3>
+        <p>AI ต้องการ FSD spec ที่ชัดเจนก่อนเสมอ — ถ้าข้ามขั้น FSD ผลลัพธ์จะออกมาผิดทิศทาง เสียเวลามากกว่าเขียนเอง</p>
+      </div>
+      <div class="card">
+        <p class="label">Actionable</p>
+        <h3>เริ่มจาก idea.md เสมอ</h3>
+        <p>เขียน idea เป็น Markdown แล้วใช้ FSD SOP skill สร้าง spec ก่อน — อย่าให้ AI เริ่มเขียนโค้ดโดยไม่มี FSD</p>
+      </div>
+      <div class="card gold">
+        <p class="label">Non-obvious</p>
+        <h3>ทดสอบ failure จริงๆ</h3>
+        <p>ระบบทดสอบได้จริงๆ เช่น ปิด WiFi AP กลางอากาศ หรือ kill MQTT broker เพื่อดู error handling — สิ่งที่ desktop simulator ทำไม่ได้</p>
+      </div>
+      <div class="card success">
+        <p class="label">Time Savings</p>
+        <h3>งาน 1.5 ชม. แทน หลายวัน</h3>
+        <p>โปรเจกต์ iOS voice keyboard ปกติจะใช้เวลา 2-3 วัน (setup + debug + flash manual) แต่ด้วย workbench เสร็จใน 1.5 ชั่วโมง</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:4px">
+      <p class="label">Edge Case</p>
+      <h3>Pi bridge ไม่จำเป็นเสมอไป</h3>
+      <p>ถ้า host computer มี USB/serial ports พร้อมใช้งานโดยตรง — ไม่ต้องใช้ Pi Zero เลย Pi bridge แก้ปัญหาเฉพาะกรณีที่ใช้ VM (เช่น Proxmox) ที่มี serial controller เดียว</p>
+    </div>
+  </div>
+</section>
+
+<!-- p4a: Hardware — Intuition -->
+<section class="page" id="p4a" data-group="hardware" data-group-title="สถาปัตยกรรม Hardware" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div class="section-label">Hardware Architecture — Intuition</div>
+    <h2>ทำไมถึงต้องมี Pi Zero Bridge</h2>
+    <p class="section-lead">ก่อนที่จะเข้าใจ workbench นี้ได้ต้องเข้าใจก่อนว่า ปัญหาที่ระบบนี้แก้คืออะไร ในโลกของ embedded development การที่ AI ต้องการ "แตะ" hardware โดยตรงเป็นสิ่งที่ยากมากเพราะ hardware ต้องต่อเข้า USB หรือ serial port ของเครื่องที่รัน AI อยู่ แต่เมื่อ AI รันอยู่ใน VM หรือ cloud environment การต่อ USB ตรงๆ เป็นสิ่งที่ทำไม่ได้โดยง่าย Pi Zero 2W คือทางออกที่หรูหราที่สุดสำหรับปัญหานี้</p>
+
+    <h3>ปัญหาที่ workbench แก้: Serial Port ใน VM ไม่พอ</h3>
+    <p>Proxmox และ hypervisor ทั่วไปมีข้อจำกัดเรื่อง serial controller — โดยปกติ VM หนึ่งจะได้รับ serial controller ได้จำนวนจำกัด และการ passthrough USB device ไปยัง VM ก็มีความซับซ้อนพอสมควร ถ้าต้องการต่อ ESP32 สาม, สี่, หรือห้าบอร์ดพร้อมกัน เรื่องนี้กลายเป็นปัญหาใหญ่ทันที</p>
+    <p>นี่คือจุดที่ Raspberry Pi Zero 2W เข้ามาแก้ปัญหาได้อย่างสง่างาม: แทนที่จะพยายาม passthrough USB ทุกตัวเข้า VM โดยตรง ให้ Pi Zero เป็นตัวรับ USB device ทั้งหมดแทน จากนั้น Pi expose serial ports เหล่านั้นออกมาเป็น TCP socket ผ่าน Ethernet — VM เชื่อมต่อมาที่ TCP socket นั้น และมองเห็นเหมือนเป็น serial port ปกติ ปัญหาหมดไปทันที</p>
+    <p>analogyที่ดีที่สุดคือ USB print server ที่คนใช้กันในออฟฟิศ — แทนที่ทุกคนจะต้องเสียบสาย USB เข้า printer โดยตรง ก็ต่อ printer เข้า print server ครั้งเดียว แล้วทุกคนใช้ผ่าน network ได้ workbench นี้ก็ทำแบบเดียวกันกับ serial ports ของ ESP32</p>
+
+    <h3>ทำไมต้อง Automate การ Flash และทดสอบ</h3>
+    <p>ก่อนจะมีระบบ automated นี้ embedded developer ต้องทำขั้นตอนซ้ำๆ ทุกครั้งที่แก้โค้ด: เสียบ USB เข้าบอร์ด, เปิด terminal ใหม่, เลือก port ที่ถูก, รัน esptool, รอ flash เสร็จ, เปิด serial monitor, ดู boot log, แล้วก็ทำซ้ำ loop นี้ทุกครั้งที่แก้บรรทัดเดียว นี่คือ "context switch cost" ที่สูงมากและเป็นหนึ่งในสาเหตุหลักที่ embedded dev ใช้เวลานาน</p>
+    <p>เมื่อ AI รันอยู่ใน terminal และมีสิทธิ์เข้าถึง serial bridge ผ่าน network AI สามารถสั่ง flash ได้เองด้วย command เดียว จากนั้นเปิด serial monitor อ่าน output ประเมินผล และถ้ามี error ก็แก้โค้ดแล้ว flash ใหม่ทันที — ทั้งหมดนี้เกิดขึ้นภายใน terminal เดียวกันโดย developer ไม่ต้องลุกจากเก้าอี้</p>
+    <p>ผลลัพธ์ที่ได้คือ feedback loop ที่เร็วมาก ใน embedded development ปกติ feedback loop อาจใช้เวลา 3-5 นาทีต่อ iteration แต่ด้วยระบบ automated นี้ลดลงเหลือไม่กี่สิบวินาที เมื่อ AI ทำซ้ำได้หลายร้อยรอบในชั่วโมงเดียว ผลลัพธ์ก็คือโปรเจกต์เสร็จเร็วกว่ามากโดยธรรมชาติ</p>
+
+    <h3>Analogy: USB-over-Network Server สำหรับ Embedded</h3>
+    <p>ถ้าเคยใช้ NAS หรือ network printer จะเข้าใจ concept นี้ได้ทันที — Pi Zero 2W ทำหน้าที่เหมือน device server ในโลก industrial automation ซึ่งเป็นเทคโนโลยีที่มีมานานแล้ว แต่ที่นี่เราใช้กับ ESP32 developer board ราคาถูกแทน serial equipment ราคาแพง</p>
+    <p>ข้อดีของ approach นี้คือ scalable มาก ถ้าต้องการเพิ่ม ESP32 board อีกสิบบอร์ดก็แค่เพิ่ม USB Hub ให้ใหญ่ขึ้น ไม่ต้องแตะ VM configuration ใดๆ เลย Pi Zero จะ expose serial ports เพิ่มเข้ามาใน network โดยอัตโนมัติ</p>
+    <p>และที่สำคัญมากคือ การออกแบบแบบนี้ทำให้ workbench สามารถอยู่ได้แม้ไม่มี cloud — ทุกอย่างรันใน local network ข้อมูล firmware และ code ไม่ออกไปนอก premise เลย สำหรับ project ที่มีความ sensitive เรื่อง IP นี่เป็นข้อดีที่สำคัญมาก</p>
+
+    <div class="takeaway"><b>Key Insight:</b> Pi Zero 2W คือ "serial bridge" ที่ทำให้ VM สั่ง ESP32 ได้เหมือนเสียบ USB โดยตรง — แก้ปัญหา serial passthrough ของ VM ด้วยวิธีที่ scalable และไม่ต้องแตะ hypervisor configuration</div>
+  </div>
+</section>
+
+<!-- p4b: Hardware — Mechanism -->
+<section class="page" id="p4b" data-group="hardware" data-title="การตั้งค่า">
+  <div class="page-inner">
+    <div class="section-label">Hardware Architecture — Mechanism</div>
+    <h2>การตั้งค่าและ Wiring</h2>
+    <p class="section-lead">ส่วนนี้เจาะลึกรายละเอียดของ hardware ที่ต้องใช้และวิธีที่ Pi Zero 2W expose serial ports ออกมาผ่าน network TCP socket เพื่อให้ VM และ Claude Code เชื่อมต่อได้ รายละเอียดเหล่านี้สำคัญสำหรับผู้ที่ต้องการ replicate ระบบนี้เอง</p>
+
+    <h3>อุปกรณ์ Hardware ที่ต้องใช้</h3>
+    <p>Raspberry Pi Zero 2W เป็น single-board computer ที่ใช้ ARM Cortex-A53 quad-core และรัน Raspberry Pi OS ได้เต็มๆ มี USB OTG port ที่สามารถทำงานเป็น USB host ได้ด้วย adapter ราคาอยู่ที่ประมาณ $15 USD ซึ่งถือว่าถูกมากเมื่อเทียบกับประโยชน์ที่ได้</p>
+    <p>USB Hub แบบ powered (มี power adapter ของตัวเอง) เป็นสิ่งจำเป็น เพราะ Pi Zero 2W ไม่สามารถจ่ายไฟให้ ESP32 หลายตัวพร้อมกันได้เพียงพอ ราคาอยู่ที่ $10-20 USD USB Hub แบบ 4-7 port ก็เพียงพอสำหรับการใช้งานทั่วไป</p>
+    <p>ESP32 boards ที่ต่อเข้าระบบต้องใช้ USB data cable เท่านั้น ไม่ใช่ power-only cable (สายที่มีแค่ 2 เส้นสำหรับชาร์จ) สายที่ดีจะมี 4 เส้น รวม D+ และ D- สำหรับ data transfer ถ้าเสียบแล้ว Pi ไม่เห็นบอร์ด ให้ตรวจสอบสายก่อนเสมอ นอกจากนี้ยังต้องมี Ethernet cable เชื่อมต่อ Pi กับ VM ด้วย Ethernet เสถียรกว่า WiFi สำหรับ serial forwarding</p>
+
+    <h3>วิธีที่ Pi Expose Serial Ports ผ่าน Network</h3>
+    <p>เมื่อ ESP32 เชื่อมต่อผ่าน USB Pi Linux จะเห็น device เป็น <code>/dev/ttyUSB0</code>, <code>/dev/ttyUSB1</code> เป็นต้น ขึ้นอยู่กับจำนวนบอร์ดที่ต่อ วิธีที่ง่ายที่สุดในการ forward serial port ผ่าน network คือใช้ <code>socat</code> หรือเขียน Python script เองก็ได้</p>
+    <div class="copy-wrap">
+      <pre><code># บน Pi Zero 2W: forward /dev/ttyUSB0 ไปเป็น TCP port 8000
+socat TCP-LISTEN:8000,reuseaddr,fork \
+      /dev/ttyUSB0,raw,b115200
+
+# หรือใช้ Python script
+python3 -c "
+import serial, socket, threading
+ser = serial.Serial('/dev/ttyUSB0', 115200)
+srv = socket.socket(); srv.bind(('0.0.0.0', 8000)); srv.listen(1)
+conn, _ = srv.accept()
+# forward bidirectional
+"</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>บน VM หรือ Docker container สามารถ connect กลับมาได้ด้วย <code>socat</code> เช่นกัน:</p>
+    <div class="copy-wrap">
+      <pre><code># บน VM: สร้าง virtual serial port ที่ชี้ไปยัง Pi
+socat PTY,link=/dev/ttyVUSB0,raw \
+      TCP:192.168.1.100:8000
+
+# Claude Code จากนั้นใช้ /dev/ttyVUSB0 เหมือน serial port ปกติ
+esptool.py --port /dev/ttyVUSB0 --baud 115200 write_flash 0x0 firmware.bin</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p>pattern นี้ทำงานได้อย่างโปร่งใส — Claude Code ไม่รู้ว่า serial port ที่ใช้อยู่เป็น "virtual" ที่อยู่ไกลออกไป 10 เมตรหรืออยู่ข้างๆ เครื่อง การ flash firmware และ monitor serial output ทำงานได้เหมือนกันทุกประการ</p>
+
+    <h3>Wiring Diagram</h3>
+    <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;height:auto;background:var(--soft);border-radius:var(--radius-sm)">
+      <!-- ESP32 stack -->
+      <rect x="10" y="30" width="100" height="30" rx="5" fill="#3b82f6"/>
+      <text x="60" y="50" text-anchor="middle" font-size="11" fill="white" font-family="monospace">ESP32 A</text>
+      <rect x="10" y="70" width="100" height="30" rx="5" fill="#3b82f6"/>
+      <text x="60" y="90" text-anchor="middle" font-size="11" fill="white" font-family="monospace">ESP32 B</text>
+      <rect x="10" y="110" width="100" height="30" rx="5" fill="#3b82f6"/>
+      <text x="60" y="130" text-anchor="middle" font-size="11" fill="white" font-family="monospace">ESP32 C</text>
+      <text x="60" y="165" text-anchor="middle" font-size="10" fill="#94a3b8" font-family="monospace">USB data</text>
+      <text x="60" y="178" text-anchor="middle" font-size="10" fill="#94a3b8" font-family="monospace">cable each</text>
+      <!-- lines to hub -->
+      <line x1="110" y1="45" x2="170" y2="90" stroke="#94a3b8" stroke-width="1.5"/>
+      <line x1="110" y1="85" x2="170" y2="95" stroke="#94a3b8" stroke-width="1.5"/>
+      <line x1="110" y1="125" x2="170" y2="100" stroke="#94a3b8" stroke-width="1.5"/>
+      <!-- USB Hub -->
+      <rect x="170" y="68" width="100" height="55" rx="6" fill="#334155"/>
+      <text x="220" y="93" text-anchor="middle" font-size="11" fill="white" font-family="monospace">USB Hub</text>
+      <text x="220" y="109" text-anchor="middle" font-size="10" fill="#94a3b8" font-family="monospace">powered</text>
+      <!-- power symbol -->
+      <text x="220" y="144" text-anchor="middle" font-size="10" fill="#f59e0b" font-family="monospace">+ DC adapter</text>
+      <!-- arrow to Pi -->
+      <line x1="270" y1="95" x2="330" y2="95" stroke="#94a3b8" stroke-width="2"/>
+      <polygon points="328,91 338,95 328,99" fill="#94a3b8"/>
+      <text x="300" y="86" text-anchor="middle" font-size="9" fill="#94a3b8" font-family="monospace">USB</text>
+      <!-- Pi Zero -->
+      <rect x="338" y="65" width="110" height="60" rx="6" fill="#16a34a"/>
+      <text x="393" y="90" text-anchor="middle" font-size="11" fill="white" font-family="monospace">Pi Zero 2W</text>
+      <text x="393" y="108" text-anchor="middle" font-size="10" fill="rgba(255,255,255,.7)" font-family="monospace">/dev/ttyUSB*</text>
+      <text x="393" y="120" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.6)" font-family="monospace">socat TCP:8000+</text>
+      <!-- Ethernet -->
+      <line x1="448" y1="95" x2="510" y2="95" stroke="#d4af37" stroke-width="2" stroke-dasharray="6,3"/>
+      <polygon points="508,91 518,95 508,99" fill="#d4af37"/>
+      <text x="479" y="86" text-anchor="middle" font-size="9" fill="#d4af37" font-family="monospace">Ethernet</text>
+      <!-- VM box -->
+      <rect x="518" y="48" width="160" height="110" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+      <text x="598" y="72" text-anchor="middle" font-size="11" fill="#94a3b8" font-family="monospace">VM (Proxmox)</text>
+      <!-- Docker -->
+      <rect x="530" y="80" width="136" height="65" rx="4" fill="#0f172a" stroke="#3b82f6" stroke-width="1"/>
+      <text x="598" y="100" text-anchor="middle" font-size="10" fill="#3b82f6" font-family="monospace">Docker Container</text>
+      <text x="598" y="116" text-anchor="middle" font-size="9" fill="#60a5fa" font-family="monospace">socat PTY /dev/ttyVUSB0</text>
+      <text x="598" y="130" text-anchor="middle" font-size="9" fill="#60a5fa" font-family="monospace">Claude Code Agent</text>
+      <rect x="0" y="0" width="1" height="1" fill="none"/>
+    </svg>
+    <p style="font-size:13px;color:var(--muted);text-align:center;margin-top:8px">แผนภาพ wiring: ESP32 (USB data cable) → USB Hub (powered) → Pi Zero 2W → Ethernet → VM Docker container — socat สร้าง virtual serial port ใน container ที่ชี้กลับไปยัง Pi ผ่าน TCP</p>
+
+    <div class="takeaway"><b>Core Pattern:</b> serial-over-network ไม่ใช่ของใหม่ — ยืมมาจาก industrial automation แต่นำมาใช้กับ ESP32 developer board ราคาถูกและ open-source tools เพื่อสร้าง workbench ที่ cost-effective มากๆ</div>
+  </div>
+</section>
+
+<!-- p5a: Workflow — Intuition -->
+<section class="page" id="p5a" data-group="workflow" data-group-title="Workflow 8 ขั้น" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div class="section-label">Workflow 8 Steps — Intuition</div>
+    <h2>ทำไม AI ต้องการ Workflow ที่มีโครงสร้าง</h2>
+    <p class="section-lead">หนึ่งในความเข้าใจผิดที่พบบ่อยที่สุดคือการคิดว่า "แค่บอก AI ว่าต้องการอะไร แล้ว AI จะทำให้" ในความเป็นจริง AI language model ทำงานได้ดีที่สุดเมื่อมีข้อมูลที่ชัดเจนและมีโครงสร้าง — โดยเฉพาะในงาน embedded development ที่ hardware spec, protocol, pin assignment และ test case ต้องถูกกำหนดไว้อย่างแม่นยำ Workflow 8 ขั้นตอนนี้เป็นโครงสร้างที่ทำให้ AI ทำงานได้โดยไม่ต้องเดาเลย</p>
+
+    <h3>ทำไม AI ต้องการ Workflow ที่ชัดเจน</h3>
+    <p>ลองนึกภาพว่าจ้างช่างก่อสร้างมาสร้างบ้าน แต่บอกแค่ว่า "สร้างบ้านให้หน่อย" โดยไม่มีแบบแปลนและ specification ใดๆ เลย ผลลัพธ์ที่ได้จะขึ้นอยู่กับการตีความของช่างล้วนๆ และอาจไม่ตรงกับที่ต้องการเลย embedding development ก็เหมือนกัน — AI ไม่รู้ว่า project ควรใช้ MCU อะไร, communication protocol อะไร, pin ไหนต่อกับอะไร, และควร test อะไรบ้าง ถ้าไม่มีข้อมูลเหล่านี้</p>
+    <p>FSD (Functional Specification Document) คือ "blueprint" ที่เติมเต็มช่องว่างเหล่านั้น เมื่อ AI มี FSD ที่สมบูรณ์ก็สามารถทำงานได้อย่างมีทิศทางตั้งแต่ต้นจนจบ โดยไม่ต้องถามซ้ำแล้วซ้ำเล่า หรือเดาข้อมูลที่ไม่มี ความสำคัญของขั้นตอน FSD นี้จึงไม่ใช่แค่ "documentation" แต่เป็น "machine-readable instruction" สำหรับ AI โดยตรง</p>
+    <p>เปรียบเทียบกับ architectural blueprint ที่ architect วาดไว้ก่อนที่ contractor จะลงมือสร้าง — blueprint ดีทำให้ contractor ทำงานได้รวดเร็วและถูกต้อง blueprint แย่ทำให้เสียเวลาแก้ไขตลอด FSD ใน embedded dev ก็ทำหน้าที่เดียวกันทุกประการ</p>
+
+    <h3>ภาพรวม 8 ขั้นตอน</h3>
+    <ul class="steps">
+      <li>
+        <span class="step-num">1</span>
+        <div class="step-body">
+          <strong>สร้าง GitHub Repository</strong>
+          <p>AI สร้าง repo ใหม่พร้อม structure ที่ถูกต้องตั้งแต่ต้น — ไม่ต้องทำเอง</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <div class="step-body">
+          <strong>เขียน Idea ใน Markdown</strong>
+          <p>Developer เขียน <code>idea.md</code> — อธิบาย project ที่ต้องการ, ปัญหาที่แก้, และความคาดหวังทั่วไป เป็นภาษามนุษย์ ไม่ต้องเป็นภาษาเทคนิค</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <div class="step-body">
+          <strong>FSD Generation ด้วย AI Skill</strong>
+          <p><strong>จุดสำคัญที่สุด</strong> — AI skill อ่าน <code>idea.md</code> แล้ว output FSD ที่ประกอบด้วย MCU selection, communication protocols, pin assignments, component list, และ test cases</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <div class="step-body">
+          <strong>AI แบ่ง FSD เป็น Phases</strong>
+          <p>AI อ่าน FSD ทั้งหมดแล้วแบ่งงานออกเป็น phase ที่ทำงานได้ทีละส่วน เช่น phase 1: BLE pairing, phase 2: HID report, phase 3: Unicode support</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">5</span>
+        <div class="step-body">
+          <strong>AI เขียนโค้ด + แก้ Compilation Error</strong>
+          <p>AI เขียน firmware code ตาม FSD spec ถ้า compile ไม่ผ่านก็อ่าน error แก้เอง loop ซ้ำจนผ่าน 100%</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">6</span>
+        <div class="step-body">
+          <strong>AI Flash Firmware ผ่าน Workbench</strong>
+          <p>AI ส่ง esptool command ผ่าน serial bridge — Pi Zero รับแล้วส่งต่อไปยัง ESP32 จริงๆ ไม่มีมนุษย์เข้ามาเกี่ยวข้อง</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">7</span>
+        <div class="step-body">
+          <strong>AI รัน Test Cases</strong>
+          <p>AI รัน test ทุกอย่างจาก FSD โดยอัตโนมัติ รวมถึง edge cases เช่น ปิด WiFi กลางอากาศ หรือ kill MQTT broker</p>
+        </div>
+      </li>
+      <li>
+        <span class="step-num">8</span>
+        <div class="step-body">
+          <strong>Developer Update FSD → AI Iterate</strong>
+          <p>ถ้าต้องการ feature ใหม่ developer แก้ FSD เพิ่ม requirement — AI อ่าน diff แล้ว iterate โดยอัตโนมัติ</p>
+        </div>
+      </li>
+    </ul>
+    <p style="margin-top:16px;color:var(--ink-dim)">ขั้นตอนที่ 3 (FSD Generation) คือจุดที่สำคัญที่สุดของ workflow ทั้งหมด ถ้า FSD ไม่ครบถ้วนหรือไม่ชัดเจน ขั้นตอนหลังจากนั้นทั้งหมดจะมีปัญหาตามมา เหมือนบ้านที่สร้างบนรากฐานที่ไม่มั่นคง</p>
+
+    <div class="takeaway"><b>Core Shift:</b> Workflow นี้เปลี่ยน embedded dev จาก "trial and error ซ้ำๆ" เป็น "spec-driven automation" — developer ลงทุนเวลาใน spec ครั้งเดียว แล้ว AI ทำส่วนที่เบื่อที่สุดให้ทั้งหมด</div>
+  </div>
+</section>
+
+<!-- p5b: Workflow — FSD & Coding Mechanism -->
+<section class="page" id="p5b" data-group="workflow" data-title="FSD &amp; Coding">
+  <div class="page-inner">
+    <div class="section-label">Workflow — Mechanism</div>
+    <h2>FSD SOP Skill และ Code Generation Loop</h2>
+    <p class="section-lead">FSD SOP Skill คือ custom AI skill ที่เป็นหัวใจของ workflow — มันแปลง idea ที่เขียนด้วยภาษามนุษย์ให้กลายเป็น structured specification ที่ AI ใช้ทำงานได้โดยตรง ส่วน code generation loop คือกลไกที่ทำให้ AI เขียนโค้ด, แก้ error, และ iterate จนได้ firmware ที่ทำงานได้โดยไม่ต้องมีมนุษย์เข้ามาแทรก</p>
+
+    <h3>FSD SOP Skill ทำงานอย่างไร</h3>
+    <p>SOP ย่อมาจาก Standard Operating Procedure — FSD SOP Skill คือ custom skill ที่สร้างขึ้นสำหรับ Claude Code โดยเฉพาะ เมื่อ developer รัน skill นี้ มันจะอ่าน <code>idea.md</code> และ generate FSD ออกมาในรูปแบบที่ AI สามารถใช้ทำงานต่อได้ทันที ไม่ใช่แค่ documentation สำหรับมนุษย์อ่าน</p>
+    <p>ตัวอย่าง <code>idea.md</code> สำหรับ iOS Voice Keyboard project อาจมีเนื้อหาประมาณนี้: "ต้องการสร้าง keyboard ที่รับ input จาก iPhone ผ่าน speech-to-text แล้วส่งข้อความผ่าน Bluetooth ไปยัง ESP32 ซึ่งทำหน้าที่เป็น USB HID keyboard รองรับภาษาไทยและภาษาอังกฤษ" จาก idea ไม่กี่บรรทัดนี้ FSD SOP Skill จะ generate spec ที่มีความละเอียดมากขึ้นอย่างมาก</p>
+    <p>FSD ที่ generate ออกมาจะประกอบด้วยหัวข้อสำคัญเช่น: MCU selection (ESP32 พร้อม rationale ว่าทำไม), communication protocols ที่ใช้ (BLE สำหรับรับจาก iPhone, USB HID สำหรับส่งไปยัง host), pin assignments (USB D+/D- ต่อ pin ไหน), component list, และ test cases ที่ครอบคลุม happy path และ edge cases ทั้งหมด</p>
+
+    <div class="copy-wrap">
+      <pre><code># idea.md (input)
+# iOS Voice Keyboard
+Phone does speech-to-text, sends text via BLE to ESP32.
+ESP32 acts as USB HID keyboard to host computer.
+Must support Thai and English characters.
+Must reconnect automatically if disconnected.
+
+# FSD output (excerpt, generated by AI skill)
+## MCU Selection
+- Target: ESP32-S3 (native USB, BLE 5.0)
+- Rationale: native USB HID avoids CH340 chip complexity
+
+## Protocols
+- BLE (central: iOS app, peripheral: ESP32)
+- USB HID (ESP32 as keyboard to host)
+
+## Test Cases
+- TC001: BLE pairing success within 10s
+- TC002: Thai character U+0E01 transmitted correctly
+- TC003: USB disconnect → auto-reconnect within 5s</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>Code Generation และ Self-Healing Compilation</h3>
+    <p>เมื่อ AI มี FSD ที่สมบูรณ์แล้ว ขั้นต่อไปคือการเขียน firmware code สำหรับ ESP32 AI จะเขียน C++ code ที่ implement แต่ละ feature ตามที่ FSD กำหนดไว้ทีละ phase จากนั้นรัน compiler เพื่อตรวจสอบว่า code ถูกต้อง</p>
+    <p>ส่วนที่น่าทึ่งที่สุดคือ self-healing compilation loop — เมื่อ compiler ออก error message AI จะอ่าน error นั้น วิเคราะห์สาเหตุ แก้ไข code ที่เกี่ยวข้อง และ compile ใหม่ loop นี้ทำซ้ำจนกว่า compilation จะผ่าน 100% โดยไม่ต้องให้มนุษย์ดูเลย ต่างจาก traditional development ที่ developer ต้องนั่งอ่าน error เอง คิดเอง แล้วแก้เอง ซึ่งใช้เวลาและ mental energy มาก</p>
+    <p>กระบวนการนี้เร็วกว่า manual debugging มากเพราะ AI ไม่ต้องหยุดคิด ไม่ต้อง search ใน Stack Overflow ไม่ต้องรอให้สมองประมวลผล มัน iterate ด้วยความเร็วที่มนุษย์สู้ไม่ได้ และสามารถลอง approach ต่างๆ ได้หลายแนวทางในเวลาสั้นๆ</p>
+
+    <h3>Enhancement Loop: Developer อัปเดต FSD → AI Iterate</h3>
+    <p>หลังจาก project ทำงานได้แล้วและ developer ต้องการเพิ่ม feature ใหม่ ขั้นตอนก็ง่ายมาก แค่เพิ่ม requirement ใหม่เข้าใน FSD file — ไม่ว่าจะเป็น test case เพิ่มเติม, feature ใหม่, หรือข้อกำหนดด้าน performance ที่เพิ่มขึ้น</p>
+    <p>AI อ่าน diff ของ FSD แล้วระบุว่าส่วนไหนของ code ต้องเปลี่ยน implement changes เฉพาะส่วนที่เกี่ยวข้อง ทดสอบอีกครั้ง และ commit/push ไปยัง Git repository โดยอัตโนมัติ ทุก iteration มี commit message ที่อธิบาย change ที่เกิดขึ้น ทำให้ developer track progress ได้ง่าย</p>
+    <p>ความสวยงามของ pattern นี้คือ FSD กลายเป็น "single source of truth" ที่ทั้ง developer และ AI ใช้อ้างอิงร่วมกัน ถ้ามีความขัดแย้งระหว่าง code กับ spec AI จะยึด spec เสมอ ทำให้ code ตามทัน spec อยู่เสมอ</p>
+
+    <div class="takeaway"><b>FSD = Single Source of Truth:</b> ทำให้ AI และมนุษย์พูดภาษาเดียวกัน — developer ลงทุนใน spec ที่ดี AI ลงทุนใน code ที่ถูกต้องตาม spec นั้น</div>
+  </div>
+</section>
+
+<!-- p6: AI Agent Environment (flat) -->
+<section class="page" id="p6" data-title="AI Agent Environment">
+  <div class="page-inner">
+    <div class="section-label">Environment</div>
+    <h2>AI Agent Environment: Docker + Claude Code</h2>
+    <p class="section-lead">การออกแบบ environment ที่ดีคือส่วนสำคัญที่ทำให้ AI ทำงานได้อย่างมีประสิทธิภาพและปลอดภัย Docker container ให้ isolation ที่จำเป็น ในขณะที่ Claude Code ทำหน้าที่เป็น AI brain ที่รับ task และ execute ในแต่ละ project มี container ของตัวเองพร้อม environment ที่ configure ไว้สำหรับ project นั้นโดยเฉพาะ</p>
+
+    <h3>ทำไมต้อง Isolate ต่อ Project</h3>
+    <p>ในโปรเจกต์ embedded development แต่ละโปรเจกต์มี dependency ที่แตกต่างกันมาก บางโปรเจกต์ต้องการ ESP-IDF version เก่า บางโปรเจกต์ต้องการ Arduino framework บางโปรเจกต์มี Python library ที่อาจชนกับโปรเจกต์อื่น Docker container แก้ปัญหานี้ได้หมดจด แต่ละ container มี filesystem และ environment ของตัวเอง ไม่มีทางที่ dependency ของโปรเจกต์หนึ่งจะไปกระทบอีกโปรเจกต์ได้</p>
+    <p><code>superclaude</code> คือ shell alias ที่ถูก configure ไว้ให้ start Claude Code พร้อม environment ที่ครบถ้วนภายใน container — รวมถึง access ไปยัง serial bridge บน Pi Zero, Git credentials, และ environment variables ที่จำเป็นทั้งหมด developer แค่พิมพ์ <code>superclaude</code> ใน terminal ของ container แล้ว Claude Code ก็พร้อมทำงานทันที ไม่ต้องตั้งค่าอะไรเพิ่มเติม</p>
+    <p>การออกแบบ one container per project ยังมีประโยชน์ด้านการจัดการอีกด้วย developer สามารถ pause โปรเจกต์หนึ่ง หันไปทำอีกโปรเจกต์ แล้วกลับมาทำต่อได้โดยสภาพ environment ยังคงเดิมทุกอย่าง เหมือนการ save state ของงานทั้งหมด</p>
+
+    <h3>Terminal-Driven Workflow</h3>
+    <p>Claude Code ทำงานใน terminal ทั้งหมด — ไม่มี GUI ไม่มี point-and-click ไม่มี drag-and-drop developer สื่อสารกับ AI ผ่าน text ใน terminal Claude Code ตอบสนองด้วย text และ action ที่มองเห็นได้ทั้งหมด แนวทางนี้มีข้อดีชัดเจนสำหรับ automation: ทุก action ที่ AI ทำสามารถ log ได้, replay ได้, และ automate ได้ง่าย</p>
+    <p>ใน terminal session หนึ่ง AI มีสิทธิ์เข้าถึงหลายสิ่ง: filesystem ของ container ทั้งหมด, git commands สำหรับ version control, serial port ที่ tunnel มาจาก Pi bridge, internet connection สำหรับ download library หรือ documentation, และ system commands ทั่วไป การมี access ครบถ้วนนี้ทำให้ AI ทำ task ได้โดยไม่ต้องขอ permission ซ้ำๆ ซึ่งช่วยลด friction ของ workflow ลงได้มาก</p>
+    <p>สำหรับ developer ที่คุ้นเคยกับ pair programming นี่เป็น experience ที่คล้ายกัน แต่ "pair" คนนี้ทำงานได้ 24 ชั่วโมง ไม่เหนื่อย และ iterate ได้เร็วกว่ามนุษย์มาก developer อธิบายสิ่งที่ต้องการ AI ลงมือทำ developer review ผลลัพธ์ แล้ว iterate ต่อ</p>
+
+    <h3>ข้อควรระวังเรื่อง Security</h3>
+    <p>การให้ AI มี "full env access" ใน container หมายความว่า AI สามารถทำอะไรก็ได้ภายใน container นั้น — อ่านไฟล์ทุกอย่าง, เขียนไฟล์, รัน command ใดๆ, เชื่อมต่อ network ไปยังที่ใดก็ได้ นี่เป็นความสามารถที่จำเป็นสำหรับ autonomous work แต่ก็มาพร้อมกับ risk ที่ต้องตระหนัก</p>
+    <p>Docker isolation ช่วยจำกัด blast radius ได้อย่างมีนัยสำคัญ ถ้า AI ทำอะไรผิดพลาดใน container ผลเสียจะอยู่แค่ใน container นั้น ไม่กระทบ host system หรือ container อื่น แต่นี่ไม่ได้หมายความว่าควรปล่อยให้ AI ทำงานโดยไม่ดูแล การ review git diff ก่อน push ทุกครั้งเป็นนิสัยที่ควรมีเสมอ เพื่อ verify ว่า code ที่ AI เขียนสมเหตุสมผลและไม่มี security issue แฝงอยู่</p>
+    <p>นอกจากนี้ควรระวังเรื่อง credentials ภายใน container — อย่าเก็บ API keys หรือ passwords ใน environment variables ที่ AI เข้าถึงได้ โดยไม่จำเป็น ใช้ Docker secrets หรือ vault pattern แทน ถ้า project มี sensitive data ควรพิจารณาใช้ read-only file system สำหรับส่วนที่ไม่จำเป็นต้องแก้ไข</p>
+
+    <div class="callout warning">
+      <strong>Best Practice:</strong> Review git diff ก่อน push เสมอ — AI อาจเขียน code ที่ทำงานได้แต่มี logic ที่ไม่ตรงกับ intent จริงๆ การ review เป็น safety net ที่สำคัญ
+    </div>
+
+    <div class="takeaway"><b>Docker + Claude Code:</b> sandbox ที่ให้ AI ทำงานได้เต็มที่โดยไม่กระทบ host system — isolate ต่อ project, superclaude shortcut สำหรับ full env access, review diff ก่อน push เสมอ</div>
+  </div>
+</section>
+
+<!-- p7a: Flash & Test — Intuition -->
+<section class="page" id="p7a" data-group="flash-test" data-group-title="Flash &amp; Test อัตโนมัติ" data-title="ภาพรวม">
+  <div class="page-inner">
+    <div class="section-label">Flash &amp; Test — Intuition</div>
+    <h2>Autonomous Flash คืออะไร</h2>
+    <p class="section-lead">คำว่า "autonomous flash" หมายความว่า AI สามารถ flash firmware เข้า ESP32 board ได้เองโดยที่ developer ไม่ต้องแตะ physical hardware เลย ไม่ต้องเสียบสาย ไม่ต้องเปิด serial monitor ไม่ต้องรอดู boot sequence เอง ทั้งหมดนี้เกิดขึ้นโดย AI ผ่าน Pi Zero bridge ที่ทำหน้าที่เป็น "remote hands"</p>
+
+    <h3>Flash แบบ Manual vs. Automatic เปรียบเทียบ</h3>
+    <p>ใน workflow แบบ manual เมื่อ developer แก้โค้ดเสร็จต้องทำขั้นตอนต่อไปนี้ทุกครั้ง: บันทึกไฟล์, เปิด terminal ใหม่, ตรวจสอบว่า ESP32 เชื่อมต่อ port อะไร, รัน <code>esptool.py --port /dev/ttyUSB0 ...</code>, รอ 15-30 วินาที, เปิด serial monitor, ดู boot log, ตรวจสอบว่าทำงานถูกต้อง แล้วกลับไปแก้โค้ดต่อ ถ้าต้องทำแบบนี้ 50-100 รอบใน session เดียว เวลาที่เสียไปสะสมได้อย่างมาก</p>
+    <p>ใน workflow แบบ automatic AI รัน command เดียวผ่าน serial bridge — Pi Zero รับ command แล้วส่งต่อไปยัง ESP32 จริงๆ ใช้เวลา flash เท่ากัน แต่ AI ไม่ต้องรอ context ใดๆ ทำได้ทันทีที่ compile ผ่าน จากนั้น AI เปิด serial monitor อ่าน boot log วิเคราะห์ output และ report ผลได้เองโดยอัตโนมัติ developer ได้รับ summary ของผลการ flash โดยไม่ต้องทำอะไรเพิ่มเติม</p>
+    <p>เปรียบเทียบกับ lab assistant ที่คอยทำงาน manual ให้ตลอดเวลา — developer ออกแบบ experiment แล้วส่งให้ assistant ทำ assistant รายงานผล developer วิเคราะห์ผลแล้วออกแบบ experiment ต่อไป นี่คือ model ที่ embedded AI workbench ใช้อยู่ และเป็น model ที่นักวิทยาศาสตร์และวิศวกรรู้จักดีในบริบทของ laboratory automation</p>
+
+    <h3>Serial Monitoring อัตโนมัติ</h3>
+    <p>หลังจาก flash เสร็จ AI เปิด serial monitor เพื่อดู boot sequence ของ ESP32 ทันที การดู boot log สำคัญมากเพราะ ESP32 บางครั้งอาจ panic หรือ crash ระหว่าง boot ซึ่งบ่งชี้ว่ามีปัญหาใน firmware แต่ปัญหานี้จะไม่ปรากฏใน compile log — ต้องรัน firmware จริงๆ บน hardware จริงๆ ถึงจะเห็น</p>
+    <p>เมื่อ AI เห็น panic message หรือ error ใน serial log มันจะ parse log นั้น ระบุสาเหตุ (เช่น stack overflow, null pointer dereference, hardware initialization failure) แล้วกลับไปแก้ code ที่เกี่ยวข้อง compile ใหม่ flash ใหม่ ดู log ใหม่ ทั้งหมดนี้เกิดในลูปอัตโนมัติจนกว่า boot sequence จะสมบูรณ์ไม่มี error</p>
+    <p>ความเร็วของ loop นี้คือจุดที่สร้างความแตกต่างที่ยิ่งใหญ่ที่สุด ใน manual workflow developer อาจใช้ 5-10 นาทีต่อ iteration (คิด + แก้ + flash + ดู log) แต่ AI iteration อาจเหลือแค่ 1-2 นาที เมื่อมี bug ที่ต้องแก้หลายรอบ ความแตกต่างนี้จะขยายเป็นชั่วโมงที่ประหยัดได้</p>
+
+    <div class="takeaway"><b>Autonomous Flash Loop:</b> developer เขียนแค่ spec, AI เป็นคนกด flash และอ่าน log เอง — feedback loop จาก หลายนาที เหลือ ไม่กี่สิบวินาที ต่อ iteration</div>
+  </div>
+</section>
+
+<!-- p7b: Flash & Test — Mechanism -->
+<section class="page" id="p7b" data-group="flash-test" data-title="กลไกทดสอบ">
+  <div class="page-inner">
+    <div class="section-label">Flash &amp; Test — Mechanism</div>
+    <h2>Test Simulation: IoT Realistic Testing</h2>
+    <p class="section-lead">หนึ่งในคุณสมบัติที่โดดเด่นที่สุดของ workbench คือความสามารถในการทดสอบ edge cases ที่เกิดขึ้นจริงในสภาวะ IoT จริงๆ ได้ — ไม่ใช่แค่ simulation บน desktop Pi Zero มีความสามารถในการสร้าง WiFi Access Point, kill MQTT broker, ตัด network connection, และ monitor serial output พร้อมกัน ทำให้ test cases สะท้อน real-world condition ได้อย่างแท้จริง</p>
+
+    <h3>การจำลอง Network Failure</h3>
+    <p>IoT device ในโลกจริงต้องทำงานในสภาวะที่ network ไม่เสถียร WiFi อาจหาย, MQTT broker อาจ restart, power อาจดับ ถ้า firmware ไม่ handle กรณีเหล่านี้ได้อย่างถูกต้อง device จะ hang หรือ crash โดยไม่ recover การทดสอบกรณีเหล่านี้บน desktop simulator มักไม่สมบูรณ์เพราะ simulator ไม่สามารถ reproduce ความซับซ้อนของ network stack จริงๆ ได้ครบถ้วน</p>
+    <p>workbench แก้ปัญหานี้ได้อย่างตรงไปตรงมา Pi Zero สามารถสร้าง WiFi AP ได้ด้วย <code>hostapd</code> ทำให้ ESP32 connect เข้ามาได้เหมือน real WiFi network จากนั้น AI สั่งให้ Pi ปิด AP กลางอากาศ และ monitor ดูว่า ESP32 มี behavior อะไร: reconnect ได้ภายในกี่วินาที, มี error message ที่ถูกต้องใน serial log หรือไม่, state ของ application ยังคงสมบูรณ์หรือเปล่า</p>
+    <p>ในทำนองเดียวกัน AI สั่ง kill MQTT broker process บน Pi แล้วดูว่า ESP32 handle การขาด connection ของ broker ได้อย่างไร ทั้งหมดนี้เป็น automated test ที่ AI รันเองโดยไม่ต้องให้ developer มานั่งปิด router เอง หรือ kill process เอง</p>
+
+    <h3>ตัวอย่าง Test Cases จาก iOS Keyboard Project</h3>
+    <p>ในโปรเจกต์ iOS Voice Keyboard test cases ที่ AI รันอัตโนมัติครอบคลุม scenarios ที่สำคัญทั้งหมด:</p>
+    <div class="bento cols-2">
+      <div class="card">
+        <p class="label">TC001 — BLE Pairing</p>
+        <h3>BLE Pairing Failure Recovery</h3>
+        <p>จำลอง pairing ล้มเหลว (signal weak / timeout) แล้วดูว่า ESP32 retry หรือ fallback gracefully ไม่ hang อยู่ใน pairing state ตลอดไป</p>
+      </div>
+      <div class="card success">
+        <p class="label">TC002 — Unicode</p>
+        <h3>Thai Character Transmission</h3>
+        <p>ส่งอักขระ Unicode ภาษาไทย (เช่น U+0E01 ก) ผ่าน BLE → ตรวจสอบว่า USB HID report ส่ง keycode ที่ถูกต้องไปยัง host computer</p>
+      </div>
+      <div class="card warning">
+        <p class="label">TC003 — USB Disconnect</p>
+        <h3>Host Computer Disconnect</h3>
+        <p>host computer ปิด USB port กลางอากาศ — ESP32 ต้องตรวจจับ disconnect และ reconnect อัตโนมัติเมื่อ USB กลับมา ไม่ค้างอยู่ใน error state</p>
+      </div>
+      <div class="card">
+        <p class="label">TC004 — Multi-Language</p>
+        <h3>Language Switch</h3>
+        <p>สลับระหว่าง Thai → English → Thai ผ่าน BLE command — ตรวจสอบว่า HID keymap เปลี่ยนตามและ output ถูกต้องทั้งสองภาษา</p>
+      </div>
+    </div>
+    <p style="margin-top:16px">AI รัน test ทั้งหมดเหล่านี้โดยอัตโนมัติผ่าน Pi workbench ผลลัพธ์ถูก log ไว้และ summary ถูกส่งกลับมาให้ developer อ่าน ถ้า test ใด fail AI จะ loop กลับไป debug แก้โค้ด flash ใหม่ แล้ว rerun test จนผ่านทั้งหมด</p>
+
+    <h3>ทำไม Realistic Testing สำคัญสำหรับ IoT</h3>
+    <p>IoT devices ทำงานใน environment ที่ไม่แน่นอนอย่างยิ่ง — network ขาดโดยไม่มีการเตือน, power อาจหายกะทันหัน, temperature เปลี่ยน, signal strength ผันผวน device ที่ทำงานได้ดีใน controlled environment ของ lab อาจ fail ทันทีที่ deploy จริงถ้าไม่ได้ test กรณีเหล่านี้ไว้ก่อน</p>
+    <p>simulator บน desktop สร้าง happy path test ได้ดี แต่ fail ในการจำลอง real-world chaos เพราะ network stack จริงๆ มีความซับซ้อนและ timing behavior ที่ simulator ไม่สามารถ reproduce ได้ครบถ้วน การทดสอบบน real hardware ใน real network environment จึงเป็น gold standard ที่ workbench นี้ทำได้</p>
+    <p>ยิ่งไปกว่านั้น workbench ให้ทดสอบเหล่านี้รันอัตโนมัติทุก iteration โดยไม่ต้องตั้งค่าเพิ่มเติม ทุกครั้งที่ code เปลี่ยน test suite ทั้งหมดรันใหม่อัตโนมัติ นี่คือสิ่งที่ CI/CD ทำสำหรับ web development แต่สำหรับ embedded hardware ซึ่งปกติยากกว่ามาก</p>
+
+    <div class="takeaway"><b>Realistic IoT Testing:</b> workbench ทดสอบ error condition จริงๆ (network failure, power loss simulation, reconnect recovery) — ไม่ใช่แค่ happy path ที่ simulator ทำได้</div>
+  </div>
+</section>
+
+<!-- p8: Demo — iOS Voice Keyboard -->
+<section class="page" id="p8" data-title="Demo: iOS Voice Keyboard">
+  <div class="page-inner">
+    <div class="section-label">Demo Project</div>
+    <h2>Demo: iOS Voice Keyboard ใน 1.5 ชั่วโมง</h2>
+    <p class="section-lead">โปรเจกต์ iOS Voice Keyboard คือหลักฐานที่จับต้องได้ชิ้นสำคัญที่สุดของ workbench นี้ มันแสดงให้เห็นว่าในเวลาเพียง 1.5 ชั่วโมง AI สามารถสร้าง product ที่ซับซ้อนพอสมควรได้โดยสมบูรณ์ ตั้งแต่ BLE pairing, Unicode text handling, ไปจนถึง USB HID keyboard emulation รองรับหลายภาษา</p>
+
+    <h3>แนวคิดและ Motivation</h3>
+    <p>Dictation software ที่ดีอย่าง Dragon NaturallySpeaking มีราคาแพงมากและมักจำกัดอยู่กับ platform เฉพาะ Apple Dictation ใน macOS ดีพอสมควรแต่ใช้ได้แค่กับ Mac เท่านั้น สำหรับ Windows หรือ Linux มีทางเลือกน้อยมากที่รองรับหลายภาษาได้ดี โดยเฉพาะภาษาไทยซึ่งมักเป็นปัญหาใหญ่ใน speech recognition บน desktop</p>
+    <p>แนวคิดง่ายมาก: smartphone ปัจจุบันมี speech-to-text engine ที่ยอดเยี่ยมในตัวอยู่แล้ว ทั้ง iOS Siri และ Android มีความแม่นยำสูงและรองรับหลายภาษา แทนที่จะพยายาม implement speech recognition ใหม่บน desktop ให้ใช้สิ่งที่มีอยู่แล้ว — รับ text ที่ transcribe แล้วจาก phone แล้วส่งไปยัง computer ผ่าน ESP32 ที่ทำหน้าที่เป็น USB keyboard</p>
+    <p>ผลลัพธ์คือ keyboard ที่ทำงานได้กับทุก OS (Windows, Linux, Mac) รองรับทุกภาษาที่ iOS รองรับ และไม่ต้องลง driver ใดๆ เพราะ host computer เห็น ESP32 เป็น standard USB HID keyboard device ที่ทุก OS รู้จักอยู่แล้ว</p>
+
+    <h3>Technical Architecture</h3>
+    <p>Architecture ของโปรเจกต์นี้แบ่งออกเป็นสามส่วนหลักที่ทำงานร่วมกัน:</p>
+    <div class="bento cols-3">
+      <div class="card">
+        <p class="label">Layer 1</p>
+        <h3>iPhone App</h3>
+        <p>iOS app ใช้ <code>SFSpeechRecognizer</code> framework รับเสียงจาก microphone แปลงเป็น text แบบ real-time จากนั้นส่ง text string ผ่าน BLE characteristic ไปยัง ESP32 ที่ advertise อยู่</p>
+      </div>
+      <div class="card success">
+        <p class="label">Layer 2</p>
+        <h3>ESP32 (BLE + HID)</h3>
+        <p>ESP32-S3 รับ BLE data จาก iPhone แปลง Unicode text string เป็น USB HID keyboard report (scan codes) แล้วส่ง report ไปยัง host computer ผ่าน USB native interface</p>
+      </div>
+      <div class="card gold">
+        <p class="label">Layer 3</p>
+        <h3>Host Computer</h3>
+        <p>Windows/Linux/Mac เห็น ESP32 เป็น standard USB keyboard — ไม่ต้องลง driver ใดๆ text จาก voice ปรากฏใน active window เหมือนพิมพ์จาก keyboard จริงๆ</p>
+      </div>
+    </div>
+    <p style="margin-top:16px">ส่วนที่ซับซ้อนที่สุดคือการ convert Unicode text ให้เป็น HID keyboard reports เพราะ Unicode character หนึ่งตัวอาจต้องใช้ HID keycode หลายตัวร่วมกัน (modifier keys + key codes) โดยเฉพาะสำหรับอักขระ Unicode ที่ไม่ได้อยู่ใน Basic ASCII range อย่างตัวอักษรไทย AI เขียน mapping table ที่ครอบคลุมกรณีเหล่านี้ไว้ใน firmware</p>
+
+    <h3>เวลาที่ใช้และ Role ของ AI Workbench</h3>
+    <p>โปรเจกต์ทั้งหมดสร้างเสร็จภายใน ~1.5 ชั่วโมง ซึ่งถือว่าน้อยมากเมื่อเทียบกับความซับซ้อนของ project นี้ใน breakdown ของเวลา ส่วนใหญ่ใช้ไปกับการที่ AI อ่าน FSD, เขียน BLE code, เขียน HID code, debug, compile, flash, และทดสอบ developer ใช้เวลาจริงๆ แค่ในการเขียน <code>idea.md</code> และ review ผลลัพธ์</p>
+    <p>workbench flash firmware ใหม่ทุกครั้งที่ AI แก้โค้ดโดย developer ไม่ต้องแตะ ESP32 board เลยแม้แต่ครั้งเดียวตลอดกระบวนการพัฒนา 1.5 ชั่วโมง ทุก compilation, ทุก flash, ทุก serial log reading เกิดขึ้นใน terminal ที่ AI ควบคุม</p>
+    <p>ถ้าทำโปรเจกต์เดียวกันด้วย manual workflow ตามปกติ การ setup BLE stack, เขียน HID descriptor, debug Unicode mapping อาจใช้เวลา 2-3 วัน ไม่รวมเวลาที่เสียกับการ flash manual ทุก iteration และเปิด serial monitor ดู log เอง ความแตกต่างของเวลา 1.5 ชั่วโมง vs. หลายวัน คือ proof ที่ชัดเจนที่สุดของ value ที่ workbench นี้สร้าง</p>
+
+    <div class="callout success">
+      <strong>Proof of Concept:</strong> iOS Voice Keyboard สร้างเสร็จใน 1.5 ชั่วโมง รองรับภาษาไทยและภาษาอังกฤษ ทำงานได้กับ Windows และ Linux โดยไม่ต้องลง driver — developer แค่เขียน idea.md
+    </div>
+
+    <div class="takeaway"><b>ใน 1.5 ชั่วโมง:</b> AI สร้าง multi-language voice keyboard ที่ทำงานข้าม OS ได้ โดย developer แค่เขียน idea — โปรเจกต์เดียวกันแบบ manual ใช้เวลา 2-3 วัน</div>
+  </div>
+</section>
+
+<!-- p9: Costs & Setup -->
+<section class="page" id="p9" data-title="ต้นทุนและการตั้งค่า">
+  <div class="page-inner">
+    <div class="section-label">Investment</div>
+    <h2>ต้นทุนและการตั้งค่าครั้งแรก</h2>
+    <p class="section-lead">ก่อนตัดสินใจสร้าง workbench นี้ควรเข้าใจ investment ที่ต้องการทั้งด้านเวลาและเงิน แม้ว่า hardware จะถูกมากเมื่อเทียบกับ professional test equipment แต่มี cost ที่มักถูกมองข้ามในส่วนของ software subscription และเวลา setup ครั้งแรก การวางแผน investment เหล่านี้ล่วงหน้าจะช่วยให้เห็น ROI ที่ชัดเจน</p>
+
+    <h3>Hardware Costs</h3>
+    <p>Raspberry Pi Zero 2W ราคาอยู่ที่ประมาณ $15 USD ซึ่งถือว่าถูกมากสำหรับ single-board computer ที่รัน Linux ได้เต็มๆ มีประสิทธิภาพเพียงพอสำหรับ serial forwarding และ network bridging ที่ workbench ต้องการ ข้อเสียเดียวคือ availability อาจผันผวนขึ้นอยู่กับ chip shortage สถานการณ์</p>
+    <p>USB Hub แบบ powered (มี DC adapter ของตัวเอง) สำคัญมาก ราคาอยู่ที่ $10-20 USD สำหรับ 4-7 port ต้องเป็นแบบ powered เพราะ Pi Zero ไม่สามารถจ่ายไฟให้ ESP32 หลายตัวพร้อมกันได้เพียงพอ USB cables สำหรับแต่ละ ESP32 ต้องเป็น data cable ราคารวมประมาณ $5-10 USD สำหรับ 3-4 เส้น</p>
+    <p>รวม hardware ทั้งหมดอยู่ที่ประมาณ $30-50 USD สำหรับ workbench ที่รองรับ 3-4 ESP32 boards พร้อมกัน ถ้าเทียบกับ commercial hardware testing equipment ที่ราคาเป็นหลักพันหรือหลักหมื่น USD นี่ถือว่า affordable มากๆ และถ้ามี ESP32 board อยู่แล้วก็ไม่ต้องซื้อเพิ่ม</p>
+
+    <h3>Software Costs</h3>
+    <p>Claude Code เป็น component ที่มี cost ต่อเนื่อง ต้องมี Anthropic API key หรือ Claude Pro subscription เพื่อใช้งาน ค่าใช้จ่ายขึ้นอยู่กับ usage แต่สำหรับ developer ที่ทำ IoT project บ่อยๆ cost นี้มักคุ้มค่ามากเมื่อเทียบกับเวลาที่ประหยัดได้ในแต่ละ project</p>
+    <p>ส่วน software อื่นๆ เป็น open source ทั้งหมด: Proxmox (hypervisor, free), Docker (free), esptool (free), Python serial libraries (free), socat (free, มีใน repository ทุก Linux distro) ซึ่งหมายความว่า ongoing cost หลักคือ Claude Code subscription เท่านั้น</p>
+    <p>วิธีคิด ROI ง่ายๆ: ถ้า Claude Code ช่วยประหยัดเวลา 1 วันต่อ project และทำ project เดือนละ 2-3 project ค่า subscription ถือว่าคุ้มค่ามากเมื่อเทียบกับ opportunity cost ของเวลาที่ใช้ไปกับ manual flash และ debug</p>
+
+    <h3>Initial Setup Time Investment</h3>
+    <p>การตั้งค่า Pi Zero 2W ครั้งแรกใช้เวลาประมาณ 2-4 ชั่วโมง รวมถึง: ติดตั้ง Raspberry Pi OS, configure network (Ethernet + static IP), ติดตั้ง socat และ Python serial libraries, ทดสอบ serial forwarding กับ ESP32 board จริงๆ เพื่อยืนยันว่าระบบทำงาน ขั้นตอนนี้ทำครั้งเดียวแล้วไม่ต้องทำซ้ำ</p>
+    <p>การสร้าง FSD SOP AI skill ครั้งแรกใช้เวลาประมาณ 1-2 ชั่วโมง skill นี้เป็น custom prompt template ที่บอก Claude Code ว่าต้องอ่าน idea.md และ generate FSD ในรูปแบบที่กำหนด เมื่อสร้างเสร็จแล้วใช้ได้กับทุก project ไม่ต้องแก้ไขอีก</p>
+    <p>การตั้งค่า Docker environment ใช้เวลาประมาณ 1 ชั่วโมง รวมถึง: สร้าง base Docker image ที่มี toolchain ของ ESP32 (ESP-IDF หรือ Arduino framework), configure network access ไปยัง Pi bridge, สร้าง superclaude alias ใน container รวมเวลา setup ทั้งหมดประมาณ 4-8 ชั่วโมง ลงทุนครั้งเดียว ใช้ได้ตลอดไป</p>
+
+    <div class="accordion" style="margin-top:16px">
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">จำเป็นต้องมี Proxmox ไหม?</button>
+        <div class="accordion-body">
+          <p>ไม่จำเป็น! Proxmox เป็นแค่ hypervisor ที่ผู้สร้าง workbench นี้ใช้อยู่เอง คุณสามารถใช้ VirtualBox, VMware, Hyper-V หรือแม้แต่ Docker บน Windows/Mac โดยตรงก็ได้ สิ่งสำคัญคือ Claude Code ต้องเข้าถึง network ที่ Pi Zero อยู่ได้ ซึ่งทำได้ผ่าน bridge network ใน Docker หรือ VM</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">ถ้า laptop มี USB port ตรงๆ ต้องใช้ Pi bridge ไหม?</button>
+        <div class="accordion-body">
+          <p>ไม่ต้องใช้เลย! ถ้า Claude Code รันโดยตรงบน machine ที่มี USB port และมองเห็น ESP32 เป็น /dev/ttyUSB0 ได้โดยตรง ก็ไม่จำเป็นต้องมี Pi bridge เลย Pi bridge ถูกออกแบบมาเพื่อแก้ปัญหา serial passthrough ของ VM โดยเฉพาะ</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">Claude Code แพงไหม เทียบกับประโยชน์ที่ได้?</button>
+        <div class="accordion-body">
+          <p>ขึ้นอยู่กับ usage pattern ถ้าทำ IoT project บ่อยๆ และแต่ละ project ประหยัดเวลาได้ 1-3 วัน ค่า subscription คุ้มค่ามากอย่างแน่นอน แต่ถ้าทำ project นานๆ ครั้ง อาจลอง API pay-per-use แทน subscription ก็ได้ เริ่มจาก project เล็กๆ แล้ววัด ROI จริงๆ ก่อนตัดสินใจ</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">ต้องมีประสบการณ์ embedded dev มากแค่ไหน?</button>
+        <div class="accordion-body">
+          <p>ต้องรู้พื้นฐาน embedded dev พอสมควร — เช่น รู้ว่า ESP32 คืออะไร, รู้จัก serial port, รู้จัก esptool, เข้าใจ concept ของ BLE หรือ WiFi ในระดับหนึ่ง AI จะทำ coding และ debugging ให้ แต่ developer ยังต้องเขียน idea ที่มี technical direction ที่ถูกต้อง และ review ผลลัพธ์ได้ ไม่ใช่ zero-knowledge tool</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="takeaway"><b>Investment Summary:</b> hardware ~$30-50 USD (ครั้งเดียว) + setup ~4-8 ชั่วโมง (ครั้งเดียว) + Claude Code subscription (ต่อเนื่อง) — คืนทุนตั้งแต่ project แรกที่ประหยัดได้ 1-2 วัน</div>
+  </div>
+</section>
+
+<!-- p10: Key Takeaways & References -->
+<section class="page" id="p10" data-title="สรุปและอ้างอิง">
+  <div class="page-inner">
+    <div class="section-label">Summary</div>
+    <h2>สรุป 7 Takeaways + References</h2>
+
+    <div class="bento cols-2">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="takeaway">
+          <b>1. Serial Bridge Architecture</b><br>
+          workbench = Pi Zero เป็น serial bridge ให้ AI ใน VM เข้าถึง ESP32 ผ่าน network — แก้ปัญหา serial passthrough ของ Proxmox ได้อย่างหรูหรา
+        </div>
+        <div class="takeaway">
+          <b>2. Structured Workflow คือ Key</b><br>
+          8-step workflow standardize embedded dev ให้ AI ทำได้โดยไม่เดา — FSD คือหัวใจ ถ้า spec ไม่ดีทุกอย่างพัง
+        </div>
+        <div class="takeaway">
+          <b>3. FSD SOP Skill</b><br>
+          custom AI skill ที่แปลง idea Markdown → structured spec อัตโนมัติ ทำให้ developer ลงทุนเวลาใน "อยากได้อะไร" แทนที่จะเสียเวลากับ "เขียนยังไง"
+        </div>
+        <div class="takeaway">
+          <b>4. Autonomous Flash Loop</b><br>
+          AI flash + test + iterate เองโดยไม่มีมนุษย์เข้ามาแทรก — ตัด context switch ที่เป็น cost ใหญ่ที่สุดของ embedded dev ออกไปได้ทั้งหมด
+        </div>
+        <div class="takeaway">
+          <b>5. Realistic IoT Testing</b><br>
+          test simulation ทดสอบ real failure (network down, MQTT killed, USB disconnect) ไม่ใช่แค่ happy path — สิ่งที่ desktop simulator ทำไม่ได้
+        </div>
+        <div class="takeaway">
+          <b>6. Proof: 1.5 ชั่วโมง</b><br>
+          iOS Voice Keyboard (BLE + USB HID + multi-language) สร้างเสร็จใน 1.5 ชั่วโมง vs. หลายวันด้วย manual workflow — ตัวเลขที่จับต้องได้
+        </div>
+        <div class="takeaway">
+          <b>7. Limitations ที่ต้องรู้</b><br>
+          Claude Code เป็น paid service, initial setup 4-8 ชั่วโมง, Pi bridge จำเป็นเฉพาะกรณี VM — ไม่ใช่ magic solution ที่ไร้ cost
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div>
+          <h3>References</h3>
+          <ol style="padding-left:20px;color:var(--ink-dim)">
+            <li style="margin-bottom:12px">
+              <strong>AI-Driven ESP32 Workflow (Spec → Code → Test) using Claude Code</strong><br>
+              <span style="font-size:13px;color:var(--muted)">Primary source — YouTube video demonstrating the full workbench</span>
+            </li>
+            <li style="margin-bottom:12px">
+              <strong>Espressif ESP32 Documentation</strong><br>
+              <a href="https://docs.espressif.com/" target="_blank" rel="noopener" style="font-size:13px">docs.espressif.com</a>
+            </li>
+            <li style="margin-bottom:12px">
+              <strong>esptool.py — ESP ROM Bootloader Utility</strong><br>
+              <a href="https://github.com/espressif/esptool" target="_blank" rel="noopener" style="font-size:13px">github.com/espressif/esptool</a>
+            </li>
+            <li style="margin-bottom:12px">
+              <strong>Claude Code by Anthropic</strong><br>
+              <a href="https://claude.ai/code" target="_blank" rel="noopener" style="font-size:13px">claude.ai/code</a>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0">Glossary</h3>
+          <table style="margin-top:8px">
+            <tr><th>Term</th><th>ความหมาย</th></tr>
+            <tr><td><code>ESP32</code></td><td>MCU จาก Espressif มี WiFi + BLE ในตัว</td></tr>
+            <tr><td><code>FSD</code></td><td>Functional Specification Document — spec ของ project</td></tr>
+            <tr><td><code>SOP</code></td><td>Standard Operating Procedure — AI skill workflow</td></tr>
+            <tr><td><code>BLE</code></td><td>Bluetooth Low Energy — ใช้ใน IoT/wearable</td></tr>
+            <tr><td><code>USB HID</code></td><td>Human Interface Device — keyboard/mouse protocol</td></tr>
+            <tr><td><code>Serial Bridge</code></td><td>อุปกรณ์ที่ forward serial port ผ่าน network</td></tr>
+            <tr><td><code>Proxmox</code></td><td>Open-source hypervisor สำหรับ VM management</td></tr>
+            <tr><td><code>Docker</code></td><td>Container platform สำหรับ isolate environments</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="takeaway" style="font-size:16px"><b>Final Takeaway:</b> ถ้าทำ IoT/embedded project บ่อยๆ ลงทุน setup workbench ครั้งเดียว 4-8 ชั่วโมง แล้ว AI จะเป็นคน flash และทดสอบให้ทุก iteration — คืนทุนตั้งแต่ project แรก</div>
+  </div>
+</section>
+
+</div><!-- end scroll-root -->
+<script>
+const sidebar=document.getElementById('sidebar'),sidebarOverlay=document.getElementById('sidebar-overlay'),sidebarToggle=document.getElementById('sidebar-toggle'),progressBar=document.getElementById('progress-bar'),tocEl=document.getElementById('toc'),pages=Array.from(document.querySelectorAll('.page'));
+const groups=[],groupMap={};
+pages.forEach(page=>{const gSlug=page.dataset.group||page.id,gTitle=page.dataset.groupTitle,label=page.dataset.title||page.id;if(!groupMap[gSlug]){const g={slug:gSlug,title:gTitle||label,pages:[]};groups.push(g);groupMap[gSlug]=g;}if(gTitle)groupMap[gSlug].title=gTitle;groupMap[gSlug].pages.push({page,label});});
+groups.forEach(g=>{const groupDiv=document.createElement('div');groupDiv.className='toc-group';groupDiv.dataset.group=g.slug;const groupLink=document.createElement('a');groupLink.className='toc-group-label';groupLink.href='#'+g.pages[0].page.id;groupLink.textContent=g.title;groupDiv.appendChild(groupLink);if(g.pages.length>1){const subList=document.createElement('ul');subList.className='toc-subs';g.pages.forEach(({page,label})=>{const li=document.createElement('li');const a=document.createElement('a');a.className='toc-sub';a.href='#'+page.id;a.textContent=label;a.dataset.pageId=page.id;li.appendChild(a);subList.appendChild(li);});groupDiv.appendChild(subList);}tocEl.appendChild(groupDiv);});
+function setActiveById(pageId){document.querySelectorAll('.toc-group-label').forEach(a=>a.classList.remove('active'));document.querySelectorAll('.toc-sub').forEach(a=>a.classList.remove('active'));const page=pages.find(p=>p.id===pageId);const gSlug=page?(page.dataset.group||page.id):pageId;const groupDiv=tocEl.querySelector('.toc-group[data-group="'+gSlug+'"]');if(!groupDiv)return;groupDiv.querySelector('.toc-group-label')?.classList.add('active');const subLink=groupDiv.querySelector('.toc-sub[data-page-id="'+pageId+'"]');if(subLink){subLink.classList.add('active');subLink.scrollIntoView({block:'nearest',behavior:'smooth'});}else{groupDiv.querySelector('.toc-group-label')?.scrollIntoView({block:'nearest',behavior:'smooth'});}}
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)setActiveById(e.target.id);});},{root:null,threshold:0.25});pages.forEach(p=>obs.observe(p));
+sidebarToggle.addEventListener('click',()=>{sidebar.classList.toggle('open');sidebarOverlay.classList.toggle('open');});
+sidebarOverlay.addEventListener('click',()=>{sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');}});
+tocEl.querySelectorAll('a').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<=768){sidebar.classList.remove('open');sidebarOverlay.classList.remove('open');}});});
+pages.forEach((page,i)=>{const inner=page.querySelector('.page-inner');if(!inner)return;const foot=document.createElement('div');foot.className='page-foot';if(i>0){const prev=pages[i-1];const btn=document.createElement('a');btn.className='pf-btn pf-prev';btn.href='#'+prev.id;btn.textContent='← '+(prev.dataset.title||prev.id);foot.appendChild(btn);}if(i<pages.length-1){const next=pages[i+1];const btn=document.createElement('a');btn.className='pf-btn pf-next';btn.href='#'+next.id;btn.textContent=(next.dataset.title||next.id)+' →';foot.appendChild(btn);}if(foot.children.length>0)inner.appendChild(foot);});
+window.addEventListener('scroll',()=>{const doc=document.documentElement;const scrolled=doc.scrollTop||document.body.scrollTop;const total=doc.scrollHeight-doc.clientHeight;if(total>0)progressBar.style.transform='scaleX('+(scrolled/total)+')';},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowRight'){e.preventDefault();jumpSection(1);}if(e.key==='ArrowUp'||e.key==='ArrowLeft'){e.preventDefault();jumpSection(-1);}});
+function jumpSection(dir){const active=tocEl.querySelector('.toc-sub.active')||tocEl.querySelector('.toc-group-label.active');if(!active){pages[0]?.scrollIntoView({behavior:'smooth',block:'start'});return;}const targetId=active.dataset.pageId||active.getAttribute('href')?.slice(1);const idx=pages.findIndex(p=>p.id===targetId);const newIdx=Math.max(0,Math.min(pages.length-1,idx+dir));if(newIdx!==idx)pages[newIdx].scrollIntoView({behavior:'smooth',block:'start'});}
+const themeBtn=document.getElementById('theme-btn'),root=document.documentElement,saved=localStorage.getItem('explainer-theme');
+if(saved){root.dataset.theme=saved;themeBtn.textContent=saved==='dark'?'☀︎':'☾';}
+themeBtn.addEventListener('click',()=>{const next=root.dataset.theme==='dark'?'light':'dark';root.dataset.theme=next;localStorage.setItem('explainer-theme',next);themeBtn.textContent=next==='dark'?'☀︎':'☾';});
+function switchTab(btn,panelId){btn.closest('.tabs-nav').querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.tabs-panel').forEach(p=>p.classList.remove('active'));const target=document.getElementById(panelId);if(target)target.classList.add('active');}
+function toggleAccordion(btn){btn.closest('.accordion-item').classList.toggle('open');}
+function copyCode(btn){const pre=btn.closest('.copy-wrap').querySelector('pre code');navigator.clipboard.writeText(pre.textContent).then(()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);});}
+</script>
+</body>
+</html>
