@@ -1,6 +1,6 @@
 ---
 title: "cmux — Terminal สำหรับ AI Agents บน macOS"
-date: 2026-05-30 06:00:00 +0700
+date: 2026-05-30 06:30:00 +0700
 categories: [Explainers]
 tags: [terminal, ai-agents, macos, claude-code, developer-tools]
 layout: explainer-redirect

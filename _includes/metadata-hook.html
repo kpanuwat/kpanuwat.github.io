@@ -2,6 +2,7 @@
   Intercept explainer post-card clicks on the home feed.
   Opens the target /explainers/<slug>.html directly in a new focused tab,
   skipping the meta-refresh hop. No-op on pages with no explainer posts.
+  Loaded via Chirpy's {% include metadata-hook.html %} at end of <head>.
 {%- endcomment -%}
 {%- assign explainer_posts = site.posts | where: "layout", "explainer-redirect" -%}
 {%- if explainer_posts.size > 0 -%}
