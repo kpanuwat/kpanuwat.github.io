@@ -159,6 +159,13 @@ li { margin-bottom: 8px; line-height: 1.7; }
 .mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
 .cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
 
+/* ── Cheat sheet image band ── */
+.cheatsheet { display:flex; flex-direction:column; align-items:center; gap:10px; min-height:0; }
+.cheatsheet img { max-width:100%; max-height:78vh; width:auto; height:auto;
+  object-fit:contain; border-radius:var(--radius); box-shadow:var(--shadow-md); background:var(--paper); }
+.cheatsheet svg { width:100%; height:auto; }
+.cheatsheet figcaption { font-size:13px; color:var(--muted); text-align:center; }
+
 /* ── Card system ── */
 .card {
   background: var(--paper);
@@ -354,6 +361,19 @@ tr:hover td { background: var(--soft); }
         <p style="color:rgba(255,255,255,.65);font-size:12px">ทุก 20 นาที มองจุดห่าง 20 ฟุต นาน 20 วินาที — ได้ผลกว่าแว่นกรองแสง</p>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+  PAGE 1b: CHEAT SHEET
+════════════════════════════════════════════ -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <div class="page-inner">
+    <figure class="cheatsheet">
+      <img src="assets/brain-rot-short-video-attention/cheatsheet.png"
+           alt="Brain Rot: Why Short-Form Video is Killing Your Focus (and How to Fix It) — cheat sheet">
+      <figcaption>ภาพสรุปแบบ cheat sheet — บันทึกไว้ดูซ้ำได้ · Source: NotebookLM</figcaption>
+    </figure>
   </div>
 </section>
 
