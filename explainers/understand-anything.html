@@ -36,6 +36,7 @@
   --radius-sm: 8px;
   --nav-h: 52px;
   --page-max: 960px;
+  --sidebar-w: 240px;
 }
 [data-theme="dark"] {
   --ink: #f1f5f9;
@@ -70,6 +71,15 @@ code, kbd, pre, .mono {
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+/* ── Progress bar ── */
+#progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 3px; background: var(--accent);
+  transform-origin: left; transform: scaleX(0);
+  transition: transform .1s linear;
+  pointer-events: none;
+}
+
 /* ── Nav bar ── */
 #nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -80,25 +90,17 @@ a:hover { text-decoration: underline; }
   padding: 0 16px;
   box-shadow: var(--shadow-sm);
 }
+#sidebar-toggle {
+  background: none; border: none; cursor: pointer;
+  font-size: 20px; color: var(--ink); padding: 4px 8px;
+  margin-right: 8px; border-radius: var(--radius-sm);
+  line-height: 1; flex-shrink: 0;
+  transition: background .15s;
+}
+#sidebar-toggle:hover { background: var(--soft); }
 #nav .brand {
   font-weight: 700; font-size: 15px; color: var(--ink);
   margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 240px;
-}
-#nav .page-links {
-  display: flex; gap: 2px; overflow-x: auto;
-  scrollbar-width: none; -ms-overflow-style: none;
-}
-#nav .page-links::-webkit-scrollbar { display: none; }
-#nav .page-links a {
-  padding: 6px 10px; border-radius: var(--radius-sm);
-  font-size: 13px; color: var(--ink-dim); white-space: nowrap;
-  transition: background .15s, color .15s;
-}
-#nav .page-links a:hover,
-#nav .page-links a.active {
-  background: var(--accent-wash); color: var(--accent);
-  text-decoration: none;
 }
 #nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
 #nav .controls button {
@@ -109,8 +111,73 @@ a:hover { text-decoration: underline; }
 }
 #nav .controls button:hover { background: var(--soft); }
 
+/* ── Sidebar ── */
+#sidebar {
+  position: fixed; top: var(--nav-h); left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--soft);
+  border-right: 1px solid var(--soft-2);
+  overflow-y: auto; overflow-x: hidden;
+  padding: 16px 0 40px;
+  z-index: 90;
+  transition: transform .25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--soft-2) transparent;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--soft-2); border-radius: 2px; }
+#sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 89;
+  background: rgba(15,23,42,.4);
+}
+.toc-group { margin-bottom: 2px; }
+.toc-group-label {
+  display: block; padding: 8px 16px;
+  font-size: 13px; font-weight: 600; color: var(--ink-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none;
+}
+.toc-group-label:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-group-label.active { color: var(--accent); font-weight: 700; }
+.toc-subs { padding: 0; list-style: none; margin-bottom: 4px; }
+.toc-sub {
+  display: block; padding: 5px 16px 5px 30px;
+  font-size: 12px; color: var(--muted);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none;
+}
+.toc-sub:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-sub.active {
+  color: var(--accent); font-weight: 600;
+  background: var(--accent-wash);
+  border-right: 2px solid var(--accent);
+}
+
+/* ── Page footer (prev/next) — auto-injected by JS ── */
+.page-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 32px; margin-top: 8px;
+  border-top: 1px solid var(--soft-2);
+}
+.page-foot .pf-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  background: var(--soft); border: 1px solid var(--soft-2);
+  font-size: 13px; color: var(--ink-dim);
+  transition: background .15s, color .15s;
+  text-decoration: none; white-space: nowrap;
+}
+.page-foot .pf-btn:hover { background: var(--accent-wash); color: var(--accent); text-decoration: none; }
+.page-foot .pf-next { margin-left: auto; }
+
 /* ── Sections ── */
-#scroll-root { padding-top: var(--nav-h); }
+#scroll-root { padding-top: var(--nav-h); margin-left: var(--sidebar-w); }
 .page {
   scroll-margin-top: calc(var(--nav-h) + 16px);
   padding: 64px 24px;
@@ -313,31 +380,46 @@ tr:hover td { background: var(--soft); }
 
 /* ── Print ── */
 @media print {
-  #nav { display: none; }
-  #scroll-root { padding-top: 0; }
+  #nav, #sidebar, #sidebar-overlay, #progress-bar, .page-foot { display: none; }
+  #scroll-root { padding-top: 0; margin-left: 0; }
   .page { page-break-after: always; }
   .page:last-child { page-break-after: avoid; }
 }
 
-/* ── Responsive ── */
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); box-shadow: none; }
+  #sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  #sidebar-overlay.open { display: block; }
+  #scroll-root { margin-left: 0; }
+}
 @media (max-width: 480px) {
   .page { padding: 32px 16px; }
   h2 { font-size: 22px; }
-  #nav .brand { max-width: 120px; font-size: 13px; }
+  #nav .brand { font-size: 13px; }
 }
 </style>
 </head>
 <body>
 
+<!-- ── Progress bar ── -->
+<div id="progress-bar"></div>
+
 <!-- ── Navigation ── -->
 <nav id="nav">
+  <button id="sidebar-toggle" title="Toggle navigation" aria-label="Toggle navigation">☰</button>
   <span class="brand">Understand Anything — Knowledge Graph</span>
-  <div class="page-links" id="page-links"></div>
   <div class="controls">
     <button id="theme-btn" title="Toggle dark mode">☀︎</button>
     <button onclick="window.print()" title="Print / save as PDF">⎙</button>
   </div>
 </nav>
+
+<!-- ── Left sidebar TOC (JS-filled) ── -->
+<aside id="sidebar">
+  <nav id="toc"></nav>
+</aside>
+<div id="sidebar-overlay"></div>
 
 <div id="scroll-root">
 
@@ -441,7 +523,11 @@ tr:hover td { background: var(--soft); }
 </section>
 
 <!-- PAGE 3: DEEP-DIVE PROTOCOL -->
-<section class="page" id="p3" data-title="Deep-Dive Protocol">
+<section class="page" id="p3a"
+  data-group="protocol"
+  data-group-title="Deep-Dive Protocol"
+  data-tier="intuition"
+  data-title="ส่วนประกอบ">
   <div class="page-inner">
     <div>
       <p class="section-label">Section 1 — Deep-Dive Protocol</p>
@@ -555,6 +641,24 @@ tr:hover td { background: var(--soft); }
       </p>
     </div>
 
+    <div class="takeaway"><b>★ Mental model:</b> ระบบประกอบ 7 ชิ้น แต่ละชิ้นมีหน้าที่เดียว — Tree-sitter สร้างโครงสร้าง, LLM เติมความหมาย, Dashboard แสดงผล</div>
+  </div>
+</section>
+
+<section class="page" id="p3b"
+  data-group="protocol"
+  data-tier="advanced"
+  data-title="สมมติฐาน & Takeaways">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 1 — Deep-Dive Protocol · สมมติฐาน & Key Takeaways</p>
+      <h2>สิ่งที่ต้องรู้ก่อนใช้ และ Insight ที่พกติดตัว</h2>
+      <p class="section-lead">
+        สมมติฐานเหล่านี้คือสิ่งที่ระบบถือว่าผู้ใช้รู้อยู่แล้ว — แต่มักเป็นสาเหตุที่ทำให้ล้มเหลวครั้งแรก
+        Key Takeaways ที่ตามมาคือ 7 insight ที่สำคัญที่สุด เรียงจาก high-level ลงสู่ actionable
+      </p>
+    </div>
+
     <div>
       <h3>สมมติฐานที่ซ่อนอยู่ (Implicit Assumptions)</h3>
       <ul>
@@ -608,11 +712,15 @@ tr:hover td { background: var(--soft); }
   </div>
 </section>
 
-<!-- PAGE 4: MULTI-AGENT PIPELINE -->
-<section class="page" id="p4" data-title="Pipeline">
+<!-- PAGES 4a–4b: MULTI-AGENT PIPELINE -->
+<section class="page" id="p4a"
+  data-group="pipeline"
+  data-group-title="Pipeline"
+  data-tier="intuition"
+  data-title="ขั้นตอน">
   <div class="page-inner">
     <div>
-      <p class="section-label">Section 2 — Multi-Agent Pipeline</p>
+      <p class="section-label">Section 2 — Multi-Agent Pipeline · ขั้นตอน</p>
       <h2>Pipeline ทำงานอย่างไร: จาก Code ถึง Knowledge Graph</h2>
       <p class="section-lead">
         หัวใจของ Understand Anything คือ multi-agent pipeline ที่ประสานงานระหว่าง static analysis และ LLM reasoning
@@ -672,6 +780,24 @@ tr:hover td { background: var(--soft); }
       </li>
     </ul>
 
+    <div class="takeaway"><b>★ ขั้นตอน:</b> Scan (Tree-sitter) → Map (6 agents parallel) → Teach (Dashboard) — แต่ละขั้นมีเครื่องมือที่ถูกต้องสำหรับงานนั้น</div>
+  </div>
+</section>
+
+<section class="page" id="p4b"
+  data-group="pipeline"
+  data-tier="mechanism"
+  data-title="กลไกลึก">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 2 — Multi-Agent Pipeline · กลไกลึก</p>
+      <h2>Tree-sitter vs. LLM และ Incremental Update</h2>
+      <p class="section-lead">
+        สองกลไกที่สำคัญที่สุดของ pipeline: การแบ่งงานระหว่าง parser deterministic กับ LLM probabilistic
+        และการ update graph แบบ incremental ที่ช่วยลด cost ในระยะยาว
+      </p>
+    </div>
+
     <details class="disclosure">
       <summary>เจาะลึก: Tree-sitter vs. LLM — ทำงานด้วยกันอย่างไร?</summary>
       <div class="details-body">
@@ -704,8 +830,12 @@ tr:hover td { background: var(--soft); }
   </div>
 </section>
 
-<!-- PAGE 5: KNOWLEDGE GRAPH STRUCTURE -->
-<section class="page" id="p5" data-title="Knowledge Graph">
+<!-- PAGES 5a–5b: KNOWLEDGE GRAPH STRUCTURE -->
+<section class="page" id="p5a"
+  data-group="knowledge-graph"
+  data-group-title="Knowledge Graph"
+  data-tier="intuition"
+  data-title="โครงสร้าง">
   <div class="page-inner">
     <div>
       <p class="section-label">Section 3 — Knowledge Graph Structure</p>
@@ -796,6 +926,24 @@ tr:hover td { background: var(--soft); }
         <h3>Business Flows</h3>
         <p>ชั้น cross-cutting ที่แมป business process ข้าม layers เช่น "checkout flow" ที่ผ่าน API → Service → Data</p>
       </div>
+    </div>
+
+    <div class="takeaway"><b>★ โครงสร้าง:</b> graph = nodes (entities) + edges (relations) + metadata — commit ลง repo ได้เหมือน lock file แต่สำหรับ semantic map</div>
+  </div>
+</section>
+
+<section class="page" id="p5b"
+  data-group="knowledge-graph"
+  data-tier="mechanism"
+  data-title="Team Asset">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Section 3 — Knowledge Graph · Team Asset</p>
+      <h2>Knowledge Graph เป็น Team Asset — วิธีใช้อย่างมีประสิทธิภาพ</h2>
+      <p class="section-lead">
+        ประโยชน์ที่ใหญ่ที่สุดของ graph คือมันเป็น artifact ที่ shareable และ versionable
+        เหมือนโค้ด — commit, review ใน PR, และ update แบบ incremental ได้
+      </p>
     </div>
 
     <h3>Knowledge Graph เป็น Team Asset — วิธีใช้อย่างมีประสิทธิภาพ</h3>
@@ -1027,7 +1175,11 @@ git add .gitattributes</code></pre>
 </section>
 
 <!-- PAGE 9: TAKEAWAYS + REFERENCES -->
-<section class="page" id="p9" data-title="สรุป">
+<section class="page" id="p9a"
+  data-group="summary"
+  data-group-title="สรุป"
+  data-tier="intuition"
+  data-title="Key Takeaways">
   <div class="page-inner">
     <div>
       <p class="section-label">Key Takeaways &amp; References</p>
@@ -1064,6 +1216,20 @@ curl -fsSL https://raw.githubusercontent.com/Lum1104/Understand-Anything/main/in
 # เปิด dashboard
 /understand-dashboard</code></pre>
       </div>
+    </div>
+
+    <div class="takeaway"><b>★ ถ้าจำได้อย่างเดียว:</b> scan ครั้งเดียว ได้ semantic map ที่ทีมและ AI ใช้ร่วมกันได้ตลอดชีวิต project</div>
+  </div>
+</section>
+
+<section class="page" id="p9b"
+  data-group="summary"
+  data-tier="advanced"
+  data-title="References & Glossary">
+  <div class="page-inner">
+    <div>
+      <p class="section-label">Key Takeaways — References & Glossary</p>
+      <h2>แหล่งข้อมูลและคำศัพท์สำคัญ</h2>
     </div>
 
     <div>
@@ -1104,48 +1270,164 @@ curl -fsSL https://raw.githubusercontent.com/Lum1104/Understand-Anything/main/in
 </div><!-- /scroll-root -->
 
 <script>
-// ── Hash-based page nav ──
-const scrollRoot = document.getElementById('scroll-root');
-const pageLinks = document.getElementById('page-links');
+// ── DOM refs ──
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const progressBar = document.getElementById('progress-bar');
+const tocEl = document.getElementById('toc');
 const pages = Array.from(document.querySelectorAll('.page'));
 
-pages.forEach((page, i) => {
-  const a = document.createElement('a');
-  a.href = '#' + page.id;
-  a.textContent = page.dataset.title || ('p' + (i + 1));
-  pageLinks.appendChild(a);
+// ── Build sidebar TOC ──
+// Self-healing: no data-group → page.id is used as group key (flat single entry)
+const groups = [];
+const groupMap = {};
+
+pages.forEach(page => {
+  const gSlug = page.dataset.group || page.id;
+  const gTitle = page.dataset.groupTitle;
+  const label  = page.dataset.title || page.id;
+
+  if (!groupMap[gSlug]) {
+    const g = { slug: gSlug, title: gTitle || label, pages: [] };
+    groups.push(g);
+    groupMap[gSlug] = g;
+  }
+  if (gTitle) groupMap[gSlug].title = gTitle;
+  groupMap[gSlug].pages.push({ page, label });
 });
+
+groups.forEach(g => {
+  const groupDiv = document.createElement('div');
+  groupDiv.className = 'toc-group';
+  groupDiv.dataset.group = g.slug;
+
+  const groupLink = document.createElement('a');
+  groupLink.className = 'toc-group-label';
+  groupLink.href = '#' + g.pages[0].page.id;
+  groupLink.textContent = g.title;
+  groupDiv.appendChild(groupLink);
+
+  if (g.pages.length > 1) {
+    const subList = document.createElement('ul');
+    subList.className = 'toc-subs';
+    g.pages.forEach(({ page, label }) => {
+      const li = document.createElement('li');
+      const a  = document.createElement('a');
+      a.className = 'toc-sub';
+      a.href = '#' + page.id;
+      a.textContent = label;
+      a.dataset.pageId = page.id;
+      li.appendChild(a);
+      subList.appendChild(li);
+    });
+    groupDiv.appendChild(subList);
+  }
+
+  tocEl.appendChild(groupDiv);
+});
+
+// ── Scroll-spy ──
+function setActiveById(pageId) {
+  document.querySelectorAll('.toc-group-label').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.toc-sub').forEach(a => a.classList.remove('active'));
+
+  const page  = pages.find(p => p.id === pageId);
+  const gSlug = page ? (page.dataset.group || page.id) : pageId;
+  const groupDiv = tocEl.querySelector(`.toc-group[data-group="${gSlug}"]`);
+  if (!groupDiv) return;
+
+  groupDiv.querySelector('.toc-group-label')?.classList.add('active');
+  const subLink = groupDiv.querySelector(`.toc-sub[data-page-id="${pageId}"]`);
+  if (subLink) {
+    subLink.classList.add('active');
+    subLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  } else {
+    groupDiv.querySelector('.toc-group-label')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
 
 const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      document.querySelectorAll('#page-links a').forEach(a => a.classList.remove('active'));
-      const active = document.querySelector(`#page-links a[href="#${e.target.id}"]`);
-      if (active) {
-        active.classList.add('active');
-        active.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-      }
-    }
-  });
-}, { root: null, threshold: 0.3 });
+  entries.forEach(e => { if (e.isIntersecting) setActiveById(e.target.id); });
+}, { root: null, threshold: 0.25 });
 pages.forEach(p => obs.observe(p));
 
+// ── Mobile hamburger ──
+sidebarToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  sidebarOverlay.classList.toggle('open');
+});
+sidebarOverlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('open');
+  }
+});
+tocEl.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    }
+  });
+});
+
+// ── Auto-inject prev/next footer ──
+pages.forEach((page, i) => {
+  const inner = page.querySelector('.page-inner');
+  if (!inner) return;
+  const foot = document.createElement('div');
+  foot.className = 'page-foot';
+  if (i > 0) {
+    const prev = pages[i - 1];
+    const btn  = document.createElement('a');
+    btn.className = 'pf-btn pf-prev';
+    btn.href = '#' + prev.id;
+    btn.textContent = '← ' + (prev.dataset.title || prev.id);
+    foot.appendChild(btn);
+  }
+  if (i < pages.length - 1) {
+    const next = pages[i + 1];
+    const btn  = document.createElement('a');
+    btn.className = 'pf-btn pf-next';
+    btn.href = '#' + next.id;
+    btn.textContent = (next.dataset.title || next.id) + ' →';
+    foot.appendChild(btn);
+  }
+  if (foot.children.length > 0) inner.appendChild(foot);
+});
+
+// ── Scroll progress bar ──
+window.addEventListener('scroll', () => {
+  const doc     = document.documentElement;
+  const scrolled = doc.scrollTop || document.body.scrollTop;
+  const total   = doc.scrollHeight - doc.clientHeight;
+  if (total > 0) progressBar.style.transform = `scaleX(${scrolled / total})`;
+}, { passive: true });
+
+// ── Arrow-key section jump ──
 document.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); jumpSection(1); }
-  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); jumpSection(-1); }
+  if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')  { e.preventDefault(); jumpSection(-1); }
 });
 function jumpSection(dir) {
-  const active = document.querySelector('#page-links a.active');
-  const links = Array.from(document.querySelectorAll('#page-links a'));
-  const idx = links.indexOf(active);
-  const next = links[idx + dir];
-  if (next) next.click();
+  const active = tocEl.querySelector('.toc-sub.active') ||
+                 tocEl.querySelector('.toc-group-label.active');
+  if (!active) { pages[0]?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  const targetId = active.dataset.pageId || active.getAttribute('href')?.slice(1);
+  const idx = pages.findIndex(p => p.id === targetId);
+  const newIdx = Math.max(0, Math.min(pages.length - 1, idx + dir));
+  if (newIdx !== idx) pages[newIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── Theme toggle ──
 const themeBtn = document.getElementById('theme-btn');
-const root = document.documentElement;
-const saved = localStorage.getItem('explainer-theme');
+const root     = document.documentElement;
+const saved    = localStorage.getItem('explainer-theme');
 if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
 themeBtn.addEventListener('click', () => {
   const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
