@@ -1,6 +1,6 @@
 ---
 title: "RTK-GPS & DePIN: ความแม่นยำระดับเซนติเมตรจากเครือข่ายกระจายศูนย์"
-date: 2026-05-31 06:00:00 +0700
+date: 2026-05-30 06:34:00 +0700
 categories: [Explainers]
 tags: [gps, rtk, depin, esp32, iot, blockchain, gnss, hardware]
 layout: explainer-redirect
