@@ -3,7 +3,10 @@ title: "AI Coding Workflow ที่มีประสิทธิภาพ: Sma
 date: 2026-05-31 06:38:00 +0700
 categories: [Engineering]
 tags: [ai, software-engineering, tdd, workflow, vertical-slices, kanban]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
