@@ -3,7 +3,10 @@ title: "ทักษะพื้นฐานซอฟต์แวร์ในย
 date: 2026-05-31 06:37:00 +0700
 categories: [Engineering]
 tags: [ai, software-engineering, architecture, tdd, domain-driven-design, clean-code]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
