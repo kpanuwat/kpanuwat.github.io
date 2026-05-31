@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Dynamic Workflows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (mirrors marp-deck 26-token :root) ── */
+:root {
+  --ink: #1e293b;
+  --ink-dim: #475569;
+  --muted: #94a3b8;
+  --paper: #ffffff;
+  --soft: #f1f5f9;
+  --soft-2: #e2e8f0;
+  --accent: #7c3aed;
+  --accent-deep: #4c1d95;
+  --accent-wash: #ede9fe;
+  --gold: #d4af37;
+  --danger: #dc2626;
+  --danger-wash: #fee2e2;
+  --danger-ink: #991b1b;
+  --success: #16a34a;
+  --success-wash: #dcfce7;
+  --success-ink: #14532d;
+  --warning: #f59e0b;
+  --warning-wash: #fef3c7;
+  --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 52px;
+  --page-max: 960px;
+  --sidebar-w: 240px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9;
+  --ink-dim: #94a3b8;
+  --muted: #475569;
+  --paper: #0f172a;
+  --soft: #1e293b;
+  --soft-2: #334155;
+  --accent-wash: #1e3a8a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe;
+  --danger-wash: #450a0a;  --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+}
+code, kbd, pre, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Progress bar ── */
+#progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 3px; background: var(--accent);
+  transform-origin: left; transform: scaleX(0);
+  transition: transform .1s linear;
+  pointer-events: none;
+}
+
+/* ── Nav bar ── */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--soft-2);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  box-shadow: var(--shadow-sm);
+}
+#sidebar-toggle {
+  background: none; border: none; cursor: pointer;
+  font-size: 20px; color: var(--ink); padding: 4px 8px;
+  margin-right: 8px; border-radius: var(--radius-sm);
+  line-height: 1; flex-shrink: 0;
+  transition: background .15s;
+}
+#sidebar-toggle:hover { background: var(--soft); }
+#nav .brand {
+  font-weight: 700; font-size: 15px; color: var(--ink);
+  margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button {
+  background: none; border: 1px solid var(--soft-2);
+  border-radius: var(--radius-sm); padding: 5px 10px;
+  font-size: 13px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+#nav .controls button:hover { background: var(--soft); }
+
+/* ── Sidebar ── */
+#sidebar {
+  position: fixed; top: var(--nav-h); left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--soft);
+  border-right: 1px solid var(--soft-2);
+  overflow-y: auto; overflow-x: hidden;
+  padding: 16px 0 40px;
+  z-index: 90;
+  transition: transform .25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--soft-2) transparent;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--soft-2); border-radius: 2px; }
+
+#sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 89;
+  background: rgba(15,23,42,.4);
+}
+
+/* ── Sidebar TOC ── */
+.toc-group { margin-bottom: 2px; }
+
+.toc-group-label {
+  display: block;
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 600; color: var(--ink-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none;
+}
+.toc-group-label:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-group-label.active { color: var(--accent); font-weight: 700; }
+
+.toc-subs { padding: 0; list-style: none; margin-bottom: 4px; }
+
+.toc-sub {
+  display: block;
+  padding: 5px 16px 5px 30px;
+  font-size: 12px; color: var(--muted);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none;
+}
+.toc-sub:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-sub.active {
+  color: var(--accent); font-weight: 600;
+  background: var(--accent-wash);
+  border-right: 2px solid var(--accent);
+}
+
+/* ── Sections (document scroll) ── */
+#scroll-root {
+  padding-top: var(--nav-h);
+  margin-left: var(--sidebar-w);
+}
+.page {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+  padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.page-inner {
+  width: 100%; max-width: var(--page-max);
+  display: flex; flex-direction: column; gap: 28px;
+}
+.page.cover {
+  min-height: calc(100vh - var(--nav-h));
+  background: linear-gradient(135deg, #0f172a 0%, var(--accent-deep) 100%);
+  color: white; justify-content: center; align-items: center; text-align: center;
+}
+.page.cover .page-inner { align-items: center; }
+
+/* ── Page footer (prev/next) — auto-injected by JS ── */
+.page-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 32px; margin-top: 8px;
+  border-top: 1px solid var(--soft-2);
+}
+.page-foot .pf-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  background: var(--soft); border: 1px solid var(--soft-2);
+  font-size: 13px; color: var(--ink-dim); cursor: pointer;
+  transition: background .15s, color .15s;
+  text-decoration: none; white-space: nowrap;
+}
+.page-foot .pf-btn:hover { background: var(--accent-wash); color: var(--accent); text-decoration: none; }
+.page-foot .pf-next { margin-left: auto; }
+
+/* ── Typography ── */
+h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+
+/* ── Prose flow ── */
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
+.prose-block { display: flex; flex-direction: column; gap: 0; }
+.prose-block + .prose-block { margin-top: 4px; }
+.section-label {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.page-number {
+  font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 24px;
+  align-self: flex-end;
+}
+
+/* ── Cover mark ── */
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+
+/* ── Cheat sheet image band ── */
+.cheatsheet { display:flex; flex-direction:column; align-items:center; gap:10px; min-height:0; }
+.cheatsheet img { max-width:100%; max-height:78vh; width:auto; height:auto;
+  object-fit:contain; border-radius:var(--radius); box-shadow:var(--shadow-md); background:var(--paper); }
+.cheatsheet svg { width:100%; height:auto; }
+.cheatsheet figcaption { font-size:13px; color:var(--muted); text-align:center; }
+
+/* ── Card system ── */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+  border-left: 4px solid var(--accent);
+  box-sizing: border-box;
+}
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card h3      { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p       { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul      { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+
+/* ── Bento grid ── */
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 640px) {
+  .bento.cols-2, .bento.cols-3, .bento.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Takeaway banner ── */
+.takeaway {
+  border-left: 4px solid var(--accent);
+  background: var(--soft);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 15px; line-height: 1.6;
+}
+.takeaway b { color: var(--accent); }
+
+/* ── Steps list ── */
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.steps li .step-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--accent); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+
+/* ── Callout ── */
+.callout {
+  background: var(--accent-wash);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 15px; color: var(--accent-deep);
+  border: 1px solid var(--accent);
+}
+.callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+
+/* ── Inline code ── */
+code {
+  background: var(--soft-2); color: var(--danger-ink); font-size: .875em;
+  padding: 2px 6px; border-radius: 4px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6;
+}
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+kbd {
+  background: var(--soft-2); border: 1px solid var(--soft-2);
+  border-bottom-color: var(--muted); border-radius: 4px;
+  font-size: .8em; padding: 2px 7px; box-shadow: 0 1px 0 var(--muted);
+}
+
+/* ── Copy button ── */
+.copy-wrap { position: relative; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--soft-2); border: none; border-radius: 4px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+.copy-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.copy-btn.copied { background: var(--success-wash); color: var(--success-ink); }
+
+/* ── Tabs ── */
+.tabs-nav {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--soft-2); margin-bottom: 16px;
+}
+.tabs-nav button {
+  background: none; border: none; padding: 8px 14px; cursor: pointer;
+  font-size: 14px; color: var(--ink-dim); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color .15s, border-color .15s;
+}
+.tabs-nav button:hover { color: var(--ink); }
+.tabs-nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs-panel { display: none; }
+.tabs-panel.active { display: block; }
+
+/* ── Accordion ── */
+.accordion { border: 1px solid var(--soft-2); border-radius: var(--radius-sm); overflow: hidden; }
+.accordion-item { border-top: 1px solid var(--soft-2); }
+.accordion-item:first-child { border-top: none; }
+.accordion-btn {
+  width: 100%; background: none; border: none; padding: 14px 16px;
+  text-align: left; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; font-size: 15px; color: var(--ink);
+  transition: background .15s;
+}
+.accordion-btn:hover { background: var(--soft); }
+.accordion-btn::after { content: "▾"; font-size: 12px; color: var(--muted); transition: transform .2s; }
+.accordion-item.open .accordion-btn::after { transform: rotate(-180deg); }
+.accordion-body { display: none; padding: 0 16px 16px; color: var(--ink-dim); font-size: 14px; line-height: 1.7; }
+.accordion-item.open .accordion-body { display: block; }
+
+/* ── Progressive disclosure (native <details>) ── */
+details.disclosure {
+  border-left: 3px solid var(--accent);
+  background: var(--soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 12px 0;
+}
+details.disclosure summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  user-select: none;
+}
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after {
+  content: "▾";
+  font-size: 12px; color: var(--muted);
+  transition: transform .2s;
+  margin-left: auto;
+}
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body {
+  padding: 4px 16px 16px;
+  font-size: 14px; color: var(--ink-dim); line-height: 1.7;
+}
+details.disclosure .details-body p { font-size: 14px; }
+details.disclosure .details-body pre { margin: 8px 0; }
+
+/* ── Comparison table ── */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+
+/* ── Print ── */
+@media print {
+  #nav, #sidebar, #sidebar-overlay, #progress-bar, .page-foot { display: none; }
+  #scroll-root { padding-top: 0; margin-left: 0; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); box-shadow: none; }
+  #sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  #sidebar-overlay.open { display: block; }
+  #scroll-root { margin-left: 0; }
+}
+@media (max-width: 480px) {
+  .page { padding: 32px 16px; }
+  h2 { font-size: 22px; }
+  #nav .brand { font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Progress bar ── -->
+<div id="progress-bar"></div>
+
+<!-- ── Navigation ── -->
+<nav id="nav">
+  <button id="sidebar-toggle" title="Toggle navigation" aria-label="Toggle navigation">☰</button>
+  <span class="brand">Dynamic Workflows</span>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">☀︎</button>
+    <button onclick="window.print()" title="Print / save as PDF">⎙</button>
+  </div>
+</nav>
+
+<!-- ── Left sidebar TOC (JS-filled) ── -->
+<aside id="sidebar">
+  <nav id="toc"></nav>
+</aside>
+<div id="sidebar-overlay"></div>
+
+<div id="scroll-root">
+<!-- ── p1 COVER ── -->
+<section class="page cover" id="p1" data-title="หน้าแรก">
+  <div class="cover-inner">
+    <div class="cover-eyebrow">Claude Code · ฟีเจอร์ใหม่ Claude Opus 4.8</div>
+    <h1 class="cover-title">Dynamic Workflows</h1>
+    <p class="cover-subtitle">ส่งกองทัพ Sub-agents ทำงานพร้อมกันหลักร้อยตัว<br>แล้วสังเคราะห์ผลลัพธ์เดียว — ทุกอย่างอัตโนมัติ</p>
+    <div class="cover-stats">
+      <div class="stat-card">
+        <span class="stat-num">×100</span>
+        <span class="stat-label">Sub-agents ทำงานพร้อมกัน (สูงสุด 1,000/รอบ)</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">11 วัน</span>
+        <span class="stat-label">Bun แปลง Zig→Rust 750k บรรทัด ผ่านเทสต์ 99.8%</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">5M</span>
+        <span class="stat-label">Input Tokens ใน 1 การรัน — รู้ก่อนใช้จะปลอดภัยกว่า</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── p1b CHEATSHEET BAND ── -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <h2>Cheat Sheet</h2>
+  <div class="cheatsheet-band">
+    <img src="assets/claude-code-dynamic-workflows/cheatsheet.png" alt="Claude Code Dynamic Workflows cheat sheet">
+  </div>
+</section>
+
+<!-- ── p2 OVERVIEW ── -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <h2>ภาพรวม — Dynamic Workflows คืออะไร?</h2>
+  <p class="section-lead">
+    ลองนึกภาพงานกำจัด Dead code ใน codebase ขนาด 300 ไฟล์ ถ้าให้เอเจนต์ตัวเดียวทำ มันจะต้องอ่านทีละไฟล์เรียงกัน และพอถึงไฟล์ที่ 200 ก็จำเนื้อหาไฟล์แรกๆ ไม่ได้แล้ว แต่ถ้าใช้ Dynamic Workflows Claude จะเขียนสคริปต์ JavaScript ขึ้นมาเอง แล้วส่ง Sub-agents 300 ตัวออกไปอ่านพร้อมกัน แต่ละตัวมีความจำเป็นของตัวเอง ผลลัพธ์ทั้งหมดถูกรวบรวมมาสังเคราะห์เป็นรายงานเดียว — นั่นคือแก่นของ Dynamic Workflows
+  </p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🎼</div>
+      <h3 class="card-title">Master Orchestrator</h3>
+      <p>Claude วิเคราะห์งาน เขียนสคริปต์ JS ไดนามิก แล้วสั่ง Sub-agents ทำงานขนาน แผนงานเก็บอยู่ในตัวแปรสคริปต์ ไม่ใช่ใน Context window ของแชทหลัก</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h3 class="card-title">Parallel Execution</h3>
+      <p>Sub-agents ทำงานพร้อมกันสูงสุด 16 ตัวต่อรอบ รันได้สูงสุด 1,000 ตัวต่อ Workflow และบันทึก Progress ไว้ตลอด — ถ้าหยุดกลางคันกลับมาต่อได้</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔍</div>
+      <h3 class="card-title">Adversarial Verification</h3>
+      <p>เอเจนต์บางกลุ่มทำหน้าที่ "โต้แย้ง" ผลลัพธ์ของเอเจนต์อื่น วนซ้ำจนทุกฝ่าย Converge — กลไกนี้ทำให้โค้ดที่แปลงโดย Bun ผ่านเทสต์ได้ถึง 99.8%</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">💡</div>
+      <h3 class="card-title">Clean Context per Agent</h3>
+      <p>แต่ละ Sub-agent ได้ Context window ใหม่สะอาด ไม่ถูกปนเปื้อนจากงานอื่น ทำให้วิเคราะห์ส่วนงานของตัวเองได้ลึกและแม่นยำ</p>
+    </div>
+  </div>
+
+  <h3>Dynamic Workflows ต่างจากฟีเจอร์อื่นอย่างไร?</h3>
+  <p>Claude Code มีวิธีจัดการงานหลายแบบ แต่ละแบบเหมาะกับปัญหาต่างกัน การเลือกผิดประเภทหมายถึงเสียเวลาและ Token โดยไม่จำเป็น ตารางด้านล่างเปรียบเทียบตรงๆ:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ฟีเจอร์</th>
+          <th>เน้น</th>
+          <th>เหมาะกับ</th>
+          <th>ไม่เหมาะกับ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Skills</strong></td>
+          <td>กระบวนการซ้ำได้ (HOW)</td>
+          <td>งานมีสูตรตายตัว เช่น deploy, test</td>
+          <td>งานที่ต้องการความกว้าง</td>
+        </tr>
+        <tr>
+          <td><strong>Sub-agents (เดี่ยว)</strong></td>
+          <td>งานเดี่ยวแบบ Off-load</td>
+          <td>งานเดี่ยวที่แยกออกจาก Context หลัก</td>
+          <td>งานที่ต้องรันหลายตัวพร้อมกัน</td>
+        </tr>
+        <tr>
+          <td><strong>Agent Teams</strong></td>
+          <td>ทีมขนาดเล็ก บทบาทตายตัว</td>
+          <td>งานที่รู้บทบาทล่วงหน้า เช่น Frontend+Backend</td>
+          <td>งานที่ยังไม่รู้ว่าต้องใช้ทักษะอะไร</td>
+        </tr>
+        <tr>
+          <td><strong>/goal</strong></td>
+          <td>ความลึก (DEPTH) — วนลูปจนจบ</td>
+          <td>ปัญหาที่ต้องลองซ้ำหลายรอบ</td>
+          <td>งานที่แยกส่วนได้แล้วทำพร้อมกันได้</td>
+        </tr>
+        <tr style="background:var(--accent-wash);">
+          <td><strong>Dynamic Workflows ★</strong></td>
+          <td>ความกว้าง (WIDTH) — ขนานจำนวนมาก</td>
+          <td>งานชิ้นย่อยอิสระจำนวนมาก สเกลใหญ่</td>
+          <td>งานต้องทำตามลำดับ หรืองานเล็กเกิน</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> Dynamic Workflows = WIDTH play; /goal = DEPTH play — เลือกจากว่า bottleneck คือ "ต้องทำหลายอย่างพร้อมกัน" หรือ "ต้องคิดซ้ำจนได้คำตอบ"</div>
+</section>
+
+<!-- ── p3a DEEP-DIVE: Architecture ── -->
+<section class="page" id="p3a" data-group="deep-dive" data-group-title="เจาะลึกกลไก" data-tier="intuition" data-title="สถาปัตยกรรม">
+  <h2>เจาะลึก — สถาปัตยกรรม Fan-out / Fan-in</h2>
+  <p class="section-lead">
+    วิธีที่ง่ายที่สุดในการเข้าใจ Dynamic Workflows คือนึกภาพ "วาทยากร (Conductor) กับวงออร์เคสตรา" วาทยากร (Master Agent) ไม่ได้เล่นเครื่องดนตรีทุกชิ้นเอง แต่เขียนโน้ตให้นักดนตรีแต่ละคน (Sub-agents) เล่นพร้อมกัน แล้วรวบรวมเสียงทั้งหมดออกมาเป็นซิมโฟนีชิ้นเดียว — นั่นคือ Fan-out → Fan-in
+  </p>
+
+  <h3>ขั้นตอนที่ 1: Fan-out — กระจายงาน</h3>
+  <p>เมื่อคุณส่งคำสั่งขนาดใหญ่ Claude (ในฐานะ Orchestrator) จะทำ 3 สิ่ง: (1) วิเคราะห์งานและตัดสินใจว่าส่วนไหนทำพร้อมกันได้, (2) เขียนสคริปต์ JavaScript ไดนามิกที่เก็บ "แผนงาน" ทั้งหมดไว้ในตัวแปร (ไม่ใช่ใน Context window ของคุณ), (3) สั่ง Sub-agents จำนวนมากออกไปทำงานพร้อมๆ กัน โดยแต่ละตัวได้รับไฟล์/งานส่วนของตัวเองและ Context window ที่สะอาด</p>
+
+  <div class="bento">
+    <div class="bento-item bento-wide">
+      <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" aria-label="Fan-out / Fan-in diagram">
+        <!-- Master Agent -->
+        <rect x="10" y="75" width="120" height="50" rx="8" fill="var(--accent)" opacity="0.9"/>
+        <text x="70" y="97" text-anchor="middle" font-size="11" fill="white" font-weight="bold">Master Agent</text>
+        <text x="70" y="113" text-anchor="middle" font-size="9" fill="white">(Orchestrator)</text>
+
+        <!-- Fan-out arrows -->
+        <line x1="130" y1="88" x2="195" y2="55" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="130" y1="100" x2="195" y2="100" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="130" y1="112" x2="195" y2="145" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Sub-agents -->
+        <rect x="200" y="35" width="90" height="40" rx="6" fill="var(--accent-deep)" opacity="0.85"/>
+        <text x="245" y="53" text-anchor="middle" font-size="9" fill="white">Sub-agent 1</text>
+        <text x="245" y="67" text-anchor="middle" font-size="8" fill="#ddd">Files A–G</text>
+
+        <rect x="200" y="80" width="90" height="40" rx="6" fill="var(--accent-deep)" opacity="0.85"/>
+        <text x="245" y="98" text-anchor="middle" font-size="9" fill="white">Sub-agent 2</text>
+        <text x="245" y="112" text-anchor="middle" font-size="8" fill="#ddd">Files H–N</text>
+
+        <rect x="200" y="125" width="90" height="40" rx="6" fill="var(--accent-deep)" opacity="0.85"/>
+        <text x="245" y="143" text-anchor="middle" font-size="9" fill="white">Sub-agent 3</text>
+        <text x="245" y="157" text-anchor="middle" font-size="8" fill="#ddd">Files O–Z</text>
+
+        <!-- Verifier agents -->
+        <rect x="320" y="55" width="80" height="35" rx="5" fill="#dc2626" opacity="0.8"/>
+        <text x="360" y="72" text-anchor="middle" font-size="8.5" fill="white">Verifier</text>
+        <text x="360" y="84" text-anchor="middle" font-size="7.5" fill="#fca5a5">(Refute)</text>
+
+        <line x1="290" y1="62" x2="320" y2="70" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#rarr)"/>
+        <line x1="290" y1="100" x2="320" y2="75" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#rarr)"/>
+
+        <!-- Fan-in arrows -->
+        <line x1="400" y1="72" x2="470" y2="88" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="290" y1="100" x2="470" y2="100" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+        <line x1="290" y1="140" x2="470" y2="112" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Synthesis -->
+        <rect x="475" y="70" width="110" height="60" rx="8" fill="var(--accent)" opacity="0.9"/>
+        <text x="530" y="95" text-anchor="middle" font-size="10" fill="white" font-weight="bold">Synthesis</text>
+        <text x="530" y="110" text-anchor="middle" font-size="9" fill="white">Single Output</text>
+        <text x="530" y="123" text-anchor="middle" font-size="8" fill="#ddd">(Fan-in)</text>
+
+        <defs>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)"/>
+          </marker>
+          <marker id="rarr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#dc2626"/>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="1" height="1" fill="none"/>
+      </svg>
+      <p style="font-size:0.8em;color:var(--muted);text-align:center;margin-top:0.5rem">สายแดงประ = Adversarial verification — เอเจนต์คู่โต้แย้งผลลัพธ์ของกันและกัน</p>
+    </div>
+  </div>
+
+  <h3>ขั้นตอนที่ 2: Adversarial Verification — ระบบตรวจสอบคุณภาพในตัว</h3>
+  <p>หลังจาก Sub-agents ทำงานเสร็จ ไม่ใช่ว่าผลลัพธ์จะถูกรวบรวมทันที Dynamic Workflows มีกลไกพิเศษคือการส่ง "เอเจนต์นักวิจารณ์" เพิ่มเติมเข้าไปพยายาม "หักล้าง (Refute)" ผลลัพธ์ที่ได้ กระบวนการนี้วนซ้ำจนกว่าทุกฝ่ายจะ Converge หรือตกลงกันได้ — นั่นคือเหตุผลที่โปรเจกต์ Bun สามารถแปลงโค้ด 750,000 บรรทัดจาก Zig ไป Rust แล้วยังผ่านเทสต์ได้ถึง 99.8%</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — Adversarial Verification ทำงานอย่างไร?</summary>
+    <div class="details-body">
+      <p>เมื่อ Sub-agent หนึ่งส่งผลลัพธ์กลับมา Orchestrator อาจสั่ง Sub-agent คู่โต้แย้ง (Adversarial agent) เข้าไปตรวจสอบโดยเฉพาะ โดยให้ Context เต็มของงานชิ้นนั้น พร้อมคำสั่งให้พยายามหาข้อผิดพลาดอย่างเต็มที่</p>
+      <p>ถ้า Adversarial agent พบข้อผิดพลาด Orchestrator จะส่ง Sub-agent ตัวเดิมกลับไปแก้ไข แล้วส่ง Adversarial agent ใหม่เข้าไปตรวจซ้ำ วงจรนี้จะวนจนผลลัพธ์ผ่านการโต้แย้ง กระบวนการทั้งหมดยังคงบันทึก Progress ไว้ทุกขั้นตอน ทำให้ถ้าเกิด Crash ระหว่างทาง ก็ไม่ต้องเริ่มใหม่ตั้งแต่ต้น</p>
+    </div>
+  </details>
+
+  <h3>ขั้นตอนที่ 3: Fan-in — สังเคราะห์ผลลัพธ์เดียว</h3>
+  <p>เมื่อ Sub-agents ทั้งหมดผ่านการตรวจสอบแล้ว ผลลัพธ์จะถูกส่งกลับมายัง Orchestrator ซึ่งจะทำหน้าที่ประมวลผลรวมและสร้าง Output สุดท้ายเดียวให้คุณ — คุณจะเห็นเพียงผลลัพธ์สรุปในหน้าต่างแชทหลัก ไม่ใช่ข้อมูลดิบจาก Sub-agents ทุกตัว ซึ่งช่วยให้ Context window ของแชทหลักยังสะอาดอยู่เสมอ</p>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> Fan-out คือ "กระจาย" Fan-in คือ "รวบ" Adversarial Verification คือ "โต้แย้งก่อนรวบ" — ทั้งสามคือกลไกหลักที่ทำให้ Workflows ทั้งเร็วและน่าเชื่อถือ</div>
+</section>
+
+<!-- ── p3b DEEP-DIVE: JS Script Mechanics ── -->
+<section class="page" id="p3b" data-group="deep-dive" data-tier="mechanism" data-title="JavaScript Engine">
+  <h2>เจาะลึก — JavaScript Script ที่ Claude เขียนเอง</h2>
+  <p class="section-lead">
+    ส่วนที่น่าสนใจที่สุดของ Dynamic Workflows คือ Claude ไม่ได้เพียงแค่ "สั่ง" Sub-agents แต่มันเขียนโปรแกรม JavaScript ขึ้นมาทั้งชิ้นเพื่อควบคุมการทำงาน คิดว่ามันเหมือนกับ Claude กำลังเขียน Script สำหรับผู้กำกับภาพยนตร์ (Director) ที่จะบอกนักแสดง (Sub-agents) ว่าใครทำอะไร เมื่อไหร่ รอใคร และถ้าเกิดข้อผิดพลาดต้องทำยังไง
+  </p>
+
+  <h3>ทำไมต้องเป็น JavaScript? ไม่ใช่ Prompt ธรรมดา?</h3>
+  <p>Prompt ธรรมดาอยู่ใน Context window ของ Claude — ซึ่งมีขนาดจำกัด และยิ่งยาวยิ่งช้า แต่ JavaScript Script อยู่ "นอก" Context window สคริปต์เก็บ State ของงานทั้งหมด: งานไหนเสร็จแล้ว, งานไหนกำลังรัน, ผลลัพธ์ชั่วคราวของใคร — ทั้งหมดนี้ไม่กิน Token ของแชทหลักเลย Claude จึงสามารถจัดการงาน 1,000 Sub-agents ได้โดยที่หน้าต่างสนทนาของคุณยังเบาและเร็ว</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — โครงสร้างสคริปต์มีหน้าตาเป็นอย่างไร?</summary>
+    <div class="details-body">
+      <p>เมื่อ Claude เขียนสคริปต์ขึ้นมา โดยทั่วไปจะมีองค์ประกอบดังนี้:</p>
+      <ul>
+        <li><strong>Task Queue</strong> — รายการงานทั้งหมดที่ต้องทำ พร้อม Dependencies ว่าชิ้นไหนต้องรอชิ้นไหน</li>
+        <li><strong>Concurrency Controller</strong> — ควบคุมให้รัน Sub-agents พร้อมกันไม่เกิน 16 ตัว</li>
+        <li><strong>Result Buffer</strong> — เก็บผลลัพธ์ชั่วคราวของแต่ละ Sub-agent</li>
+        <li><strong>Checkpoint Writer</strong> — บันทึก Progress ทุกครั้งที่งานชิ้นหนึ่งเสร็จ</li>
+        <li><strong>Synthesis Trigger</strong> — เรียก Fan-in เมื่องานทั้งหมดเสร็จ</li>
+      </ul>
+      <p>สคริปต์นี้รันอยู่ใน Environment ที่ Claude Code จัดเตรียมให้โดยตรง ทำให้สามารถเรียก Claude API เพื่อสร้าง Sub-agent ใหม่ได้แบบ Programmatic</p>
+    </div>
+  </details>
+
+  <h3>Progress Checkpointing — ทำไมงานถึงหยุดกลางคันได้โดยไม่เสียหาย</h3>
+  <p>หนึ่งในคุณสมบัติที่ทรงคุณค่าที่สุดของ Dynamic Workflows คือการบันทึก Progress ไว้ตลอดเวลา เมื่อ Sub-agent แต่ละตัวทำงานเสร็จ Orchestrator จะเขียนบันทึกผลลัพธ์นั้นลงไปทันที ดังนั้นหากอินเทอร์เน็ตหลุดหรือ Session ถูกตัด คุณสามารถกลับมา Resume ได้จากจุดที่ค้างอยู่ — ไม่ต้องเสีย Token ในการรันซ้ำกับงานที่เสร็จไปแล้ว</p>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> สคริปต์ JS คือ "สมองนอกตัว" ของ Orchestrator — เก็บ State ทั้งหมดโดยไม่ใช้ Context window ทำให้ Workflow ใหญ่แค่ไหนก็ไม่ทำให้แชทหลักช้าลง</div>
+</section>
+
+<!-- ── p4 USE CASES ── -->
+<section class="page" id="p4" data-group="use-cases" data-group-title="Use Cases จริง" data-tier="intuition" data-title="ตัวอย่างงานจริง">
+  <h2>Use Cases — งานประเภทไหนที่ Dynamic Workflows เปลี่ยนเกม</h2>
+  <p class="section-lead">
+    Dynamic Workflows ไม่ใช่เครื่องมือสำหรับทุกงาน แต่เมื่อเจอปัญหาที่ใช่ มันสามารถทำในสิ่งที่เคยเป็นไปไม่ได้ให้กลายเป็นเรื่องของชั่วโมงหรือแม้แต่นาที หัวใจของทุก Use case ที่ได้ผลดีคือหลักการเดียวกัน: <strong>งานต้องแบ่งเป็นชิ้นย่อยที่เป็นอิสระต่อกันได้</strong>
+  </p>
+
+  <h3>กรณีที่ 1: กวาดล้าง Codebase ขนาดใหญ่ (Klarna)</h3>
+  <p>บริษัท Klarna ใช้ Dynamic Workflows ในการค้นหา "Dead code" — โค้ดที่ไม่ได้ถูกเรียกใช้งานแล้วแต่ยังอยู่ในระบบ ซึ่งเครื่องมือ Static analysis แบบดั้งเดิมตรวจไม่พบ ปัญหาคือถ้าให้เอเจนต์ตัวเดียวอ่านไฟล์ทีละไฟล์ เมื่อถึงไฟล์ที่ 200 Context window จะเต็มและ "ลืม" เนื้อหาจากไฟล์แรกๆ แล้ว Dynamic Workflows แก้ปัญหานี้ด้วยการส่ง Sub-agents แยกกันไปตรวจสอบแต่ละโมดูล — แต่ละตัวมีความจำสะอาดและโฟกัสงานของตัวเอง</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — ทำไม Context Pollution ถึงร้ายแรง?</summary>
+    <div class="details-body">
+      <p>Context window ของ LLM ไม่ใช่หน่วยความจำที่ "จำได้ทุกอย่าง" ยิ่ง Context ยาวขึ้น โมเดลจะให้ความสำคัญกับเนื้อหาที่อยู่ใกล้ "ปัจจุบัน" มากกว่าเนื้อหาแรกๆ เมื่อวิเคราะห์ไฟล์ที่ 200 โมเดลอาจ "จำ" Pattern ที่เห็นในไฟล์ที่ 1 ได้ไม่แม่นยำอีกต่อไป ทำให้การเชื่อมโยงข้อมูลข้ามไฟล์มีโอกาสผิดพลาดสูงมาก Dynamic Workflows แก้ปัญหานี้ที่ระดับสถาปัตยกรรม ไม่ใช่ด้วยการยืด Context ให้ใหญ่ขึ้น</p>
+    </div>
+  </details>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> เมื่อต้องวิเคราะห์ไฟล์ 100+ ชิ้นที่เป็นอิสระต่อกัน ส่ง Sub-agent แยกกันไปแทนการอ่านเรียงลำดับ — ได้ทั้งความแม่นยำและความเร็ว</div>
+
+  <h3>กรณีที่ 2: Migration โค้ดระดับ 750,000 บรรทัด (Bun)</h3>
+  <p>โปรเจกต์ Bun ต้องการแปลงโค้ดจากภาษา Zig ไปเป็น Rust จำนวน 750,000 บรรทัด งานนี้ถ้าทำด้วยมนุษย์อย่างเดียวอาจใช้เวลาหลายเดือน แต่ด้วย Dynamic Workflows ใช้เวลาตั้งแต่ Commit แรกจนถึงการ Merge เพียง 11 วัน และโค้ดที่ได้ผ่านชุดการทดสอบ (Test suite) ถึง 99.8% — ตัวเลขนี้เป็นไปได้เพราะ Adversarial Verification: Sub-agents คู่โต้แย้งเข้าไปตรวจสอบโค้ดที่แปลงแล้วในแต่ละไฟล์ก่อนที่จะยอมรับผลลัพธ์</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — Adversarial Verification ในงาน Migration ทำงานอย่างไร?</summary>
+    <div class="details-body">
+      <p>ในกรณีนี้ Orchestrator ออกแบบ Workflow แบบ 3 Phase:</p>
+      <ol>
+        <li><strong>Translator agents</strong> แปลง Zig → Rust ทีละไฟล์แบบขนาน</li>
+        <li><strong>Verifier agents</strong> รับโค้ดต้นทาง + โค้ดปลายทาง แล้วพยายามหาความแตกต่างทาง Semantic ที่ทำให้พฤติกรรมเปลี่ยน</li>
+        <li>ถ้า Verifier พบปัญหา → ส่ง Translator กลับไปแก้ไข → Verify อีกครั้ง วนซ้ำจนผ่าน</li>
+      </ol>
+      <p>กระบวนการทั้งหมดนี้เกิดขึ้น "นอก" Context window ของผู้ใช้ คุณเห็นเพียง Progress bar และสรุปผลสุดท้าย</p>
+    </div>
+  </details>
+</section>
+
+<!-- ── p4b USE CASES cont ── -->
+<section class="page" id="p4b" data-group="use-cases" data-tier="mechanism" data-title="Research + Audit">
+  <h2>Use Cases — Research เชิงลึกและการประเมินสเกลใหญ่</h2>
+  <p class="section-lead">
+    นอกจาก Codebase analysis Dynamic Workflows ยังแก้ปัญหาในงานวิจัยและประเมินผลที่ต้องรวบรวมข้อมูลจำนวนมากพร้อมกัน งานเหล่านี้มีลักษณะร่วมกันคือ "ต้องดูหลายอย่างพร้อมกัน แต่แต่ละอย่างเป็นอิสระ" — ซึ่งเป็น Sweet spot ของ Dynamic Workflows พอดี
+  </p>
+
+  <h3>กรณีที่ 3: Deep Research (/deep-research command)</h3>
+  <p>ฟีเจอร์ <code>/deep-research</code> ใน Claude Code ทำงานบน Dynamic Workflows โดยตรง เมื่อคุณถามคำถามที่ซับซ้อน มันจะส่ง Sub-agents หลายตัวออกไปค้นหาข้อมูลจากเว็บไซต์ในหลากหลายมุมมองพร้อมกัน เอเจนต์บางกลุ่มทำหน้าที่ตรวจสอบความน่าเชื่อถือของแหล่งข้อมูล เอเจนต์บางกลุ่มหาข้อมูลโต้แย้ง ก่อนที่ Orchestrator จะสังเคราะห์รายงานที่มีการอ้างอิงแหล่งที่มาอย่างถูกต้อง — กระบวนการที่ถ้าทำแบบ Sequential อาจใช้เวลาหลายชั่วโมง ลดเหลือไม่กี่นาที</p>
+
+  <h3>กรณีที่ 4: ประเมิน 41 ทักษะพร้อมกัน (41 Parallel Skill Audits)</h3>
+  <p>ในกรณีศึกษาที่โดดเด่นจากวิดีโอ มีการส่ง Sub-agents 41 ตัวออกไปพร้อมกัน แต่ละตัวรับผิดชอบประเมิน 1 ทักษะ โดยแต่ละตัวต้องอ่านโค้ด ตรวจสอบเงื่อนไข และให้คะแนน — รวม Input tokens ที่ใช้ในการรันครั้งนั้นสูงถึง <strong>5 ล้าน Tokens</strong> นี่คือตัวอย่างสำคัญที่แสดงทั้งพลังและต้นทุนของ Dynamic Workflows ในทางปฏิบัติ</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — ทำไม 41 ตัวถึงใช้ 5 ล้าน Tokens?</summary>
+    <div class="details-body">
+      <p>เมื่อ Sub-agent แต่ละตัวถูกสร้างขึ้น มันต้องโหลด Context ของตัวเองทั้งหมดใหม่ตั้งแต่ต้น รวมถึง:</p>
+      <ul>
+        <li>System prompt และคำสั่งจาก Orchestrator</li>
+        <li>โค้ดหรือไฟล์ที่ต้องตรวจสอบ</li>
+        <li>Context พื้นฐานของโปรเจกต์</li>
+      </ul>
+      <p>สมมติว่าแต่ละ Sub-agent ใช้ประมาณ 100,000 Tokens สำหรับการทำงานของตัวเอง × 41 ตัว = 4.1 ล้าน Tokens บวกกับ Orchestrator อีก ~900,000 Tokens = ใกล้เคียง 5 ล้าน Tokens พอดี</p>
+    </div>
+  </details>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🔬</div>
+      <h3 class="card-title">Security Audit ทั้งระบบ</h3>
+      <p>ส่ง Sub-agents ไปตรวจสอบช่องโหว่ความปลอดภัยในทุก Service พร้อมกัน แต่ละตัวรายงานผลกลับมา แล้วสังเคราะห์เป็นรายงานความเสี่ยงรวม</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3 class="card-title">วิเคราะห์ Review 200 รายการ</h3>
+      <p>แต่ละ Sub-agent อ่านและวิเคราะห์ 1 Review ออก Sentiment + Category ก่อนส่งกลับให้ Orchestrator รวบรวมแนวโน้มภาพรวม</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏗️</div>
+      <h3 class="card-title">Plan Stress-testing</h3>
+      <p>ส่งเอเจนต์หลายกลุ่มไปวิเคราะห์สถาปัตยกรรมจากมุมมองต่างกัน กลุ่มหนึ่งสนับสนุน อีกกลุ่มโต้แย้ง ได้แผนงานที่ผ่านการกลั่นกรองมาอย่างแข็งแกร่ง</p>
+    </div>
+  </div>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> กฎเหล็ก — งานที่เหมาะต้อง "แบ่งชิ้นย่อยอิสระได้" และ "สเกลใหญ่เกินกว่าเอเจนต์ตัวเดียวจะจำทุกอย่างได้" ถ้าทั้งสองเงื่อนไขไม่ครบ ให้ใช้เครื่องมืออื่นแทน</div>
+</section>
+
+<!-- ── p5 TOKEN COST ── -->
+<section class="page" id="p5" data-title="ต้นทุน Token">
+  <h2>Token Cost — ความจริงที่ต้องรู้ก่อนกดรัน</h2>
+  <p class="section-lead">
+    Dynamic Workflows คือหนึ่งในฟีเจอร์ที่แพงที่สุดใน Claude Code มันไม่ได้ "ประหยัด" Token จากการแบ่งงาน แต่ <strong>ทวีคูณ (Multiply)</strong> การใช้ Token ขึ้นอย่างมหาศาล ความเข้าใจผิดนี้สามารถทำให้โควตาเดือนละ $200 หายไปครึ่งหนึ่งภายใน 30 นาที จากการรันงานเดียว
+  </p>
+
+  <h3>ทำไมถึงแพง? — Context Window Reloading</h3>
+  <p>สาเหตุหลักคือ Sub-agent ทุกตัวที่ถูกสร้างขึ้นต้องโหลด Context ของตัวเองใหม่ตั้งแต่ต้น ตั้งแต่คำสั่งเริ่มต้น รายการงาน ไปจนถึงไฟล์ที่เกี่ยวข้อง ต้นทุนนี้บวกรวมกันจากทุก Sub-agent ไม่ใช่หาร</p>
+
+  <div class="bento">
+    <div class="bento-item">
+      <h4>สูตรประมาณต้นทุน</h4>
+      <pre class="code-block">ต้นทุนรวม ≈
+  Orchestrator: 2,000–5,000 tokens
+  + (จำนวน Sub-agents
+     × 1,000–10,000 tokens/ตัว)
+
+ตัวอย่าง:
+  100 Sub-agents × 5,000 tokens
+  = 500,000 tokens ขั้นต่ำ
+  (ยังไม่รวมงานจริงของแต่ละตัว)</pre>
+    </div>
+    <div class="bento-item">
+      <h4>ตัวเลขจริงจากกรณีศึกษา</h4>
+      <ul>
+        <li>41 Sub-agents ประเมิน 41 ทักษะ = <strong>5 ล้าน Input Tokens</strong></li>
+        <li>การกวาด Local files ทั้งโปรเจกต์ 30 นาที = เผา <strong>ครึ่งหนึ่งของโควตา $200/เดือน</strong></li>
+        <li>Bun Migration 750k บรรทัด = หลายสิบล้าน Tokens รวม</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>3 กลยุทธ์ลดต้นทุน</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🎯</div>
+      <h3 class="card-title">1. Model Tiering</h3>
+      <p>ใช้ <strong>Claude Haiku</strong> (หรือ Sonnet) สำหรับ Sub-agents ที่ทำงานซ้ำๆ เก็บ <strong>Opus</strong> ไว้เฉพาะ Orchestrator วิธีนี้ลดต้นทุนได้ <strong>60-80%</strong></p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔬</div>
+      <h3 class="card-title">2. Scope First</h3>
+      <p>อย่าส่ง 300 ไฟล์ทีแรก ทดสอบด้วย <strong>20 ไฟล์ก่อน</strong> เพื่อดูว่า Orchestrator แตกงานอย่างไร ใช้กี่ตัว และ Token เท่าไหร่ แล้วค่อยขยาย</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <h3 class="card-title">3. Context Pruning</h3>
+      <p>ออกแบบ Prompt ให้แต่ละ Sub-agent ได้รับเฉพาะ Context ที่จำเป็น ไม่ใช่ทั้งโปรเจกต์ แต่ละ KB ที่ลดได้ × จำนวน Sub-agents = ประหยัดนับล้าน Tokens</p>
+    </div>
+  </div>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — เมื่อไหร่ Dynamic Workflows ถึงไม่ "คุ้ม" แม้งานจะใช้ได้?</summary>
+    <div class="details-body">
+      <p>แม้งานจะแยกส่วนได้ แต่ถ้า <strong>จำนวน Sub-agents น้อยเกินไป</strong> (เช่น 3-5 ตัว) ค่า Overhead ของ Orchestration (เขียนสคริปต์, ประสานงาน, สังเคราะห์) อาจมากกว่าประโยชน์ที่ได้จากการขนาน ให้ใช้ Dynamic Workflows เมื่องานต้องการ Sub-agents <strong>อย่างน้อย 10+ ตัว</strong> ไม่อย่างนั้น Sub-agent เดี่ยวหรือ Agent Teams จะประหยัดกว่า</p>
+    </div>
+  </details>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> คำนวณก่อนรัน: N Sub-agents × Est. tokens/ตัว = งบที่ต้องมี; Model Tiering (Haiku sub-agents + Opus orchestrator) คือ lever ที่ทรงพลังที่สุดในการลดต้นทุน 60-80%</div>
+</section>
+
+<!-- ── p6 DECISION GUIDE ── -->
+<section class="page" id="p6" data-title="คู่มือตัดสินใจ">
+  <h2>คู่มือตัดสินใจ — ใช้ หรือ ไม่ใช้?</h2>
+  <p class="section-lead">
+    Dynamic Workflows เป็นเครื่องมือที่ทรงพลังแต่มีต้นทุนสูง การตัดสินใจว่าควรใช้หรือไม่ขึ้นอยู่กับลักษณะของงานเป็นหลัก ไม่ใช่ขนาดของงาน งานใหญ่แต่ Sequential ควรใช้เครื่องมืออื่น ส่วนงานเล็กแต่ขนานได้อาจยังไม่คุ้มค่าที่จะใช้
+  </p>
+
+  <h3>ใช้ Dynamic Workflows เมื่อ ✓</h3>
+  <div class="card-grid">
+    <div class="card" style="border-left:3px solid #16a34a">
+      <h3 class="card-title">งานแยกส่วนได้ + สเกลใหญ่</h3>
+      <p>ตรวจสอบ 100+ ไฟล์, แปลง 500+ ไฟล์, วิเคราะห์ 200+ รายการ — แต่ละชิ้นเป็นอิสระต่อกัน</p>
+    </div>
+    <div class="card" style="border-left:3px solid #16a34a">
+      <h3 class="card-title">ยังไม่รู้บทบาทล่วงหน้า</h3>
+      <p>ไม่รู้ว่าต้องใช้ทักษะอะไรบ้าง ให้ Orchestrator ออกแบบ Sub-agent structure เองแบบไดนามิก</p>
+    </div>
+    <div class="card" style="border-left:3px solid #16a34a">
+      <h3 class="card-title">ต้องการ Adversarial QA</h3>
+      <p>งาน Migration หรือ Audit ที่ต้องการคุณภาพสูง เอเจนต์โต้แย้งกันจนได้ผลลัพธ์ที่ผ่านการกลั่นกรองแล้ว</p>
+    </div>
+    <div class="card" style="border-left:3px solid #16a34a">
+      <h3 class="card-title">Context Pollution เป็นปัญหา</h3>
+      <p>งานที่เอเจนต์ตัวเดียวจะ "ลืม" ข้อมูลแรกๆ เมื่อต้องดูไฟล์จำนวนมาก</p>
+    </div>
+  </div>
+
+  <h3>อย่าใช้ Dynamic Workflows เมื่อ ✗</h3>
+  <div class="card-grid">
+    <div class="card" style="border-left:3px solid #dc2626">
+      <h3 class="card-title">งาน Sequential เคร่งครัด</h3>
+      <p>ขั้นตอน 2 ต้องรอขั้นตอน 1 เสมอ — การขนานไม่มีประโยชน์ เสีย Token ค่า Overhead ฟรีๆ</p>
+    </div>
+    <div class="card" style="border-left:3px solid #dc2626">
+      <h3 class="card-title">งานเล็ก จบได้ใน Pass เดียว</h3>
+      <p>งานที่เอเจนต์ตัวเดียวทำได้ใน 2-3 นาที ค่า Orchestration overhead ไม่คุ้มเลย</p>
+    </div>
+    <div class="card" style="border-left:3px solid #dc2626">
+      <h3 class="card-title">แก้ไฟล์ร่วมกัน (Shared State)</h3>
+      <p>ถ้า Sub-agents หลายตัวต้องเขียนไฟล์เดียวกัน จะเกิด Conflict — ต้องออกแบบให้แต่ละตัวมีไฟล์เป็นของตัวเอง</p>
+    </div>
+    <div class="card" style="border-left:3px solid #dc2626">
+      <h3 class="card-title">รู้บทบาทล่วงหน้าชัดเจน</h3>
+      <p>ถ้ารู้แน่ว่าต้องการ Frontend + Backend + QA ใช้ Agent Teams แทน — ประหยัดกว่าและควบคุมได้ดีกว่า</p>
+    </div>
+  </div>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — Flow Chart ตัดสินใจแบบ Step-by-step</summary>
+    <div class="details-body">
+      <ol>
+        <li><strong>งานแบ่งชิ้นย่อยอิสระได้ไหม?</strong> — ไม่ → ใช้ /goal หรือ Single agent</li>
+        <li><strong>ชิ้นย่อยมีกี่ชิ้น?</strong> — น้อยกว่า 10 → ใช้ Sub-agent เดี่ยวหรือ Agent Teams</li>
+        <li><strong>รู้บทบาทล่วงหน้าไหม?</strong> — รู้ → ใช้ Agent Teams; ไม่รู้ → Dynamic Workflows</li>
+        <li><strong>งบประมาณ Token เพียงพอไหม?</strong> — คำนวณ N × per-agent cost ก่อนรัน</li>
+        <li><strong>ถ้าทุกข้อผ่าน</strong> → Dynamic Workflows + Scope test (20 ชิ้นก่อน)</li>
+      </ol>
+    </div>
+  </details>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> ถ้างานทำตามลำดับหรือเล็กเกินไป ฟีเจอร์อื่นจะถูกกว่าและเร็วกว่า Dynamic Workflows — ใหญ่ + แยกส่วนได้ คือ Sweet spot เดียวที่คุ้มค่า</div>
+</section>
+
+<!-- ── p7 KEY TAKEAWAYS ── -->
+<section class="page" id="p7" data-title="สรุปสาระสำคัญ">
+  <h2>สรุปสาระสำคัญ — 7 ข้อที่ต้องจำ</h2>
+  <p class="section-lead">
+    Dynamic Workflows เปลี่ยนวิธีที่ AI จัดการงานสเกลใหญ่ แต่พลังนี้มาพร้อมต้นทุนที่ต้องเข้าใจ 7 ข้อด้านล่างนี้สรุปทุกสิ่งที่จำเป็นต้องรู้ตั้งแต่แนวคิดพื้นฐานจนถึงกลยุทธ์ปฏิบัติ
+  </p>
+
+  <div class="takeaways-list">
+    <div class="takeaway-item">
+      <span class="takeaway-num">1</span>
+      <div>
+        <strong>WIDTH vs DEPTH — เลือกให้ถูก</strong>
+        <p>Dynamic Workflows = WIDTH play (ทำหลายอย่างพร้อมกัน); /goal = DEPTH play (ลองซ้ำจนได้คำตอบ) เลือกจากว่า Bottleneck คืออะไร</p>
+      </div>
+    </div>
+    <div class="takeaway-item">
+      <span class="takeaway-num">2</span>
+      <div>
+        <strong>Parallel ≠ ถูกกว่า — มันแพงกว่าเสมอ</strong>
+        <p>แต่ละ Sub-agent โหลด Context ใหม่ทั้งหมด ต้นทุนรวม = N × per-agent cost ไม่ใช่ cost รวมหาร N เสมอประมาณก่อนรัน</p>
+      </div>
+    </div>
+    <div class="takeaway-item">
+      <span class="takeaway-num">3</span>
+      <div>
+        <strong>Adversarial Verification คือกลไกคุณภาพ</strong>
+        <p>เอเจนต์โต้แย้งกันจนได้คำตอบที่ Converge — เหตุผลที่ Bun ได้ 99.8% pass rate บน 750k บรรทัด</p>
+      </div>
+    </div>
+    <div class="takeaway-item">
+      <span class="takeaway-num">4</span>
+      <div>
+        <strong>Independent + Data-isolated คือเงื่อนไขสำคัญ</strong>
+        <p>งานต้องแยกชิ้นได้โดยที่แต่ละชิ้นไม่ต้องรอผลจากชิ้นอื่น และไม่แก้ไฟล์ร่วมกัน</p>
+      </div>
+    </div>
+    <div class="takeaway-item">
+      <span class="takeaway-num">5</span>
+      <div>
+        <strong>Model Tiering = lever ลดต้นทุน 60-80%</strong>
+        <p>Haiku (หรือ Sonnet) สำหรับ Sub-agents + Opus สำหรับ Orchestrator เท่านั้น</p>
+      </div>
+    </div>
+    <div class="takeaway-item">
+      <span class="takeaway-num">6</span>
+      <div>
+        <strong>ทดสอบ 20 ชิ้นก่อน ไม่ใช่ 300</strong>
+        <p>Small-scope test ช่วยให้เห็นว่า Orchestrator แตกงานอย่างไรและใช้ Token เท่าไหร่ก่อนลงทุนเต็มระบบ</p>
+      </div>
+    </div>
+    <div class="takeaway-item">
+      <span class="takeaway-num">7</span>
+      <div>
+        <strong>รู้บทบาทแล้ว? → Agent Teams; ยังไม่รู้? → Dynamic Workflows</strong>
+        <p>Agent Teams ประหยัดและควบคุมได้ดีกว่าเมื่อโครงสร้างทีมชัดเจน Dynamic Workflows เก่งในการออกแบบ Workflow เองเมื่อยังไม่รู้</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>อ้างอิง</h3>
+  <ol class="references">
+    <li>Claude Code Dynamic Workflows Clearly Explained — YouTube (NotebookLM source, notebook: claude-code-dynamic-workflows): <em>Klarna dead code removal case study, Bun migration metrics, 41-skill audit token data, /deep-research architecture</em></li>
+    <li>Claude Code Opus 4.8 Dynamic Workflows — Anthropic documentation: <em>Max 16 concurrent agents, 1000 agents/run, progress checkpointing behavior</em></li>
+    <li>Bun project GitHub — Zig→Rust migration: <em>11-day timeline, 750k lines, 99.8% test pass rate</em></li>
+  </ol>
+</section>
+
+</div><!-- /scroll-root -->
+
+<script>
+// ── DOM refs ──
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const progressBar = document.getElementById('progress-bar');
+const tocEl = document.getElementById('toc');
+const pages = Array.from(document.querySelectorAll('.page'));
+
+// ── Build sidebar TOC from data-group ──
+// Groups: consecutive pages sharing data-group become sub-pages.
+// Self-healing: no data-group → page.id is its own group key (flat single entry).
+const groups = [];
+const groupMap = {};
+
+pages.forEach(page => {
+  const gSlug = page.dataset.group || page.id;
+  const gTitle = page.dataset.groupTitle;
+  const label  = page.dataset.title || page.id;
+
+  if (!groupMap[gSlug]) {
+    const g = { slug: gSlug, title: gTitle || label, pages: [] };
+    groups.push(g);
+    groupMap[gSlug] = g;
+  }
+  // First page that carries data-group-title wins
+  if (gTitle) groupMap[gSlug].title = gTitle;
+  groupMap[gSlug].pages.push({ page, label });
+});
+
+// Render
+groups.forEach(g => {
+  const groupDiv = document.createElement('div');
+  groupDiv.className = 'toc-group';
+  groupDiv.dataset.group = g.slug;
+
+  const groupLink = document.createElement('a');
+  groupLink.className = 'toc-group-label';
+  groupLink.href = '#' + g.pages[0].page.id;
+  groupLink.textContent = g.title;
+  groupDiv.appendChild(groupLink);
+
+  if (g.pages.length > 1) {
+    const subList = document.createElement('ul');
+    subList.className = 'toc-subs';
+    g.pages.forEach(({ page, label }) => {
+      const li = document.createElement('li');
+      const a  = document.createElement('a');
+      a.className = 'toc-sub';
+      a.href = '#' + page.id;
+      a.textContent = label;
+      a.dataset.pageId = page.id;
+      li.appendChild(a);
+      subList.appendChild(li);
+    });
+    groupDiv.appendChild(subList);
+  }
+
+  tocEl.appendChild(groupDiv);
+});
+
+// ── Scroll-spy via IntersectionObserver ──
+function setActiveById(pageId) {
+  document.querySelectorAll('.toc-group-label').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.toc-sub').forEach(a => a.classList.remove('active'));
+
+  const page  = pages.find(p => p.id === pageId);
+  const gSlug = page ? (page.dataset.group || page.id) : pageId;
+  const groupDiv = tocEl.querySelector(`.toc-group[data-group="${gSlug}"]`);
+
+  if (!groupDiv) return;
+  groupDiv.querySelector('.toc-group-label')?.classList.add('active');
+
+  const subLink = groupDiv.querySelector(`.toc-sub[data-page-id="${pageId}"]`);
+  if (subLink) {
+    subLink.classList.add('active');
+    subLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  } else {
+    groupDiv.querySelector('.toc-group-label')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) setActiveById(e.target.id); });
+}, { root: null, threshold: 0.25 });
+pages.forEach(p => obs.observe(p));
+
+// ── Mobile hamburger ──
+sidebarToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  sidebarOverlay.classList.toggle('open');
+});
+sidebarOverlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('open');
+  }
+});
+// Close drawer after tapping a link on mobile
+tocEl.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    }
+  });
+});
+
+// ── Auto-inject .page-foot prev/next (authors never hand-write these) ──
+pages.forEach((page, i) => {
+  const inner = page.querySelector('.page-inner');
+  if (!inner) return;
+  const foot = document.createElement('div');
+  foot.className = 'page-foot';
+  if (i > 0) {
+    const prev = pages[i - 1];
+    const btn  = document.createElement('a');
+    btn.className = 'pf-btn pf-prev';
+    btn.href = '#' + prev.id;
+    btn.textContent = '← ' + (prev.dataset.title || prev.id);
+    foot.appendChild(btn);
+  }
+  if (i < pages.length - 1) {
+    const next = pages[i + 1];
+    const btn  = document.createElement('a');
+    btn.className = 'pf-btn pf-next';
+    btn.href = '#' + next.id;
+    btn.textContent = (next.dataset.title || next.id) + ' →';
+    foot.appendChild(btn);
+  }
+  if (foot.children.length > 0) inner.appendChild(foot);
+});
+
+// ── Scroll progress bar ──
+window.addEventListener('scroll', () => {
+  const doc     = document.documentElement;
+  const scrolled = doc.scrollTop || document.body.scrollTop;
+  const total   = doc.scrollHeight - doc.clientHeight;
+  if (total > 0) progressBar.style.transform = `scaleX(${scrolled / total})`;
+}, { passive: true });
+
+// ── Arrow-key section jump ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); jumpSection(1); }
+  if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')  { e.preventDefault(); jumpSection(-1); }
+});
+function jumpSection(dir) {
+  const active = tocEl.querySelector('.toc-sub.active') ||
+                 tocEl.querySelector('.toc-group-label.active');
+  if (!active) { pages[0]?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  const targetId = active.dataset.pageId || active.getAttribute('href')?.slice(1);
+  const idx = pages.findIndex(p => p.id === targetId);
+  const newIdx = Math.max(0, Math.min(pages.length - 1, idx + dir));
+  if (newIdx !== idx) pages[newIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Theme toggle ──
+const themeBtn = document.getElementById('theme-btn');
+const root     = document.documentElement;
+const saved    = localStorage.getItem('explainer-theme');
+if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
+themeBtn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  localStorage.setItem('explainer-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
+});
+
+// ── Tabs ──
+function switchTab(btn, panelId) {
+  btn.closest('.tabs-nav').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tabs-panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(panelId);
+  if (target) target.classList.add('active');
+}
+
+// ── Accordion ──
+function toggleAccordion(btn) {
+  btn.closest('.accordion-item').classList.toggle('open');
+}
+
+// ── Copy button ──
+function copyCode(btn) {
+  const pre = btn.closest('.copy-wrap').querySelector('pre code');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
