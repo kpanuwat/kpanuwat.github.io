@@ -3,7 +3,10 @@ title: "Case AI Harness: State Machine + Proof of Work วิธีของ Nic
 date: 2026-05-31 06:36:00 +0700
 categories: [Engineering]
 tags: [ai, state-machine, evals, harness, hallucination, typescript, agents]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
