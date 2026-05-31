@@ -3,7 +3,10 @@ title: "Diode: AWS สำหรับอิเล็กทรอนิกส์ 
 date: 2026-05-31 06:39:00 +0700
 categories: [Engineering]
 tags: [hardware, electronics, ai, pcb, startup, llm, manufacturing]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
