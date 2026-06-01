@@ -3,7 +3,10 @@ title: "10 ไอซีพื้นฐานที่ช่วยให้กา
 date: 2026-06-01 00:01:00 +0700
 categories: [Engineering]
 tags: [electronics, ics, 555-timer, shift-register, logic-gates, op-amp, motor-driver, voltage-regulator]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
