@@ -3,7 +3,10 @@ title: "Pixal3D: โมเดล Open-Weights 3D ใหม่จาก Tencent A
 date: 2026-05-31 06:42:00 +0700
 categories: [Engineering]
 tags: [3d-ai, open-weights, local-ai, tencent, generative-ai, siggraph]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
