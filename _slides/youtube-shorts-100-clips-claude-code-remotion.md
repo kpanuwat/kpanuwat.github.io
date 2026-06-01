@@ -86,8 +86,9 @@ style: |
 ---
 
 <!-- _class: cheatsheet -->
+<!-- _backgroundColor: #f8f7f4 -->
 
-![bg](assets/youtube-shorts-100-clips-claude-code-remotion-cheatsheet.png)
+![bg fit](assets/youtube-shorts-100-clips-claude-code-remotion-cheatsheet.png)
 
 <!-- Speaker: 60 วินาที overview ทั้ง workflow — Validate → Build → Batch Render → Scale -->
 
@@ -97,7 +98,7 @@ style: |
 
 <p class="subhead">200B daily views ดึงดูดทุกคน — เมื่อทุกคน AI-produce ได้ สิ่งที่แยกกันคือ upstream</p>
 
-![bg right:33%](assets/youtube-shorts-100-clips-claude-code-remotion-background.png)
+![bg right:40% contain](assets/youtube-shorts-100-clips-claude-code-remotion-background.png)
 
 <div class="infographic">
 <svg viewBox="0 0 700 300" width="100%" xmlns="http://www.w3.org/2000/svg">
@@ -124,7 +125,7 @@ style: |
 
 ## Remotion — Video คือ React Props
 
-![bg right:33%](assets/youtube-shorts-100-clips-claude-code-remotion-remotion.png)
+![bg right:40% contain](assets/youtube-shorts-100-clips-claude-code-remotion-remotion.png)
 
 <p class="subhead">เขียน React component ครั้งเดียว เปลี่ยน JSON entry ได้ video ใหม่ทันที</p>
 
