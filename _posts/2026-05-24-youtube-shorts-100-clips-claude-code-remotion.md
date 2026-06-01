@@ -3,8 +3,10 @@ title: "สร้าง YouTube Shorts 100 คลิปใน 5 นาที ด
 date: 2026-05-23 00:10:00 +0700
 categories: [Tools]
 tags: [claude-code, remotion, youtube-shorts, ai, video-production, viroscope]
-slides: false
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
