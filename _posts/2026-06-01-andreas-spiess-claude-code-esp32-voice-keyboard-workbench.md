@@ -3,7 +3,10 @@ title: "Andreas Spiess + Claude Code + ESP32: iOS Voice Keyboard & Automated Wor
 date: 2026-05-31 06:41:00 +0700
 categories: [Engineering]
 tags: [esp32, claude-code, ble, usb-hid, raspberry-pi, ai-workflow, embedded, firmware]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
