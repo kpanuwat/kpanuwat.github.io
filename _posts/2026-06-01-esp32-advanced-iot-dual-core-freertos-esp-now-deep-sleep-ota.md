@@ -3,7 +3,10 @@ title: "ESP32 ยกระดับงาน IoT: Dual-core FreeRTOS, ESP-NOW, D
 date: 2026-05-31 06:46:00 +0700
 categories: [Engineering]
 tags: [esp32, freertos, iot, embedded, ota, tls, hardware]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
