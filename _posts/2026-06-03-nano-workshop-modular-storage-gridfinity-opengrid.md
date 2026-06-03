@@ -3,7 +3,10 @@ title: "จัดระเบียบ Nano Workshop: ระบบ Modular Stora
 date: 2026-06-02 00:01:00 +0700
 categories: [Engineering]
 tags: [workshop, gridfinity, opengrid, maker-space, organization, 3d-printing, electronics]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
