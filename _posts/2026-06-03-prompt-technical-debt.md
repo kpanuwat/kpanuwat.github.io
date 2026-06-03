@@ -3,7 +3,10 @@ title: "Prompt Technical Debt: ทำไม System Prompt ที่ซับซ�
 date: 2026-06-02 00:02:00 +0700
 categories: [Engineering]
 tags: [prompt-engineering, tech-debt, llm, ai-agents, context-management]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
