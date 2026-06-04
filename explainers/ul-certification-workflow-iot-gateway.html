@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UL Certification Workflow — IoT Gateway ในห่วงโซ่ EMS 4 ฝ่าย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (mirrors marp-deck 26-token :root) ── */
+:root {
+  --ink: #1e293b;
+  --ink-dim: #475569;
+  --muted: #94a3b8;
+  --paper: #ffffff;
+  --soft: #f1f5f9;
+  --soft-2: #e2e8f0;
+  --accent: #d97706;
+  --accent-deep: #92400e;
+  --accent-wash: #fef3c7;
+  --gold: #d4af37;
+  --danger: #dc2626;
+  --danger-wash: #fee2e2;
+  --danger-ink: #991b1b;
+  --success: #16a34a;
+  --success-wash: #dcfce7;
+  --success-ink: #14532d;
+  --warning: #f59e0b;
+  --warning-wash: #fef3c7;
+  --warning-ink: #92400e;
+  --shadow-sm: 0 1px 2px rgba(15,23,42,.06);
+  --shadow-md: 0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg: 0 12px 28px rgba(15,23,42,.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --nav-h: 52px;
+  --page-max: 960px;
+  --sidebar-w: 240px;
+}
+[data-theme="dark"] {
+  --ink: #f1f5f9;
+  --ink-dim: #94a3b8;
+  --muted: #475569;
+  --paper: #0f172a;
+  --soft: #1e293b;
+  --soft-2: #334155;
+  --accent-wash: #1e3a8a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.4);
+  --shadow-lg: 0 12px 28px rgba(0,0,0,.5);
+  --accent-deep: #bfdbfe;
+  --danger-wash: #450a0a;  --danger-ink: #fca5a5;
+  --success-wash: #052e16; --success-ink: #86efac;
+  --warning-wash: #422006; --warning-ink: #fcd34d;
+}
+
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Sarabun', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  font-size: 16px;
+}
+code, kbd, pre, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Progress bar ── */
+#progress-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 3px; background: var(--accent);
+  transform-origin: left; transform: scaleX(0);
+  transition: transform .1s linear;
+  pointer-events: none;
+}
+
+/* ── Nav bar ── */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  background: var(--paper);
+  border-bottom: 1px solid var(--soft-2);
+  display: flex; align-items: center; gap: 0;
+  padding: 0 16px;
+  box-shadow: var(--shadow-sm);
+}
+#sidebar-toggle {
+  background: none; border: none; cursor: pointer;
+  font-size: 20px; color: var(--ink); padding: 4px 8px;
+  margin-right: 8px; border-radius: var(--radius-sm);
+  line-height: 1; flex-shrink: 0;
+  transition: background .15s;
+}
+#sidebar-toggle:hover { background: var(--soft); }
+#nav .brand {
+  font-weight: 700; font-size: 15px; color: var(--ink);
+  margin-right: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#nav .controls { display: flex; gap: 6px; margin-left: 8px; flex-shrink: 0; }
+#nav .controls button {
+  background: none; border: 1px solid var(--soft-2);
+  border-radius: var(--radius-sm); padding: 5px 10px;
+  font-size: 13px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+#nav .controls button:hover { background: var(--soft); }
+
+/* ── Sidebar ── */
+#sidebar {
+  position: fixed; top: var(--nav-h); left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--soft);
+  border-right: 1px solid var(--soft-2);
+  overflow-y: auto; overflow-x: hidden;
+  padding: 16px 0 40px;
+  z-index: 90;
+  transition: transform .25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--soft-2) transparent;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--soft-2); border-radius: 2px; }
+
+#sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 89;
+  background: rgba(15,23,42,.4);
+}
+
+/* ── Sidebar TOC ── */
+.toc-group { margin-bottom: 2px; }
+
+.toc-group-label {
+  display: block;
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 600; color: var(--ink-dim);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none;
+}
+.toc-group-label:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-group-label.active { color: var(--accent); font-weight: 700; }
+
+.toc-subs { padding: 0; list-style: none; margin-bottom: 4px; }
+
+.toc-sub {
+  display: block;
+  padding: 5px 16px 5px 30px;
+  font-size: 12px; color: var(--muted);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none;
+}
+.toc-sub:hover { background: var(--soft-2); color: var(--ink); text-decoration: none; }
+.toc-sub.active {
+  color: var(--accent); font-weight: 600;
+  background: var(--accent-wash);
+  border-right: 2px solid var(--accent);
+}
+
+/* ── Sections (document scroll) ── */
+#scroll-root {
+  padding-top: var(--nav-h);
+  margin-left: var(--sidebar-w);
+}
+.page {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+  padding: 64px 24px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.page-inner {
+  width: 100%; max-width: var(--page-max);
+  display: flex; flex-direction: column; gap: 28px;
+}
+.page.cover {
+  min-height: calc(100vh - var(--nav-h));
+  background: linear-gradient(135deg, #0f172a 0%, var(--accent-deep) 100%);
+  color: white; justify-content: center; align-items: center; text-align: center;
+}
+.page.cover .page-inner { align-items: center; }
+
+/* ── Page footer (prev/next) — auto-injected by JS ── */
+.page-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 32px; margin-top: 8px;
+  border-top: 1px solid var(--soft-2);
+}
+.page-foot .pf-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  background: var(--soft); border: 1px solid var(--soft-2);
+  font-size: 13px; color: var(--ink-dim); cursor: pointer;
+  transition: background .15s, color .15s;
+  text-decoration: none; white-space: nowrap;
+}
+.page-foot .pf-btn:hover { background: var(--accent-wash); color: var(--accent); text-decoration: none; }
+.page-foot .pf-next { margin-left: auto; }
+
+/* ── Typography ── */
+h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15; }
+h2 { font-size: clamp(20px, 3vw, 28px); font-weight: 700; margin-bottom: 8px; margin-top: 8px; }
+h3 { font-size: 18px; font-weight: 700; margin-top: 28px; margin-bottom: 10px; color: var(--ink); }
+h4 { font-size: 15px; font-weight: 600; color: var(--ink-dim); margin-top: 20px; margin-bottom: 6px; }
+p { color: var(--ink-dim); line-height: 1.8; margin-bottom: 0.85em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { padding-left: 20px; color: var(--ink-dim); }
+li { margin-bottom: 8px; line-height: 1.7; }
+.cover h1, .cover p, .cover li { color: white; }
+.cover p { color: rgba(255,255,255,.8); }
+
+/* ── Prose flow ── */
+.section-lead { font-size: 17px; color: var(--ink); line-height: 1.8; font-weight: 400; }
+.section-divider { height: 1px; background: var(--soft-2); margin: 40px 0; }
+.prose-block { display: flex; flex-direction: column; gap: 0; }
+.prose-block + .prose-block { margin-top: 4px; }
+.section-label {
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.page-number {
+  font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 24px;
+  align-self: flex-end;
+}
+
+/* ── Cover mark ── */
+.mark { width: 56px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+.cover .tag { font-size: 18px; color: rgba(255,255,255,.75); margin-top: 12px; }
+
+/* ── Cheat sheet image band ── */
+.cheatsheet { display:flex; flex-direction:column; align-items:center; gap:10px; min-height:0; }
+.cheatsheet img { max-width:100%; max-height:78vh; width:auto; height:auto;
+  object-fit:contain; border-radius:var(--radius); box-shadow:var(--shadow-md); background:var(--paper); }
+.cheatsheet svg { width:100%; height:auto; }
+.cheatsheet figcaption { font-size:13px; color:var(--muted); text-align:center; }
+
+/* ── Card system ── */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 18px 20px;
+  border-left: 4px solid var(--accent);
+  box-sizing: border-box;
+}
+.card.success { border-left-color: var(--success); }
+.card.danger  { border-left-color: var(--danger); }
+.card.warning { border-left-color: var(--warning); }
+.card.gold    { border-left-color: var(--gold); }
+.card .label  { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.card h3      { margin: 0 0 6px; font-size: 17px; color: var(--ink); font-weight: 700; }
+.card p       { margin: 0 0 4px; font-size: 14px; color: var(--ink-dim); line-height: 1.65; }
+.card ul      { margin: 0; padding-left: 16px; font-size: 14px; color: var(--ink-dim); line-height: 1.8; }
+.card.compact { padding: 10px 14px; }
+.card.compact h3 { font-size: 14px; margin-bottom: 4px; }
+.card.compact p, .card.compact .label { font-size: 12px; }
+
+/* ── Bento grid ── */
+.bento { display: grid; gap: 12px; width: 100%; }
+.bento.cols-2 { grid-template-columns: 1fr 1fr; }
+.bento.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.bento.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 640px) {
+  .bento.cols-2, .bento.cols-3, .bento.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Takeaway banner ── */
+.takeaway {
+  border-left: 4px solid var(--accent);
+  background: var(--soft);
+  padding: 14px 18px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 15px; line-height: 1.6;
+}
+.takeaway b { color: var(--accent); }
+
+/* ── Steps list ── */
+.steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.steps li {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: var(--soft); border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.steps li .step-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--accent); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px;
+}
+.steps li .step-body { flex: 1; }
+.steps li .step-body strong { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+.steps li .step-body p { font-size: 13px; margin: 0; }
+
+/* ── Callout ── */
+.callout {
+  background: var(--accent-wash);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 15px; color: var(--accent-deep);
+  border: 1px solid var(--accent);
+}
+.callout.danger { background: var(--danger-wash); border-color: var(--danger); color: var(--danger-ink); }
+.callout.success { background: var(--success-wash); border-color: var(--success); color: var(--success-ink); }
+.callout.warning { background: var(--warning-wash); border-color: var(--warning); color: var(--warning-ink); }
+
+/* ── Inline code ── */
+code {
+  background: var(--soft-2); color: var(--danger-ink); font-size: .875em;
+  padding: 2px 6px; border-radius: 4px;
+}
+pre {
+  background: #0f172a; color: #e2e8f0; padding: 16px 20px;
+  border-radius: var(--radius-sm); overflow-x: auto; font-size: 13px; line-height: 1.6;
+}
+pre code { background: none; color: inherit; padding: 0; border-radius: 0; }
+kbd {
+  background: var(--soft-2); border: 1px solid var(--soft-2);
+  border-bottom-color: var(--muted); border-radius: 4px;
+  font-size: .8em; padding: 2px 7px; box-shadow: 0 1px 0 var(--muted);
+}
+
+/* ── Copy button ── */
+.copy-wrap { position: relative; }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--soft-2); border: none; border-radius: 4px;
+  padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--ink-dim);
+  transition: background .15s;
+}
+.copy-btn:hover { background: var(--accent-wash); color: var(--accent); }
+.copy-btn.copied { background: var(--success-wash); color: var(--success-ink); }
+
+/* ── Tabs ── */
+.tabs-nav {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--soft-2); margin-bottom: 16px;
+}
+.tabs-nav button {
+  background: none; border: none; padding: 8px 14px; cursor: pointer;
+  font-size: 14px; color: var(--ink-dim); border-bottom: 2px solid transparent;
+  margin-bottom: -2px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: color .15s, border-color .15s;
+}
+.tabs-nav button:hover { color: var(--ink); }
+.tabs-nav button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs-panel { display: none; }
+.tabs-panel.active { display: block; }
+
+/* ── Accordion ── */
+.accordion { border: 1px solid var(--soft-2); border-radius: var(--radius-sm); overflow: hidden; }
+.accordion-item { border-top: 1px solid var(--soft-2); }
+.accordion-item:first-child { border-top: none; }
+.accordion-btn {
+  width: 100%; background: none; border: none; padding: 14px 16px;
+  text-align: left; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; font-size: 15px; color: var(--ink);
+  transition: background .15s;
+}
+.accordion-btn:hover { background: var(--soft); }
+.accordion-btn::after { content: "▾"; font-size: 12px; color: var(--muted); transition: transform .2s; }
+.accordion-item.open .accordion-btn::after { transform: rotate(-180deg); }
+.accordion-body { display: none; padding: 0 16px 16px; color: var(--ink-dim); font-size: 14px; line-height: 1.7; }
+.accordion-item.open .accordion-body { display: block; }
+
+/* ── Progressive disclosure (native <details>) ── */
+details.disclosure {
+  border-left: 3px solid var(--accent);
+  background: var(--soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin: 12px 0;
+}
+details.disclosure summary {
+  list-style: none;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  display: flex; align-items: center; gap: 8px;
+  user-select: none;
+}
+details.disclosure summary::-webkit-details-marker { display: none; }
+details.disclosure summary::after {
+  content: "▾";
+  font-size: 12px; color: var(--muted);
+  transition: transform .2s;
+  margin-left: auto;
+}
+details.disclosure[open] summary::after { transform: rotate(-180deg); }
+details.disclosure summary:hover { background: var(--soft-2); border-radius: 0 var(--radius-sm) 0 0; }
+details.disclosure .details-body {
+  padding: 4px 16px 16px;
+  font-size: 14px; color: var(--ink-dim); line-height: 1.7;
+}
+details.disclosure .details-body p { font-size: 14px; }
+details.disclosure .details-body pre { margin: 8px 0; }
+
+/* ── Comparison table ── */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--soft); font-weight: 600; color: var(--ink); }
+th, td { padding: 10px 14px; border: 1px solid var(--soft-2); text-align: left; }
+tr:hover td { background: var(--soft); }
+.check { color: var(--success); } .cross { color: var(--danger); }
+
+/* ── Print ── */
+@media print {
+  #nav, #sidebar, #sidebar-overlay, #progress-bar, .page-foot { display: none; }
+  #scroll-root { padding-top: 0; margin-left: 0; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: avoid; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-100%); box-shadow: none; }
+  #sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  #sidebar-overlay.open { display: block; }
+  #scroll-root { margin-left: 0; }
+}
+@media (max-width: 480px) {
+  .page { padding: 32px 16px; }
+  h2 { font-size: 22px; }
+  #nav .brand { font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Progress bar ── -->
+<div id="progress-bar"></div>
+
+<!-- ── Navigation ── -->
+<nav id="nav">
+  <button id="sidebar-toggle" title="Toggle navigation" aria-label="Toggle navigation">☰</button>
+  <span class="brand">UL Cert Workflow</span>
+  <div class="controls">
+    <button id="theme-btn" title="Toggle dark mode">☀︎</button>
+    <button onclick="window.print()" title="Print / save as PDF">⎙</button>
+  </div>
+</nav>
+
+<!-- ── Left sidebar TOC (JS-filled) ── -->
+<aside id="sidebar">
+  <nav id="toc"></nav>
+</aside>
+<div id="sidebar-overlay"></div>
+
+<div id="scroll-root">
+<!-- ═══════════════════════════════════════════════════════════════
+     p1 — COVER
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page cover" id="p1" data-title="หน้าแรก">
+  <div class="cover-inner">
+    <div class="cover-badge">Deep Dive · UL Certification</div>
+    <h1 class="cover-title">UL Certification Workflow<br><span class="cover-subtitle">IoT Gateway ในห่วงโซ่ EMS 4 ฝ่าย</span></h1>
+    <p class="cover-hook">ใครเซ็นเป็น Applicant — คนนั้นเป็นเจ้าของใบรับรอง<br>และทุกอย่างที่ตามมา</p>
+    <div class="cover-stats">
+      <div class="stat-card">
+        <span class="stat-num">4</span>
+        <span class="stat-label">ฝ่ายธุรกิจ<br>→ บทบาท UL ที่ต่างกัน</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">1</span>
+        <span class="stat-label">UL File<br>= ใครถือ ใครคุม IP</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">∞</span>
+        <span class="stat-label">Follow-Up Service<br>ตลอดอายุผลิตภัณฑ์</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p1b — CHEATSHEET BAND
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p1b" data-title="Cheat Sheet">
+  <h2>Cheat Sheet</h2>
+  <div class="cheatsheet-band">
+    <img src="assets/ul-certification-workflow-iot-gateway/cheatsheet.png" alt="UL Certification Workflow — IoT Gateway cheat sheet" style="width:100%;max-width:960px;display:block;margin:0 auto;border-radius:8px">
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p2 — OVERVIEW
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p2" data-title="ภาพรวม">
+  <h2>ภาพรวม: 4 ฝ่าย · 1 ใบรับรอง · กฎที่ซ่อนอยู่</h2>
+  <p class="section-lead">การขอ UL certification สำหรับ IoT gateway ไม่ใช่แค่การส่งตัวอย่างให้ lab ทดสอบ แต่คือการจัดการความสัมพันธ์ระหว่าง 4 ฝ่ายธุรกิจกับระบบ UL ที่รู้จักบทบาทเพียง 4 แบบ กฎง่าย ๆ ข้อเดียวที่เปลี่ยนทุกอย่าง: ใครลงนามเป็น Applicant คนนั้นเป็นเจ้าของ UL File — และนั่นหมายถึงอำนาจควบคุม IP ของผลิตภัณฑ์ทั้งหมด</p>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">🏢</div>
+      <h3 class="card-title">4 ฝ่ายธุรกิจ</h3>
+      <p>Product Owner (IP) · MMA (ตัวแทนจัดการ) · EMS (โรงงาน) · Raw Material Manufacturers (supplier)</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📁</div>
+      <h3 class="card-title">UL File</h3>
+      <p>กล่องเก็บ "สูตรของการรับรอง" — BOM, แบบ, โรงงาน, ผ่าน/ตก เปลี่ยนโรงงานหรือ BOM ต้องแจ้ง UL ทุกครั้ง</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏷️</div>
+      <h3 class="card-title">Mark 3 ประเภท</h3>
+      <p>UL Listed (สินค้าสำเร็จ) · UL Recognized/RU (ชิ้นส่วน) · UL Classified (ประเมินบางด้าน) — แต่ละแบบใช้กับสินค้าต่างกัน</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔍</div>
+      <h3 class="card-title">Follow-Up Service</h3>
+      <p>UL field engineer ตรวจโรงงาน EMS ต่อเนื่องตลอดอายุการผลิต ไม่ใช่แค่ครั้งเดียวหลังได้ใบรับรอง</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p3 — DEEP-DIVE PROTOCOL
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p3" data-title="Deep-Dive Protocol">
+  <h2>Deep-Dive Protocol: 5 องค์ประกอบที่รู้จักจริง</h2>
+  <p class="section-lead">ก่อนเข้าสู่รายละเอียด ต้องเข้าใจว่าระบบ UL ประกอบจากอะไร แต่ละส่วนทำหน้าที่อะไร และ "แตกแล้วคืออะไร" คำตอบ 5 ข้อนี้คือแกนหลักของทั้ง explainer</p>
+
+  <div class="bento-grid">
+    <div class="bento-card accent">
+      <h3>① UL File</h3>
+      <p><strong>บทบาท:</strong> ภาชนะทางกฎหมายที่เก็บทุกอย่างของการรับรอง — ผู้ถือ File = ผู้ควบคุมใบรับรอง</p>
+      <p><strong>ถ้าหาย/แตก:</strong> ไม่มี Applicant เดียวรับผิดชอบ → UL ไม่มีผู้ประสานงาน → กระบวนการหยุด</p>
+    </div>
+    <div class="bento-card">
+      <h3>② RU Recognized Components ใน BOM</h3>
+      <p><strong>บทบาท:</strong> ชิ้นส่วนที่ผ่าน UL pre-vetting แล้ว ใส่ใน BOM ลดงาน investigation ของสินค้าสำเร็จ</p>
+      <p><strong>ถ้าหาย/แตก:</strong> ชิ้นส่วนสำคัญไม่มี RU mark → ต้องทดสอบใหม่ทั้งหมด → ล่าช้าหลายสัปดาห์</p>
+    </div>
+    <div class="bento-card">
+      <h3>③ Manufacturing Location (EMS)</h3>
+      <p><strong>บทบาท:</strong> โรงงานที่ระบุใน UL File คือที่เดียวที่ได้รับอนุญาตให้ติด UL Mark บนสินค้า</p>
+      <p><strong>ถ้าหาย/แตก:</strong> เปลี่ยนโรงงาน EMS โดยไม่แจ้ง UL → Mark ที่ติดบนสินค้าโมฆะตามกฎหมาย</p>
+    </div>
+    <div class="bento-card">
+      <h3>④ Follow-Up Service + Traceability</h3>
+      <p><strong>บทบาท:</strong> ระบบตรวจสอบต่อเนื่องว่าสินค้าที่ผลิตจริงตรงกับที่ได้รับรองไว้</p>
+      <p><strong>ถ้าหาย/แตก:</strong> EMS เปลี่ยน BOM เงียบ ๆ → FUS audit ตรวจพบ → ใบรับรองถูกพัก/ถอน</p>
+    </div>
+    <div class="bento-card accent">
+      <h3>⑤ Role Mapping (4 ฝ่าย → UL Roles)</h3>
+      <p><strong>บทบาท:</strong> กำหนดว่าใครรับผิดชอบอะไรในกระบวนการ UL ก่อนยื่นสมัคร</p>
+      <p><strong>ถ้าหาย/แตก:</strong> PO สมมติว่า "EMS จัดการ UL" → EMS กลายเป็น Applicant → PO สูญเสียอำนาจควบคุม File</p>
+    </div>
+  </div>
+
+  <h3>สมมติฐานที่มือใหม่มองไม่เห็น</h3>
+  <div class="assumption-grid">
+    <div class="assumption-card wrong">
+      <span class="badge wrong">❌ เชื่อผิด</span>
+      <p>ได้ cert ครั้งเดียวแล้วจบ — ไม่ต้องทำอะไรต่อ</p>
+      <p class="correction">ความจริง: UL cert ผูกกับโรงงาน + BOM เฉพาะ Follow-Up Service เดินต่อเนื่องตลอดอายุผลิตภัณฑ์</p>
+    </div>
+    <div class="assumption-card wrong">
+      <span class="badge wrong">❌ เชื่อผิด</span>
+      <p>เจ้าของแบรนด์เป็นเจ้าของใบรับรองอัตโนมัติ</p>
+      <p class="correction">ความจริง: เจ้าของใบรับรองคือ <strong>Applicant</strong> ซึ่งอาจไม่ใช่เจ้าของแบรนด์ ถ้าไม่ระวัง EMS อาจถือ File แทน</p>
+    </div>
+    <div class="assumption-card wrong">
+      <span class="badge wrong">❌ เชื่อผิด</span>
+      <p>Supplier วัตถุดิบไม่เกี่ยวกับ UL cert ของสินค้าสำเร็จ</p>
+      <p class="correction">ความจริง: RU Recognized mark บน component ของ supplier คือรากฐานที่ทำให้ cert ของสินค้าสำเร็จเร็วขึ้นและถูกลง</p>
+    </div>
+  </div>
+
+  <h3>7 สาระสำคัญที่ต้องจำ</h3>
+  <ol class="takeaway-list">
+    <li>Map บทบาท UL ของ 4 ฝ่าย <strong>ก่อน</strong> ยื่นสมัคร — ไม่ใช่ระหว่างทาง</li>
+    <li>Product Owner ควรเป็น Applicant เสมอ เพื่อรักษาความเป็นเจ้าของ UL File</li>
+    <li>ใช้ RU Recognized components ใน BOM ลดระยะเวลา + ค่าใช้จ่าย cert</li>
+    <li>EMS ต้องเป็น registered manufacturer บน UL File และรับ FUS audit</li>
+    <li>MMA เติมบทบาท "ตัวแทนประสาน" ที่ UL ไม่มีในระบบ — สำคัญมากในห่วงโซ่ CM</li>
+    <li>Multiple Listing เป็นทางลัดที่สะดวก แต่ต้องแลกด้วยการ cede file control ให้ Basic Applicant</li>
+    <li>เปลี่ยน BOM · กระบวนการผลิต · หรือโรงงาน = แจ้ง UL ทันที ไม่งั้น Mark โมฆะ</li>
+  </ol>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p4 — UL MARKS 101
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p4" data-group="ul-marks" data-group-title="UL Marks 101" data-tier="intuition" data-title="Mark 3 ประเภท">
+  <h2>UL Marks 101: Listed · Recognized · Classified</h2>
+  <p class="section-lead">ก่อนเดินหน้าขอ cert ต้องรู้ก่อนว่า UL มี "ตราประทับ" 3 แบบ แต่ละแบบใช้กับสินค้าต่างระดับ และสำหรับ IoT gateway ที่เป็นสินค้าสำเร็จพร้อมขาย คำตอบมักอยู่ที่ UL Listed — ส่วน UL Recognized เป็นเรื่องของ component ที่อยู่ข้างใน</p>
+
+  <h3>UL Listed — สำหรับสินค้าสำเร็จรูป</h3>
+  <p>เมื่อเห็นโลโก้ UL บน box ของ IoT gateway ที่วางขายตามห้างหรือ online นั่นคือ <strong>UL Listed mark</strong> หมายความว่าสินค้านั้นผ่านการทดสอบจาก UL Solutions อย่างครบถ้วน ทั้งด้านความปลอดภัยไฟฟ้า, อัคคีภัย, และมาตรฐานที่เกี่ยวข้อง (เช่น UL 62368-1 สำหรับ audio/video/IT equipment ที่ครอบคลุม networking gateway ส่วนใหญ่) สินค้า Listed คือสินค้าที่ "ทำงานได้ด้วยตัวเอง (standalone)" ผู้บริโภคหรือวิศวกรสามารถติดตั้งได้โดยตรงโดยไม่ต้องประเมินอีกรอบ</p>
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> IoT gateway ที่จะขายตลาด US ต้องมี UL Listed mark — นี่คือ end goal ของ cert journey ทั้งหมด</div>
+
+  <h3>UL Recognized (RU mark) — สำหรับชิ้นส่วนในโรงงาน</h3>
+  <p>UL Recognized หรือที่รู้จักจาก <strong>RU mark</strong> (ตัว R กลับด้าน) คือการรับรองสำหรับ "ชิ้นส่วนที่ติดตั้งในโรงงาน ไม่ใช่สินค้าสำเร็จรูปสำหรับผู้บริโภค" เช่น power supply module, transformer, PCB assembly หรือ wire insulation ที่ raw material manufacturer ผลิตและส่งให้ EMS ใส่ใน IoT gateway ถ้า component เหล่านี้มี RU mark อยู่แล้ว กระบวนการ cert ของสินค้าสำเร็จจะเร็วขึ้นมาก เพราะ UL ไม่ต้องทดสอบ component เหล่านั้นซ้ำ</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — ทำไม RU mark ถึงประหยัดเวลา/เงิน</summary>
+    <div class="details-body">
+      <p>UL ใช้ระบบ "pre-vetted components" คือเมื่อ component มี RU mark แล้ว UL field engineer ในช่วง Follow-Up Service จะ verify แค่ว่า component ที่ใช้จริงตรงกับ RU mark ที่ระบุใน BOM เท่านั้น ไม่ต้องส่ง lab test ใหม่ทุกครั้ง ในทางตรงข้าม ถ้า critical component ไม่มี RU mark (เช่น power supply ที่ผลิตเองโดย EMS โดยไม่ผ่านการ certify) UL อาจต้องทดสอบ component นั้นแยกก่อน ซึ่งอาจใช้เวลาหลายสัปดาห์และเพิ่มค่าใช้จ่ายหลายพันดอลลาร์</p>
+      <p>สำหรับ raw material manufacturers ในห่วงโซ่ของ IoT gateway: การลงทุนขอ RU mark สำหรับ components หลักเป็น "value proposition" สำคัญที่ทำให้ EMS และ Product Owner เลือก supplier นั้น ๆ มากกว่าคู่แข่ง</p>
+    </div>
+  </details>
+
+  <h3>UL Classified — สำหรับการประเมินเฉพาะด้าน</h3>
+  <p>UL Classified ใช้เมื่อ UL ประเมินสินค้าเพียงบางด้านเฉพาะเจาะจง เช่น ประเมินเฉพาะด้านไฟไหม้หรือสิ่งแวดล้อม ไม่ใช่ประเมินครบ ในห่วงโซ่ IoT gateway พบน้อยกว่า Listed/Recognized แต่อาจเจอในกรณี gateway ที่ต้องติดตั้งในสภาพแวดล้อมพิเศษ เช่น industrial enclosure หรือ hazardous location</p>
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> Raw material suppliers ที่มี RU mark บน components คือ "fast lane" สำหรับ PO ที่ต้องการ cert เร็ว — เลือก supplier แบบนี้ก่อนเสมอ</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p5a — 4 PARTIES → UL ROLES (intuition)
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p5a" data-group="role-mapping" data-group-title="4 ฝ่าย → UL Roles" data-tier="intuition" data-title="การ Map บทบาท">
+  <h2>4 ฝ่ายธุรกิจ → บทบาท UL: ภาพรวม</h2>
+  <p class="section-lead">UL Solutions รู้จักบทบาทหลักเพียง 4 แบบ: Applicant, Manufacturer, Multiple Listee และ Subscriber แต่ห่วงโซ่ธุรกิจของ IoT gateway มี 4 ฝ่ายที่ไม่ตรงกับ UL roles ทุกประการ งานของทีมคือ map อย่างถูกต้องก่อนเริ่มกระบวนการ เพราะเมื่อลงนามแล้วแก้ยาก</p>
+
+  <!-- SVG Role Mapping Diagram -->
+  <figure>
+    <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#92400e"/>
+        </marker>
+      </defs>
+      <!-- Background lanes -->
+      <rect x="0" y="0" width="720" height="320" rx="12" fill="#fef3c7"/>
+      <!-- Business side label -->
+      <text x="16" y="22" font-size="11" fill="#92400e" font-weight="bold" font-family="system-ui">BUSINESS PARTIES</text>
+      <!-- UL side label -->
+      <text x="400" y="22" font-size="11" fill="#92400e" font-weight="bold" font-family="system-ui">UL ROLES</text>
+      <line x1="360" y1="10" x2="360" y2="310" stroke="#d97706" stroke-width="1" stroke-dasharray="4,3"/>
+
+      <!-- Business party boxes (left) -->
+      <!-- PO -->
+      <rect x="20" y="40" width="160" height="52" rx="8" fill="#d97706"/>
+      <text x="100" y="62" text-anchor="middle" font-size="12" fill="white" font-weight="bold" font-family="system-ui">Product Owner (PO)</text>
+      <text x="100" y="80" text-anchor="middle" font-size="10" fill="#fef3c7" font-family="system-ui">owns IP + brand</text>
+      <!-- MMA -->
+      <rect x="20" y="110" width="160" height="52" rx="8" fill="#f59e0b"/>
+      <text x="100" y="132" text-anchor="middle" font-size="12" fill="white" font-weight="bold" font-family="system-ui">MMA</text>
+      <text x="100" y="150" text-anchor="middle" font-size="10" fill="#fef3c7" font-family="system-ui">Manufacturing Mgmt Agent</text>
+      <!-- EMS -->
+      <rect x="20" y="180" width="160" height="52" rx="8" fill="#b45309"/>
+      <text x="100" y="202" text-anchor="middle" font-size="12" fill="white" font-weight="bold" font-family="system-ui">EMS</text>
+      <text x="100" y="220" text-anchor="middle" font-size="10" fill="#fef3c7" font-family="system-ui">Electronics Mfg Services</text>
+      <!-- Raw Matl -->
+      <rect x="20" y="250" width="160" height="52" rx="8" fill="#78350f"/>
+      <text x="100" y="272" text-anchor="middle" font-size="12" fill="white" font-weight="bold" font-family="system-ui">Raw Material Mfrs</text>
+      <text x="100" y="290" text-anchor="middle" font-size="10" fill="#fef3c7" font-family="system-ui">component suppliers</text>
+
+      <!-- UL Role boxes (right) -->
+      <!-- Applicant -->
+      <rect x="390" y="40" width="145" height="52" rx="8" fill="#d97706" stroke="#92400e" stroke-width="2"/>
+      <text x="462" y="62" text-anchor="middle" font-size="12" fill="white" font-weight="bold" font-family="system-ui">APPLICANT</text>
+      <text x="462" y="80" text-anchor="middle" font-size="10" fill="#fef3c7" font-family="system-ui">File owner · IP control</text>
+      <!-- Coordinator (no UL role note) -->
+      <rect x="390" y="110" width="145" height="52" rx="8" fill="#f59e0b" stroke="#92400e" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="462" y="132" text-anchor="middle" font-size="12" fill="white" font-weight="bold" font-family="system-ui">COORDINATOR</text>
+      <text x="462" y="150" text-anchor="middle" font-size="10" fill="#fef3c7" font-family="system-ui">no UL role — contract only</text>
+      <!-- Manufacturer -->
+      <rect x="390" y="180" width="145" height="52" rx="8" fill="#b45309" stroke="#92400e" stroke-width="2"/>
+      <text x="462" y="202" text-anchor="middle" font-size="12" fill="white" font-weight="bold" font-family="system-ui">MANUFACTURER</text>
+      <text x="462" y="220" text-anchor="middle" font-size="10" fill="#fef3c7" font-family="system-ui">registered factory · FUS</text>
+      <!-- Recognized Component Supplier -->
+      <rect x="390" y="250" width="145" height="52" rx="8" fill="#78350f" stroke="#92400e" stroke-width="2"/>
+      <text x="462" y="264" text-anchor="middle" font-size="11" fill="white" font-weight="bold" font-family="system-ui">RU COMPONENT</text>
+      <text x="462" y="280" text-anchor="middle" font-size="11" fill="white" font-weight="bold" font-family="system-ui">SUPPLIER</text>
+      <text x="462" y="296" text-anchor="middle" font-size="10" fill="#fef3c7" font-family="system-ui">pre-vetted parts in BOM</text>
+
+      <!-- Arrows -->
+      <line x1="182" y1="66" x2="388" y2="66" stroke="#92400e" stroke-width="2" marker-end="url(#arr)"/>
+      <line x1="182" y1="136" x2="388" y2="136" stroke="#92400e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+      <line x1="182" y1="206" x2="388" y2="206" stroke="#92400e" stroke-width="2" marker-end="url(#arr)"/>
+      <line x1="182" y1="276" x2="388" y2="276" stroke="#92400e" stroke-width="2" marker-end="url(#arr)"/>
+
+      <!-- Role labels on arrows -->
+      <text x="285" y="58" text-anchor="middle" font-size="9" fill="#78350f" font-family="system-ui">Pattern A</text>
+      <text x="285" y="128" text-anchor="middle" font-size="9" fill="#78350f" font-family="system-ui">direct</text>
+      <text x="285" y="198" text-anchor="middle" font-size="9" fill="#78350f" font-family="system-ui">factory registration</text>
+      <text x="285" y="268" text-anchor="middle" font-size="9" fill="#78350f" font-family="system-ui">RU Recognition</text>
+
+      <rect x="0" y="0" width="1" height="1" fill="none"/>
+    </svg>
+    <p style="text-align:center;font-size:0.85em;color:#92400e;margin-top:8px">แผนผัง Role Mapping — ฝั่งซ้าย: 4 ฝ่ายธุรกิจ · ฝั่งขวา: บทบาท UL ที่ map กัน · เส้นประ = MMA ที่ UL ไม่มีบทบาทตรงตัว</p>
+  </figure>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> MMA คือบทบาทที่ "ไม่มีใน UL vocabulary" — ต้องจัดการผ่าน contract กับ PO และ power-of-attorney ไม่ใช่การขอ UL role ใหม่</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p5b — ROLE MAPPING (mechanism: IP trap deep dive)
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p5b" data-group="role-mapping" data-tier="mechanism" data-title="IP Ownership Trap">
+  <h2>IP Ownership Trap: เมื่อ EMS กลายเป็น Applicant</h2>
+  <p class="section-lead">กับดักที่พบบ่อยที่สุดใน IoT startup ที่ใช้ EMS ครั้งแรก คือการปล่อยให้ EMS "จัดการ UL ให้" โดยไม่รู้ว่าการทำเช่นนั้นหมายความว่า EMS กลายเป็น Applicant และถือ UL File ของสินค้าที่ PO สร้างขึ้นมาเอง สิ่งที่ตามมาคือ PO กลายเป็นแค่ Multiple Listee และสูญเสียอำนาจควบคุมทั้งหมด</p>
+
+  <h3>สิ่งที่เกิดขึ้นเมื่อ EMS เป็น Applicant</h3>
+  <p>ตาม UL Multiple Listing Service Terms: <em>"Multiple Listing Service does not result in a separate product safety certification for the Multiple Listee"</em> และที่สำคัญกว่านั้น: <em>"If the Basic Applicant decides to withdraw the Basic Product for any reason, the Multiple Listing Service for the Multiple Listee will be automatically withdrawn at the same time"</em></p>
+  <p>แปลตรง ๆ ว่า: ถ้า EMS (Basic Applicant) ตัดสินใจถอน UL File ไม่ว่าจะด้วยเหตุผลอะไรก็ตาม — ทะเลาะกัน, ยกเลิก contract, ล้มละลาย, หรือแค่ไม่ต้องการจ่ายค่า FUS ต่อ — ใบรับรองของ PO หายไปทันที PO ไม่สามารถโต้แย้งหรือโอน File ออกมาได้เพราะไม่ได้เป็นเจ้าของ</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — 3 สถานการณ์ที่ Multiple Listee เสียเปรียบ</summary>
+    <div class="details-body">
+      <p><strong>1. EMS เปลี่ยน supplier:</strong> EMS ในฐานะ Applicant มีสิทธิ์เปลี่ยน component ใน BOM ได้โดยประสาน UL โดยตรง PO อาจไม่รู้ว่า BOM เปลี่ยนจนกระทั่ง UL audit พบปัญหา</p>
+      <p><strong>2. EMS รับลูกค้าใหม่ที่เป็นคู่แข่ง:</strong> EMS อาจ "ขาย" ความรู้เรื่อง cert workflow ของ PO ให้คู่แข่ง หรือใช้ RU suppliers เดียวกันเพื่อทำ cert ให้คู่แข่งเร็วขึ้น</p>
+      <p><strong>3. ต้องการเปลี่ยน EMS:</strong> ถ้า PO ต้องการย้ายไป EMS ใหม่ ต้องเริ่ม cert ใหม่ทั้งหมด เพราะ UL File เดิมอยู่กับ EMS เก่า ต้นทุนที่แท้จริงของ "ให้ EMS จัดการ" จึงปรากฏชัดในภายหลัง</p>
+    </div>
+  </details>
+
+  <h3>Pattern A — วิธีที่ถูกต้อง: PO เป็น Applicant</h3>
+  <p>ในโครงสร้างที่ดี PO ลงนามเป็น Applicant โดยตรงกับ UL Solutions PO ถือ UL File ระบุ EMS ใน File ในฐานะ "Manufacturer" (โรงงานที่ได้รับอนุญาต) ถ้า EMS เปลี่ยน PO แจ้ง UL เพิ่ม/ลด manufacturer locations ใน File โดยไม่ต้องเริ่ม cert ใหม่ทั้งหมด IP ของสินค้าอยู่กับ PO ทั้งด้าน design และ certification</p>
+
+  <div class="two-col">
+    <div class="col-card green">
+      <h4>✅ Pattern A (ถูก)</h4>
+      <ul>
+        <li>PO = Applicant → ถือ UL File</li>
+        <li>EMS = Manufacturer Location บน File</li>
+        <li>PO มีสิทธิ์เปลี่ยน EMS โดยแจ้ง UL</li>
+        <li>PO control BOM change request</li>
+        <li>MMA ช่วย coordinate ไม่ใช่ถือ File</li>
+      </ul>
+    </div>
+    <div class="col-card red">
+      <h4>⚠️ Pattern B (เสี่ยง)</h4>
+      <ul>
+        <li>EMS = Applicant → ถือ UL File</li>
+        <li>PO = Multiple Listee ไม่มี File</li>
+        <li>PO ไม่สามารถเปลี่ยน EMS ได้อิสระ</li>
+        <li>EMS control BOM</li>
+        <li>ถ้า EMS ถอน File → PO cert หายทันที</li>
+      </ul>
+    </div>
+  </div>
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> ถ้า EMS ถอน UL File ไม่ว่าเหตุผลใด — Multiple Listing ของ PO ถูกถอนพร้อมกันทันที ตาม UL Terms ไม่มีข้อยกเว้น</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p6a — CERT WORKFLOW (intuition)
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p6a" data-group="cert-workflow" data-group-title="Certification Workflow" data-tier="intuition" data-title="ขั้นตอน Overview">
+  <h2>Certification Workflow: จาก Design Freeze ถึง UL Mark</h2>
+  <p class="section-lead">กระบวนการ UL certification ของ IoT gateway ในห่วงโซ่ 4 ฝ่ายไม่ใช่เส้นตรงจาก A ไป Z แต่เป็นงานคู่ขนานที่ต้องประสานกัน PO ดูแล design และ application, MMA ประสาน EMS และ suppliers, EMS เตรียมโรงงานและ process, Suppliers เตรียม RU components ทั้งหมดต้องพร้อมก่อน UL สามารถออก mark ได้</p>
+
+  <!-- Workflow Timeline SVG -->
+  <figure>
+    <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto">
+      <!-- BG -->
+      <rect x="0" y="0" width="720" height="260" rx="12" fill="#fffbeb"/>
+      <!-- Timeline spine -->
+      <line x1="60" y1="130" x2="680" y2="130" stroke="#d97706" stroke-width="3"/>
+      <!-- Arrow head on spine -->
+      <polygon points="680,124 680,136 692,130" fill="#d97706"/>
+
+      <!-- Phase blocks on timeline -->
+      <!-- Phase 1: Design -->
+      <rect x="60" y="100" width="90" height="60" rx="6" fill="#d97706"/>
+      <text x="105" y="126" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">① Design</text>
+      <text x="105" y="140" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">Freeze +</text>
+      <text x="105" y="152" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">BOM w/ RU</text>
+
+      <!-- Phase 2: Application -->
+      <rect x="170" y="100" width="90" height="60" rx="6" fill="#f59e0b"/>
+      <text x="215" y="126" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">② Apply</text>
+      <text x="215" y="140" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">PO = Applicant</text>
+      <text x="215" y="152" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">File created</text>
+
+      <!-- Phase 3: Sample Testing -->
+      <rect x="280" y="100" width="90" height="60" rx="6" fill="#b45309"/>
+      <text x="325" y="119" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">③ Sample</text>
+      <text x="325" y="133" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">Testing</text>
+      <text x="325" y="149" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">UL Lab / CTPAT</text>
+      <text x="325" y="160" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">UL 62368-1 etc.</text>
+
+      <!-- Phase 4: CDF review -->
+      <rect x="390" y="100" width="90" height="60" rx="6" fill="#92400e"/>
+      <text x="435" y="119" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">④ CDF</text>
+      <text x="435" y="133" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">Review</text>
+      <text x="435" y="149" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">BOM · schematic</text>
+      <text x="435" y="160" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">factory confirmed</text>
+
+      <!-- Phase 5: FUS Setup -->
+      <rect x="500" y="100" width="90" height="60" rx="6" fill="#78350f"/>
+      <text x="545" y="119" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">⑤ FUS</text>
+      <text x="545" y="133" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">Setup</text>
+      <text x="545" y="149" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">EMS factory</text>
+      <text x="545" y="160" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">initial inspection</text>
+
+      <!-- Phase 6: Mark + FUS ongoing -->
+      <rect x="610" y="100" width="75" height="60" rx="6" fill="#d97706" stroke="#92400e" stroke-width="2"/>
+      <text x="647" y="119" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">⑥ UL</text>
+      <text x="647" y="133" text-anchor="middle" font-size="10" fill="white" font-weight="bold" font-family="system-ui">Mark</text>
+      <text x="647" y="149" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">+ ongoing</text>
+      <text x="647" y="160" text-anchor="middle" font-size="9" fill="#fef3c7" font-family="system-ui">FUS audits</text>
+
+      <!-- Participant rows above -->
+      <!-- PO row -->
+      <text x="10" y="78" font-size="9" fill="#78350f" font-weight="bold" font-family="system-ui">PO</text>
+      <line x1="60" y1="75" x2="280" y2="75" stroke="#d97706" stroke-width="2"/>
+      <circle cx="105" cy="75" r="4" fill="#d97706"/>
+      <circle cx="215" cy="75" r="4" fill="#d97706"/>
+
+      <!-- EMS row -->
+      <text x="5" y="220" font-size="9" fill="#78350f" font-weight="bold" font-family="system-ui">EMS</text>
+      <line x1="60" y1="217" x2="692" y2="217" stroke="#b45309" stroke-width="2"/>
+      <circle cx="325" cy="217" r="4" fill="#b45309"/>
+      <circle cx="545" cy="217" r="4" fill="#b45309"/>
+      <circle cx="647" cy="217" r="4" fill="#b45309"/>
+
+      <!-- Supplier row -->
+      <text x="2" y="243" font-size="8" fill="#78350f" font-family="system-ui">Supplier</text>
+      <line x1="60" y1="240" x2="280" y2="240" stroke="#78350f" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <circle cx="105" cy="240" r="3" fill="#78350f"/>
+
+      <rect x="0" y="0" width="1" height="1" fill="none"/>
+    </svg>
+    <p style="text-align:center;font-size:0.85em;color:#92400e;margin-top:8px">6 phases ของ cert workflow — แถวบน: งาน PO · แถวล่าง: งาน EMS + Suppliers · Phase ⑥ FUS เดินต่อเนื่องตลอดอายุการผลิต</p>
+  </figure>
+
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> Phase ⑤-⑥ คือ "ช่วงที่แพงที่สุดถ้าพลาด" — EMS ที่ยังไม่ได้ลงทะเบียนกับ UL ต้องทำ initial inspection ก่อน ซึ่งใช้เวลาหลายสัปดาห์และมักเป็น bottleneck ที่ทีม PO ไม่ได้คาดการณ์</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p6b — CERT WORKFLOW (mechanism: each phase in detail)
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p6b" data-group="cert-workflow" data-tier="mechanism" data-title="รายละเอียดแต่ละ Phase">
+  <h2>รายละเอียดแต่ละ Phase: ใครทำอะไร</h2>
+  <p class="section-lead">แต่ละ phase ในกระบวนการ cert มีผู้รับผิดชอบชัดเจน เข้าใจ "งานของใคร" ในแต่ละขั้นช่วยให้ MMA วางแผนได้ถูกต้องและไม่มีจุดว่างที่ไม่มีใครดูแล</p>
+
+  <h3>Phase 1-2: Design Freeze + Application (PO + MMA)</h3>
+  <p>Product Owner เป็นผู้รับผิดชอบหลักใน phase แรก: lock design ให้สมบูรณ์ก่อนยื่น application (การเปลี่ยน design หลังยื่นแล้วต้องเสียเงินทดสอบใหม่), เตรียม BOM ที่ระบุ RU components อย่างชัดเจน, และยื่น application กับ UL Solutions โดยระบุตัวเองเป็น Applicant และ EMS เป็น Manufacturer location MMA ทำหน้าที่ review BOM ร่วมกับ EMS เพื่อยืนยันว่า components ที่ระบุสอดคล้องกับสิ่งที่ EMS จัดหาได้จริง</p>
+
+  <h3>Phase 3: Sample Testing (UL Lab + EMS Support)</h3>
+  <p>EMS ผลิต engineering sample (ES) ตาม locked BOM ส่งไปยัง UL-accepted laboratory ซึ่งอาจเป็น UL Solutions เองหรือ NRTL (Nationally Recognized Testing Laboratory) ที่ UL ยอมรับ ตัวอย่างจะถูกทดสอบตาม standard ที่เกี่ยวข้อง — สำหรับ IoT gateway ที่พบบ่อยคือ UL 62368-1 (Audio/Video, IT, and Communication Equipment) ซึ่งครอบคลุม networking และ IoT devices ในระดับ consumer และ commercial</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — มาตรฐาน UL ที่เกี่ยวข้องกับ IoT Gateway</summary>
+    <div class="details-body">
+      <p><strong>UL 62368-1:</strong> มาตรฐานหลักสำหรับ audio/video/IT/communication equipment ครอบคลุมด้านความปลอดภัยไฟฟ้า (electrical shock), ความร้อน (thermal), อัคคีภัย (fire), และ mechanical stress สำหรับ IoT gateway ที่เชื่อมต่อ internet ทั้ง consumer และ commercial grade</p>
+      <p><strong>UL 2900-2-2:</strong> สำหรับ IoT gateway ที่มี cybersecurity requirements เช่น industrial network gateway หรือ gateway ที่เชื่อมต่อกับ critical infrastructure</p>
+      <p><strong>FCC + UL:</strong> หลายกรณี IoT gateway ต้องผ่านทั้ง FCC Part 15 (radio frequency) และ UL safety — สองกระบวนการนี้ต้องทำคู่ขนานหรือตามลำดับที่วางแผนไว้</p>
+    </div>
+  </details>
+
+  <h3>Phase 4: CDF Review (UL Engineer + PO)</h3>
+  <p>Certification Data File (CDF) คือ "พิมพ์เขียว" ของสินค้าที่ได้รับรอง ระบุ BOM อย่างละเอียด, critical safety components (power supply, fuse, capacitor ที่มี RU mark), schematic, และ physical dimensions UL field engineer ใช้ CDF นี้เป็น reference ในทุก FUS audit ที่ตามมา — ถ้าสินค้าบน production line ไม่ตรงกับ CDF ถือว่า violation แม้ความแตกต่างเล็กน้อย</p>
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> CDF คือ "สัญญา" ระหว่าง PO กับ UL — ทุกการเปลี่ยนแปลง BOM หรือ process ต้อง submit ผ่าน UL field engineer ก่อนนำมาใช้จริงในโรงงาน</div>
+
+  <h3>Phase 5-6: FUS Setup + Ongoing Audits (EMS + UL)</h3>
+  <p>ก่อนออก UL Mark ครั้งแรก UL field engineer ต้องเข้าตรวจโรงงาน EMS (initial inspection) เพื่อยืนยัน production process, การใช้ RU components ตาม BOM, และระบบ traceability ของ EMS ถ้า EMS ผ่าน UL จะ setup FUS program สำหรับโรงงานนั้น หลังจากนั้น UL field engineer จะตรวจซ้ำแบบ "ongoing" ตลอดอายุการผลิตโดยไม่แจ้งล่วงหน้า เพื่อป้องกัน process drift</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p7 — WHO OWNS THE FILE? Pattern A vs Multiple Listing
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p7" data-title="File Ownership Strategy">
+  <h2>กลยุทธ์ File Ownership: Pattern A vs Multiple Listing</h2>
+  <p class="section-lead">ทุกบริษัทที่เริ่ม cert journey ต้องตอบคำถามว่า "เราจะถือ UL File เองหรือจะ ride บน File ของคนอื่น?" แต่ละทางเลือกมี trade-off ที่ชัดเจนและผลกระทบระยะยาวต่อ supply chain flexibility และ IP control</p>
+
+  <h3>Pattern A: PO เป็น Applicant (ถือ File เอง)</h3>
+  <p>ในกรณีที่ PO มี engineering team ที่เข้าใจ UL requirements และสามารถ manage relationship กับ UL โดยตรงได้ Pattern A คือทางเลือกที่ดีที่สุด PO สมัครเป็น Applicant, ระบุ EMS เป็น Manufacturer Location บน File, และสามารถเพิ่ม/ลด manufacturer locations ได้เมื่อต้องการเปลี่ยนหรือเพิ่ม EMS ในอนาคต ต้นทุนเพิ่มขึ้นบ้างในด้าน admin และ UL fees แต่ได้ control เต็มที่</p>
+
+  <h3>Multiple Listing: Ride บน File ของ Basic Applicant</h3>
+  <p>ถ้า EMS หรือ ODM ที่ทำงานด้วยมี UL File สำหรับสินค้า "platform" หรือ "base product" อยู่แล้ว PO สามารถขอ Multiple Listing เพื่อให้ชื่อและ brand ของ PO ปรากฏบนสินค้านั้น ได้เร็วกว่าและถูกกว่า เพราะข้ามขั้นตอน testing ทั้งหมด แต่ต้องยอมรับข้อจำกัด: PO ไม่ใช่เจ้าของ File, ไม่มี "visible link" จาก Multiple Listee ไปยัง Basic Applicant ใน UL directory, และถ้า Basic Applicant ถอน File — cert หาย</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — เมื่อไหร่ Multiple Listing สมเหตุสมผล</summary>
+    <div class="details-body">
+      <p><strong>สมเหตุสมผลเมื่อ:</strong></p>
+      <ul>
+        <li>PO เป็น startup ที่ต้องการ cert เร็ว เพื่อ GTM ก่อน จะ transition ไป Pattern A ในรุ่นต่อไป</li>
+        <li>สินค้าของ PO เป็น "rebrand" ของ ODM platform โดยตรง ไม่ได้ custom design ใหม่</li>
+        <li>ตลาดเป้าหมายไม่ critical (ไม่ใช่ medical, industrial safety, or critical infrastructure)</li>
+        <li>มี contractual protection กับ Basic Applicant (ODM) ที่ชัดเจนว่า Basic Applicant จะไม่ถอน File โดยพลการ</li>
+      </ul>
+      <p><strong>ไม่สมเหตุสมผลเมื่อ:</strong></p>
+      <ul>
+        <li>PO วางแผนขายสินค้านี้ระยะยาว (>2 ปี) และ supply chain มีโอกาสเปลี่ยน</li>
+        <li>PO ต้องการ control BOM อย่างเต็มที่</li>
+        <li>PO กำลัง raise funding หรือ exit — investor/acquirer จะ discount มูลค่าถ้า cert ไม่ได้อยู่กับ PO</li>
+      </ul>
+    </div>
+  </details>
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> Multiple Listing คือ "ทางลัดที่ซ่อนค่าใช้จ่าย" — เหมาะสำหรับ MVP แต่ไม่ใช่กลยุทธ์ระยะยาวสำหรับ PO ที่ต้องการควบคุม IP</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p8 — FOLLOW-UP SERVICE + BOM CHANGE CONTROL
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p8" data-title="Follow-Up Service">
+  <h2>Follow-Up Service: การรับรองที่ไม่มีวันหมดอายุ</h2>
+  <p class="section-lead">ความเข้าใจผิดที่พบมากที่สุดเรื่อง UL certification คือ "ได้ cert แล้วก็จบ" ความจริงคือ UL cert ไม่ใช่ one-time event แต่เป็น ongoing commitment ระหว่าง PO, EMS, และ UL Solutions ตลอดอายุการผลิตสินค้า Follow-Up Service (FUS) คือกลไกที่ทำให้ความมั่นใจนั้นเกิดขึ้นจริง</p>
+
+  <h3>FUS คืออะไรและ EMS ต้องทำอะไร</h3>
+  <p>Follow-Up Service เป็นโปรแกรม ongoing onsite certification inspections ที่ UL Solutions ดำเนินการที่โรงงาน EMS โดยตรง UL field engineer เข้าตรวจโดยไม่แจ้งล่วงหน้าเพื่อยืนยันว่า: (1) สินค้าที่กำลังผลิตตรงกับ CDF ที่ approved ไว้, (2) components ที่ใช้ตรงกับ BOM ที่ระบุ — โดยเฉพาะ RU Recognized components ต้องใช้ถูก part number และ manufacturer, (3) UL Mark ถูกติดถูกต้องตามที่กำหนด และ (4) production process ไม่มีการเปลี่ยนแปลงที่ไม่ได้แจ้ง UL</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — BOM Change Control Process</summary>
+    <div class="details-body">
+      <p>เมื่อ supply chain บังคับให้ต้องเปลี่ยน component (เช่น shortage หรือ EOL) กระบวนการที่ถูกต้องคือ:</p>
+      <ol>
+        <li><strong>PO / MMA ระบุ alternative component</strong> และตรวจสอบว่ายังมี RU mark ที่ใกล้เคียงกัน</li>
+        <li><strong>ยื่น construction change request</strong> ผ่าน UL field engineer หรือ UL portal</li>
+        <li><strong>UL review</strong> ว่า alternative component ยังผ่าน requirements เดิมหรือไม่ อาจต้องทดสอบเพิ่มเติมบ้างขึ้นกับประเภทการเปลี่ยนแปลง</li>
+        <li><strong>UL อัปเดต CDF</strong> เพื่อสะท้อน component ใหม่</li>
+        <li>เพิ่ม component ใหม่ในสายการผลิตได้หลังจาก UL approve เท่านั้น</li>
+      </ol>
+      <p>EMS ที่ข้ามขั้นตอนนี้ — เปลี่ยน component โดยไม่แจ้ง UL — อาจพบปัญหาในครั้ง FUS audit ถัดไป และ UL อาจสั่ง suspend การใช้ UL Mark จนกว่าจะแก้ไขได้</p>
+    </div>
+  </details>
+
+  <h3>บทบาทของ MMA ในกระบวนการ FUS</h3>
+  <p>MMA มีบทบาทสำคัญในการเป็นตัวกลางระหว่าง PO กับ EMS ในเรื่อง FUS compliance เพราะ PO มักไม่ได้อยู่ในโรงงาน EMS ทุกวัน MMA ทำหน้าที่ monitor ว่า EMS ปฏิบัติตาม CDF อย่างสม่ำเสมอ, แจ้ง PO เมื่อ EMS ต้องการเปลี่ยน BOM, และ coordinate การยื่น change request กับ UL ก่อนที่ EMS จะเปลี่ยนจริง สิ่งนี้เป็น value proposition ที่ชัดเจนที่สุดของ MMA ในห่วงโซ่ cert</p>
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> EMS ที่เปลี่ยน BOM โดยไม่แจ้ง UL คือ violation ทันที — MMA ที่ดีคือ "early warning system" ที่ป้องกันไม่ให้ถึงจุดนั้น</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     p9 — FAILURE MODES + MMA'S COORDINATION JOB
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="p9" data-title="Failure Modes + MMA">
+  <h2>Failure Modes และบทบาทเชิงกลยุทธ์ของ MMA</h2>
+  <p class="section-lead">ในห่วงโซ่ 4 ฝ่าย จุดที่พังบ่อยที่สุดไม่ใช่ lab testing ล้มเหลว แต่คือ "ช่องว่างระหว่างฝ่าย" ที่ไม่มีใครรับผิดชอบ MMA ที่มีประสิทธิภาพสามารถป้องกัน failure modes หลัก ๆ ได้โดยเป็น "ตัวเชื่อม" ที่ UL ระบบไม่ได้จัดไว้ให้</p>
+
+  <h3>Failure Mode 1: BOM Lock ไม่ทัน</h3>
+  <p>PO ยื่น application ก่อน lock BOM เสร็จสมบูรณ์ ทำให้ต้องเปลี่ยน component หลังยื่นแล้ว นำไปสู่ construction change requests, retesting, และ delay MMA ป้องกันได้โดย enforce "design freeze checklist" ก่อนอนุมัติให้ PO ยื่น application</p>
+
+  <h3>Failure Mode 2: EMS ไม่พร้อมสำหรับ FUS Initial Inspection</h3>
+  <p>EMS ที่ไม่เคยผ่าน UL FUS มาก่อนมักประเมิน prep time ต่ำไป การเตรียมโรงงานให้ผ่าน initial inspection ต้องใช้เวลา 4-12 สัปดาห์ขึ้นกับ process ที่มี MMA ที่มีประสบการณ์จะ pre-audit EMS ล่วงหน้าก่อนที่ UL field engineer มาตรวจจริง</p>
+
+  <details class="disclosure">
+    <summary>เจาะลึก — รายการ failure modes ทั้งหมดในห่วงโซ่ 4 ฝ่าย</summary>
+    <div class="details-body">
+      <table style="width:100%;border-collapse:collapse;font-size:0.9em">
+        <thead>
+          <tr style="background:#fef3c7">
+            <th style="text-align:left;padding:8px;border:1px solid #d97706">Failure Mode</th>
+            <th style="text-align:left;padding:8px;border:1px solid #d97706">ฝ่ายที่เสี่ยง</th>
+            <th style="text-align:left;padding:8px;border:1px solid #d97706">วิธีป้องกัน</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px;border:1px solid #f59e0b">PO ปล่อย EMS เป็น Applicant</td>
+            <td style="padding:8px;border:1px solid #f59e0b">PO สูญเสีย IP control</td>
+            <td style="padding:8px;border:1px solid #f59e0b">PO ลงนาม application เอง; contract กับ EMS ระบุชัด</td>
+          </tr>
+          <tr style="background:#fffbeb">
+            <td style="padding:8px;border:1px solid #f59e0b">BOM มี component ไม่มี RU mark</td>
+            <td style="padding:8px;border:1px solid #f59e0b">Delay testing + cost เพิ่ม</td>
+            <td style="padding:8px;border:1px solid #f59e0b">Supplier selection: prefer RU-recognized components</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;border:1px solid #f59e0b">EMS เปลี่ยน component โดยไม่แจ้ง</td>
+            <td style="padding:8px;border:1px solid #f59e0b">FUS violation, cert suspended</td>
+            <td style="padding:8px;border:1px solid #f59e0b">MMA monitoring + change control gate</td>
+          </tr>
+          <tr style="background:#fffbeb">
+            <td style="padding:8px;border:1px solid #f59e0b">เปลี่ยนโรงงาน EMS โดยไม่แจ้ง UL</td>
+            <td style="padding:8px;border:1px solid #f59e0b">Mark โมฆะ legal liability</td>
+            <td style="padding:8px;border:1px solid #f59e0b">แจ้ง UL เพิ่ม manufacturer location ก่อนย้าย</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;border:1px solid #f59e0b">Multiple Listing: EMS ถอน File</td>
+            <td style="padding:8px;border:1px solid #f59e0b">PO cert หายทันที</td>
+            <td style="padding:8px;border:1px solid #f59e0b">Pattern A หรือ contractual protection ที่แน่นหนา</td>
+          </tr>
+          <tr style="background:#fffbeb">
+            <td style="padding:8px;border:1px solid #f59e0b">Design เปลี่ยนหลังยื่น application</td>
+            <td style="padding:8px;border:1px solid #f59e0b">Retesting cost + delay</td>
+            <td style="padding:8px;border:1px solid #f59e0b">Design freeze discipline ก่อน application</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <h3>MMA: บทบาทที่ UL ไม่ได้สร้างไว้แต่จำเป็นมาก</h3>
+  <p>UL Solutions รู้จัก Applicant, Manufacturer, และ Multiple Listee แต่ไม่มีบทบาท "ตัวกลางประสาน" ในระบบ MMA จึงเป็นบทบาทที่ถูกสร้างขึ้นโดย market เพื่อเติมช่องว่างนี้ ในทางปฏิบัติ MMA ทำงาน 3 ระดับ: (1) Pre-cert — validate BOM, เลือก EMS ที่มี FUS track record ดี, ประสาน UL application; (2) During cert — coordinate testing samples, ติดตาม status กับ UL; (3) Post-cert — monitor FUS compliance, manage BOM change requests, เตือน PO เมื่อ EMS ส่งสัญญาณอยากเปลี่ยน component</p>
+  <div class="takeaway"><b>★ สาระสำคัญ:</b> MMA ที่ดีคือ "institutional memory" ของ cert journey — ช่วยให้ PO ไม่ต้องเรียนรู้ผ่านความผิดพลาดซ้ำ ๆ ทุกครั้งที่เปลี่ยน EMS</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAST — KEY TAKEAWAYS + REFERENCES
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="page" id="plast" data-title="Takeaways + References">
+  <h2>Key Takeaways + References</h2>
+
+  <h3>7 สิ่งที่ต้องจำจากบทเรียนนี้</h3>
+  <ol class="takeaway-list final">
+    <li><strong>Map บทบาท UL ของ 4 ฝ่ายก่อนยื่น application</strong> — ผิดตั้งแต่ต้นแก้ยากและแพง</li>
+    <li><strong>Product Owner ต้องเป็น Applicant เสมอ</strong> เพื่อรักษาความเป็นเจ้าของ UL File และ IP control ระยะยาว</li>
+    <li><strong>ใช้ RU Recognized components ใน BOM</strong> — ลดระยะเวลาและต้นทุน cert อย่างมีนัยสำคัญ</li>
+    <li><strong>EMS ต้องเป็น registered manufacturer บน UL File</strong> และต้องพร้อมรับ Follow-Up Service audit ต่อเนื่อง</li>
+    <li><strong>MMA เติมบทบาท coordinator</strong> ที่ UL ไม่มีในระบบ — จำเป็นสำหรับห่วงโซ่ CM ที่ซับซ้อน</li>
+    <li><strong>Multiple Listing เหมาะสำหรับ MVP เท่านั้น</strong> — ไม่ใช่กลยุทธ์ระยะยาวสำหรับ PO ที่ต้องการควบคุม IP</li>
+    <li><strong>เปลี่ยน BOM · process · หรือโรงงาน = แจ้ง UL ก่อนทำจริงเสมอ</strong> — ไม่งั้น Mark โมฆะและ legal liability ตามมา</li>
+  </ol>
+
+  <h3>References</h3>
+  <ol class="ref-list">
+    <li>UL Solutions. <em>Multiple Listing Service Terms (ML_05_05_2020)</em>. <a href="https://www.ul.com/sites/default/files/2020-05/Terms_ML_05_05_2020.pdf" target="_blank" rel="noopener">ul.com</a></li>
+    <li>UL Solutions. <em>Follow-Up Services: Ongoing Onsite Certification Inspections</em>. <a href="https://www.ul.com/resources/follow-up-services" target="_blank" rel="noopener">ul.com</a></li>
+    <li>ComplianceGate. <em>UL Certification Guide for Importers and Manufacturers</em>. <a href="https://www.compliancegate.com/ul-certification/" target="_blank" rel="noopener">compliancegate.com</a></li>
+    <li>Simcona Electronics. <em>UL Listed vs. Certified vs. Recognized: Know What You're Buying</em>. <a href="https://simcona.com/blog/ul-certified-vs-ul-listed-recognized" target="_blank" rel="noopener">simcona.com</a></li>
+    <li>UL Solutions. <em>Components Certification</em>. <a href="https://www.ul.com/services/components-certification" target="_blank" rel="noopener">ul.com</a></li>
+    <li>Dynamic Rep. <em>Demystifying UL Certification: What Manufacturers Need to Know</em>. <a href="https://www.dynamicrep.com/blog/demystifying-ul-certification-what-manufacturers-need-to-know-0" target="_blank" rel="noopener">dynamicrep.com</a></li>
+  </ol>
+</section>
+
+</div><!-- /scroll-root -->
+
+<script>
+// ── DOM refs ──
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const progressBar = document.getElementById('progress-bar');
+const tocEl = document.getElementById('toc');
+const pages = Array.from(document.querySelectorAll('.page'));
+
+// ── Build sidebar TOC from data-group ──
+// Groups: consecutive pages sharing data-group become sub-pages.
+// Self-healing: no data-group → page.id is its own group key (flat single entry).
+const groups = [];
+const groupMap = {};
+
+pages.forEach(page => {
+  const gSlug = page.dataset.group || page.id;
+  const gTitle = page.dataset.groupTitle;
+  const label  = page.dataset.title || page.id;
+
+  if (!groupMap[gSlug]) {
+    const g = { slug: gSlug, title: gTitle || label, pages: [] };
+    groups.push(g);
+    groupMap[gSlug] = g;
+  }
+  // First page that carries data-group-title wins
+  if (gTitle) groupMap[gSlug].title = gTitle;
+  groupMap[gSlug].pages.push({ page, label });
+});
+
+// Render
+groups.forEach(g => {
+  const groupDiv = document.createElement('div');
+  groupDiv.className = 'toc-group';
+  groupDiv.dataset.group = g.slug;
+
+  const groupLink = document.createElement('a');
+  groupLink.className = 'toc-group-label';
+  groupLink.href = '#' + g.pages[0].page.id;
+  groupLink.textContent = g.title;
+  groupDiv.appendChild(groupLink);
+
+  if (g.pages.length > 1) {
+    const subList = document.createElement('ul');
+    subList.className = 'toc-subs';
+    g.pages.forEach(({ page, label }) => {
+      const li = document.createElement('li');
+      const a  = document.createElement('a');
+      a.className = 'toc-sub';
+      a.href = '#' + page.id;
+      a.textContent = label;
+      a.dataset.pageId = page.id;
+      li.appendChild(a);
+      subList.appendChild(li);
+    });
+    groupDiv.appendChild(subList);
+  }
+
+  tocEl.appendChild(groupDiv);
+});
+
+// ── Scroll-spy via IntersectionObserver ──
+function setActiveById(pageId) {
+  document.querySelectorAll('.toc-group-label').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.toc-sub').forEach(a => a.classList.remove('active'));
+
+  const page  = pages.find(p => p.id === pageId);
+  const gSlug = page ? (page.dataset.group || page.id) : pageId;
+  const groupDiv = tocEl.querySelector(`.toc-group[data-group="${gSlug}"]`);
+
+  if (!groupDiv) return;
+  groupDiv.querySelector('.toc-group-label')?.classList.add('active');
+
+  const subLink = groupDiv.querySelector(`.toc-sub[data-page-id="${pageId}"]`);
+  if (subLink) {
+    subLink.classList.add('active');
+    subLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  } else {
+    groupDiv.querySelector('.toc-group-label')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) setActiveById(e.target.id); });
+}, { root: null, threshold: 0.25 });
+pages.forEach(p => obs.observe(p));
+
+// ── Mobile hamburger ──
+sidebarToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  sidebarOverlay.classList.toggle('open');
+});
+sidebarOverlay.addEventListener('click', () => {
+  sidebar.classList.remove('open');
+  sidebarOverlay.classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('open');
+  }
+});
+// Close drawer after tapping a link on mobile
+tocEl.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('open');
+    }
+  });
+});
+
+// ── Auto-inject .page-foot prev/next (authors never hand-write these) ──
+pages.forEach((page, i) => {
+  const inner = page.querySelector('.page-inner');
+  if (!inner) return;
+  const foot = document.createElement('div');
+  foot.className = 'page-foot';
+  if (i > 0) {
+    const prev = pages[i - 1];
+    const btn  = document.createElement('a');
+    btn.className = 'pf-btn pf-prev';
+    btn.href = '#' + prev.id;
+    btn.textContent = '← ' + (prev.dataset.title || prev.id);
+    foot.appendChild(btn);
+  }
+  if (i < pages.length - 1) {
+    const next = pages[i + 1];
+    const btn  = document.createElement('a');
+    btn.className = 'pf-btn pf-next';
+    btn.href = '#' + next.id;
+    btn.textContent = (next.dataset.title || next.id) + ' →';
+    foot.appendChild(btn);
+  }
+  if (foot.children.length > 0) inner.appendChild(foot);
+});
+
+// ── Scroll progress bar ──
+window.addEventListener('scroll', () => {
+  const doc     = document.documentElement;
+  const scrolled = doc.scrollTop || document.body.scrollTop;
+  const total   = doc.scrollHeight - doc.clientHeight;
+  if (total > 0) progressBar.style.transform = `scaleX(${scrolled / total})`;
+}, { passive: true });
+
+// ── Arrow-key section jump ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); jumpSection(1); }
+  if (e.key === 'ArrowUp'   || e.key === 'ArrowLeft')  { e.preventDefault(); jumpSection(-1); }
+});
+function jumpSection(dir) {
+  const active = tocEl.querySelector('.toc-sub.active') ||
+                 tocEl.querySelector('.toc-group-label.active');
+  if (!active) { pages[0]?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  const targetId = active.dataset.pageId || active.getAttribute('href')?.slice(1);
+  const idx = pages.findIndex(p => p.id === targetId);
+  const newIdx = Math.max(0, Math.min(pages.length - 1, idx + dir));
+  if (newIdx !== idx) pages[newIdx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Theme toggle ──
+const themeBtn = document.getElementById('theme-btn');
+const root     = document.documentElement;
+const saved    = localStorage.getItem('explainer-theme');
+if (saved) { root.dataset.theme = saved; themeBtn.textContent = saved === 'dark' ? '☀︎' : '☾'; }
+themeBtn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  localStorage.setItem('explainer-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀︎' : '☾';
+});
+
+// ── Tabs ──
+function switchTab(btn, panelId) {
+  btn.closest('.tabs-nav').querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tabs-panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(panelId);
+  if (target) target.classList.add('active');
+}
+
+// ── Accordion ──
+function toggleAccordion(btn) {
+  btn.closest('.accordion-item').classList.toggle('open');
+}
+
+// ── Copy button ──
+function copyCode(btn) {
+  const pre = btn.closest('.copy-wrap').querySelector('pre code');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
