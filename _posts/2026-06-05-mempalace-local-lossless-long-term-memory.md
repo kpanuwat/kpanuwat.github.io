@@ -3,7 +3,10 @@ title: "MemPalace — Local Lossless Long-term Memory สำหรับ AI"
 date: 2026-06-04 00:01:00 +0700
 categories: [Tools]
 tags: [memory, ai-tools, claude-code, mcp, local-first, chromadb, llm]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
