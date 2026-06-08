@@ -3,7 +3,10 @@ title: "Home Harvest: Smart Indoor Farm ปลูกสลัดสดได้�
 date: 2026-06-08 00:01:00 +0700
 categories: [Engineering]
 tags: [indoor-farming, smart-home, hydroponics, iot, sustainability, food-tech, agritech]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
