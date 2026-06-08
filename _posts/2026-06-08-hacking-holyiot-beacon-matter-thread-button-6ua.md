@@ -3,7 +3,10 @@ title: "ดัดแปลง HolyIoT Beacon เป็นปุ่ม Smart Home
 date: 2026-06-07 00:02:00 +0700
 categories: [Engineering]
 tags: [matter, thread, nrf54l15, smart-home, iot, bluetooth-beacon, power-optimization, 3d-printing, zephyr]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
