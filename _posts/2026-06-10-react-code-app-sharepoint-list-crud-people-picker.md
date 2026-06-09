@@ -3,7 +3,10 @@ title: "สร้าง React Code App เชื่อม SharePoint List 10,000
 date: 2026-06-09 00:03:00 +0700
 categories: [Engineering]
 tags: [react, sharepoint, spfx, crud, pagination, people-picker, office365, power-apps, claude-code]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
