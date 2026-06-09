@@ -3,7 +3,10 @@ title: "เจาะลึก MLX + MLX-LM Server: รัน Agentic AI บน M
 date: 2026-06-08 00:02:00 +0700
 categories: [Engineering]
 tags: [mlx, apple-silicon, local-ai, agentic-ai, llm, macos]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
@@ -79,6 +82,8 @@ Subagent D ─────→ join batch in-progress ──→ Response D
 - Subagents ไม่ถูกบล็อกในคิว — ทุกตัวได้รับการตอบสนองแบบ concurrent
 
 ### Distributed Inference: ขยาย RAM ข้าม Mac Cluster
+
+![Mac Cluster Distributed Inference](/assets/images/mlx_mac_cluster_inference.png)
 
 **ปัญหา:** DeepSeek model ล่าสุดมี **1.6 ล้านล้าน parameters** ต้องใช้ RAM มากกว่า **800GB** สำหรับ weights — เกินแม้แต่ Mac ที่ RAM สูงสุด (512GB)
 
