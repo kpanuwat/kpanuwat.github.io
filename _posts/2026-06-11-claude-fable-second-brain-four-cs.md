@@ -3,7 +3,10 @@ title: "เจาะลึก: สร้าง Second Brain ด้วย Claude 
 date: 2026-06-10 00:01:00 +0700
 categories: [Obsidian]
 tags: [claude, fable, second-brain, knowledge-management, ai-workflow, productivity]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
