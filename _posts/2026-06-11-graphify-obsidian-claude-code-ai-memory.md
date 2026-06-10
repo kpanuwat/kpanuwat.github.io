@@ -3,7 +3,10 @@ title: "Graphify + Obsidian + Claude Code: Second Brain สำหรับ AI �
 date: 2026-06-10 00:02:00 +0700
 categories: [Engineering]
 tags: [graphify, obsidian, claude-code, knowledge-graph, ai-memory, token-optimization]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
