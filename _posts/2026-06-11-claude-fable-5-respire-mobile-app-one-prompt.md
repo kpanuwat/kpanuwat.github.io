@@ -3,7 +3,10 @@ title: "Claude Fable 5 สร้าง Mobile App ได้ในพรอมต
 date: 2026-06-10 00:05:00 +0700
 categories: [Engineering]
 tags: [claude, fable-5, mobile-app, flutter, agent-framework, prompt-engineering, telegram, claude-code]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
