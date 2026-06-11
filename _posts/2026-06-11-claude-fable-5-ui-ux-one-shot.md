@@ -3,7 +3,13 @@ title: "รีวิว Claude Fable 5: สร้าง UI/UX แบบ One-Shot
 date: 2026-06-10 00:04:00 +0700
 categories: [Engineering]
 tags: [claude, fable, ui-ux, web-design, gsap, three-js, one-shot, ai-coding]
+image:
+  path: /assets/images/fable_5_one_shot_cover.png
+  alt: Claude Fable 5 one-shot UI/UX generation
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
