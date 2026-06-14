@@ -3,7 +3,10 @@ title: "Cloudflare Voice SDK: สร้าง Voice AI Agent แบบ Real-time
 date: 2026-06-13 00:01:00 +0700
 categories: [Engineering]
 tags: [cloudflare, voice-ai, workers, stt, tts, real-time, deepgram, durable-objects, agents-sdk]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
