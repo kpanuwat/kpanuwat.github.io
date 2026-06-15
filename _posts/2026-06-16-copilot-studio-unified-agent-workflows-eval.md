@@ -3,7 +3,12 @@ title: "Copilot Studio ใหม่ EP.2: Unified Agent Screen, Workflows Design
 date: 2026-06-15 00:02:00 +0700
 categories: [Tools]
 tags: [copilot-studio, microsoft, ai-agents, workflows, evaluation, power-platform]
+slides: true
+image:
+  path: /assets/images/copilot_studio_unified_agent_screen.png
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
