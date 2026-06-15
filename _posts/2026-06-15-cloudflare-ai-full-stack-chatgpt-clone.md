@@ -3,7 +3,10 @@ title: "Cloudflare AI Full-Stack: สร้าง ChatGPT Clone ระดับ 
 date: 2026-06-14 00:03:00 +0700
 categories: [Engineering]
 tags: [cloudflare, workers, ai-gateway, durable-objects, d1, r2, full-stack]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
