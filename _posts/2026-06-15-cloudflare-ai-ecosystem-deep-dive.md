@@ -3,6 +3,7 @@ title: "Cloudflare AI Ecosystem: เจาะลึกสแต็ก Workers, D
 date: 2026-06-14 00:07:00 +0700
 categories: [Engineering]
 tags: [cloudflare, workers, durable-objects, d1, r2, ai-gateway, agents-sdk, bindings]
+slides: true
 ---
 
 {% include slide-link.html %}
