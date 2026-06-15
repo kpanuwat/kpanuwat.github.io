@@ -3,7 +3,10 @@ title: "Copilot Studio ใหม่: Orchestrator, Skills, Memory และ MCP 
 date: 2026-06-15 00:01:00 +0700
 categories: [Tools]
 tags: [copilot-studio, microsoft, ai-agents, mcp, orchestrator, power-platform]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
