@@ -3,7 +3,10 @@ title: "เจาะลึก Local-AI-Image-Generator: รัน Stable Diffusi
 date: 2026-06-16 00:02:00 +0700
 categories: [Tools]
 tags: [stable-diffusion, local-ai, image-generation, open-source, cuda, vulkan, windows]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
