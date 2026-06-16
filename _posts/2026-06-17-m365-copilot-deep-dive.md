@@ -3,7 +3,10 @@ title: "เจาะลึก Microsoft 365 Copilot: 3 ระดับ Chat, M36
 date: 2026-06-16 00:01:00 +0700
 categories: [Tools]
 tags: [microsoft-365, copilot, copilot-studio, ai-agent, enterprise, low-code]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
