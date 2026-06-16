@@ -3,7 +3,10 @@ title: "NotebookLM → Google Vids: สร้างวิดีโอ AI Avatar 
 date: 2026-06-16 00:03:00 +0700
 categories: [Tools]
 tags: [notebooklm, google-vids, ai-avatar, gemini, google-workspace, video-production]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
