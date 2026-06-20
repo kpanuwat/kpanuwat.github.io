@@ -3,7 +3,10 @@ title: "ตรวจรับงานตู้ไฟ Consumer Unit Din Rail ส
 date: 2026-06-20 00:01:00 +0700
 categories: [Engineering]
 tags: [ev-charger, consumer-unit, electrical-safety, din-rail, rcd, rcbo, wiring-standards]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
