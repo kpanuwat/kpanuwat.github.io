@@ -3,7 +3,10 @@ title: "AI E-book & Magazine Workflow: สร้างสิ่งพิมพ�
 date: 2026-06-20 00:03:00 +0700
 categories: [Tools]
 tags: [notebooklm, gemini, google-flow, google-docs, ebook, content-creation]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
