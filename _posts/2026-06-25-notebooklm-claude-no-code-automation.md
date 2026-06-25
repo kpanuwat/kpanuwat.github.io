@@ -3,7 +3,10 @@ title: "เจาะลึก: NotebookLM + Claude สร้าง No-code Autom
 date: 2026-06-24 00:01:00 +0700
 categories: [Tools]
 tags: [notebooklm, claude, automation, no-code, productivity, ai-workflow]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
