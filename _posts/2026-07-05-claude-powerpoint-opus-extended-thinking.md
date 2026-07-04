@@ -3,7 +3,10 @@ title: "เจาะลึก Claude for PowerPoint: ใช้ Opus 4.8 + Extend
 date: 2026-07-04 00:01:00 +0700
 categories: [Tools]
 tags: [anthropic, claude, powerpoint, opus, ai-tools]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
