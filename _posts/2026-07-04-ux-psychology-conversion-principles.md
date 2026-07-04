@@ -3,10 +3,13 @@ title: "6 หลักจิตวิทยา UX/UI เพื่อเพิ่
 date: 2026-07-03 00:01:00 +0700
 categories: [Research]
 tags: [ux, ui, psychology, conversion, cro, behavioral-design]
+slides: true
 image:
   path: /assets/images/ux-psychology-conversion-principles-cheatsheet.png
   alt: 6 UX/UI psychology principles cheatsheet
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
