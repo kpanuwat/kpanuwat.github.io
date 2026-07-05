@@ -3,7 +3,10 @@ title: "เจาะลึกการสร้าง LINE OA บรอดแค
 date: 2026-07-04 00:02:00 +0700
 categories: [Engineering]
 tags: [line-oa, messaging-api, line-login, liff, webhook, rich-menu, chatbot]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
