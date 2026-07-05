@@ -3,7 +3,10 @@ title: "ลดต้นทุน Token Claude Fable 5 ลงถึง 80% ด้
 date: 2026-07-04 00:03:00 +0700
 categories: [Tools]
 tags: [fable-5, token-optimization, claude, anthropic, cost-optimization, ai-workflow]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
