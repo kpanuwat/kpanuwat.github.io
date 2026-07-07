@@ -6,7 +6,10 @@ tags: [comfyui, ai-video, ltx, text-to-video, image-to-video, nvidia-rtx, local-
 image:
   path: /assets/img/posts/comfyui-local-ai-video-generation.jpg
   alt: ComfyUI node-based workflow generating AI video locally with LTX 2.3
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
