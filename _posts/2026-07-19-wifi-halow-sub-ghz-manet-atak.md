@@ -3,7 +3,10 @@ title: "Wi-Fi HaLow (Sub-GHz): เครือข่าย MANET ระยะไ
 date: 2026-07-18 00:02:00 +0700
 categories: [Engineering]
 tags: [wifi-halow, sub-ghz, manet, mesh-networking, raspberry-pi, atak, ip-mesh, open-source, iot, batman-adv]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
