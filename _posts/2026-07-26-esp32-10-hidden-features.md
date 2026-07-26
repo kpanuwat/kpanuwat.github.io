@@ -3,7 +3,10 @@ title: "ESP32 ซ่อน 10 ฟีเจอร์ลับ: เพิ่มป
 date: 2026-07-25 00:01:00 +0700
 categories: [Engineering]
 tags: [esp32, embedded, iot, arduino, low-power, hardware]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
