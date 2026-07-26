@@ -3,7 +3,10 @@ title: "หาลูกค้าผ่าน Google Maps ทำไมได้�
 date: 2026-07-25 00:02:00 +0700
 categories: [Tools]
 tags: [google-maps, prospecting, lead-generation, cold-outreach, local-seo, sales]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
