@@ -3,7 +3,10 @@ title: "สร้างระบบ Face Detection ด้วย Python: OpenCV, 
 date: 2026-07-25 00:04:00 +0700
 categories: [Engineering]
 tags: [python, opencv, yolo, computer-vision, pytorch, cuda]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
