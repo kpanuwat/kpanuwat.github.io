@@ -3,6 +3,9 @@ title: "10 อุปกรณ์อิเล็กทรอนิกส์พื
 date: 2026-07-25 00:03:00 +0700
 categories: [Engineering]
 tags: [esp32, arduino, electronics, resistor, capacitor, transistor, mosfet, diode, relay]
+image:
+  path: /assets/images/esp32_arduino_essential_components.jpg
+  alt: 10 Essential Electronic Components Cheatsheet for ESP32 and Arduino
 slides: true
 ---
 
