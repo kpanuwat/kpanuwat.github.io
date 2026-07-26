@@ -3,7 +3,10 @@ title: "Agentic AI กับ Claude Code: ปรับตัวเป็น AI M
 date: 2026-07-26 00:02:00 +0700
 categories: [Engineering]
 tags: [agentic-ai, claude-code, ai-manager, mcp, automation, ai-agents]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
