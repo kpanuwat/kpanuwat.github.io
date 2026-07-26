@@ -3,7 +3,10 @@ title: "AI Multi-agent Orchestration: Sub-agent CLI กับ Headless Mode ผ�
 date: 2026-07-26 00:01:00 +0700
 categories: [Engineering]
 tags: [claude-code, multi-agent, subagents, headless-mode, sse, cli-orchestration, ai-agents]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
