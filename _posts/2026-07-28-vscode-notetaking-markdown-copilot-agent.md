@@ -3,7 +3,10 @@ title: "เจาะลึก VS Code สำหรับจดโน้ตแล
 date: 2026-07-27 00:03:00 +0700
 categories: [Tools]
 tags: [vscode, markdown, github-copilot, note-taking, productivity]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
