@@ -3,7 +3,10 @@ title: "เจาะลึก xFigura: ออกแบบสถาปัตย�
 date: 2026-07-27 00:04:00 +0700
 categories: [Tools]
 tags: [xfigura, google-earth, rhino, architecture, ai-design, kmz]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
