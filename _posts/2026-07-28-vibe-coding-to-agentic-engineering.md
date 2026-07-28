@@ -3,7 +3,10 @@ title: "เลิก Vibe Coding เปลี่ยนมาทำ Agentic Engin
 date: 2026-07-27 00:01:00 +0700
 categories: [Engineering]
 tags: [agentic-engineering, vibe-coding, technical-debt, software-architecture, hexagonal-architecture, deep-modules, ci-cd, spec-driven-development]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
