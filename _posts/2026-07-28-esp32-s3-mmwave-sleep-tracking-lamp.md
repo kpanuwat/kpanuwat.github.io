@@ -3,7 +3,10 @@ title: "โคมไฟติดตามการนอนหลับไร้
 date: 2026-07-27 00:02:00 +0700
 categories: [Engineering]
 tags: [esp32-s3, mmwave, sleep-tracking, iot, neopixel, open-source, dfrobot-c1001]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
