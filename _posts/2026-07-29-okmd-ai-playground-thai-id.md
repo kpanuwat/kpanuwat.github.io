@@ -3,7 +3,10 @@ title: "OKMD AI Playground: คนไทยใช้ Gemini, Claude, DeepSeek, G
 date: 2026-07-28 00:03:00 +0700
 categories: [Tools]
 tags: [okmd, ai-playground, thai-id, gemini, claude, deepseek, grok, government-ai]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
