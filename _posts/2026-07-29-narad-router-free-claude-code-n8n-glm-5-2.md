@@ -3,7 +3,10 @@ title: "เจาะลึก NaraRouter: ใช้ Claude Code และ n8n �
 date: 2026-07-28 00:02:00 +0700
 categories: [Tools]
 tags: [claude-code, n8n, llm-gateway, api, free-tier]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
