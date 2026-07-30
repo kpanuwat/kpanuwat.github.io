@@ -3,7 +3,10 @@ title: "4 Cs Framework: ใช้ AI Agents จัดการ Inbox, สร้�
 date: 2026-07-30 00:01:00 +0700
 categories: [Tools]
 tags: [ai-agents, productivity, claude, chatgpt, gemini, automation, voice-mode, human-in-the-loop]
+slides: true
 ---
+
+{% include slide-link.html %}
 
 ## TL;DR
 
